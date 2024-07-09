@@ -3,11 +3,20 @@
 @inject ISnackbar _snack
 @inject IJSRuntime js
 @inject ILogger<IngameChatComponent> _logger
+@inject IRefreshService _refreshService
 @implements IDisposable
 @if (loadingComplete)
 {
-    <MudPaper Class="" Style="position:fixed; right:4rem; bottom:4rem; background-color:#212121">
+    <MudPaper Class="" Style="max-width:50rem;position:fixed; margin-left:2rem;right:2rem; bottom:2rem; background-color:#212121;">
         <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
+            <div class="row">
+                <div class="col-6">
+            <MudText Style="padding:0.5rem;" Typo="Typo.h5">Game chat</MudText>
+                </div>
+                    <div class="col-6">
+                    <MudIcon Style="position: absolute; right: 0.5rem; top:0.3rem" Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Large" @onclick="CloseChatWindow" />
+                    </div>
+            </div>
         </MudPaper>
         <MudPaper @ref="_chatField" Style="height:30rem;  background-color:#212121; overflow-y:scroll;" class="scrollchatarea">
             <MudList Clickable="false" Dense="true" DisableGutters="false">
@@ -111,7 +120,7 @@
 
     private async Task ScrollChatWindowToBottom()
     {
-        await Task.Delay(100);
+        await Task.Delay(10);
         try
         {
             await js.InvokeVoidAsync("scrollToBottom", "scrollchatarea");
@@ -120,6 +129,11 @@
         {
             _logger.LogWarning("ScrollChatWindowToBottom() threw exception: " + ex.Message);
         }
+    }
+
+    private async Task CloseChatWindow()
+    {
+        _refreshService.CallChatWindowClose();
     }
 
     void IDisposable.Dispose()

@@ -15,12 +15,14 @@ namespace Highgeek.McWebApp.Common.Services
 
         event Action ApplicationUserRefreshRequested;
         void CallApplicationUserRefresh();
+
+        event Action ChatWindowClosehRequested;
+        void CallChatWindowClose();
     }
     public class RefreshService : IRefreshService
     {
 
         public event Action PageRefreshRequested;
-
         public void CallPageRefresh()
         {
             PageRefreshRequested?.Invoke();
@@ -38,6 +40,12 @@ namespace Highgeek.McWebApp.Common.Services
         public void CallApplicationUserRefresh()
         {
             ApplicationUserRefreshRequested?.Invoke();
+        }
+
+        public event Action ChatWindowClosehRequested;
+        public void CallChatWindowClose()
+        {
+            ChatWindowClosehRequested?.Invoke();
         }
     }
 }

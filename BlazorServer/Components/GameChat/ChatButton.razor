@@ -22,16 +22,23 @@
     protected override async void OnInitialized()
     {
         _refreshService.PageRefreshRequested += Refresh;
+        _refreshService.ChatWindowClosehRequested += CloseChatWindow;
     }
 
     private async void Refresh(){
-        
+
         if (_userService.ApplicationUser is null){
             IsChatOpen = false;
         }
         if (_userService.LpUser is null){
             IsChatOpen = false;
         }
+        StateHasChanged();
+    }
+
+    private async void CloseChatWindow()
+    {
+        IsChatOpen = false;
         StateHasChanged();
     }
 
