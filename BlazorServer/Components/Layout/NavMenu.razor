@@ -1,0 +1,143 @@
+﻿@implements IDisposable
+
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Identity
+
+@inject NavigationManager NavigationManager
+@inject UserService _userService
+@inject IRefreshService _refreshService
+@inject ILogger<NavMenu> _logger
+
+<div class=" navbar justify-content-center">
+    <a href="">
+        <MudImage Src="https://images.highgeek.eu/highgeek_logo-1024x1024.png" Style="max-width:128px; max-height:128px" />
+    </a>
+</div>
+
+<MudNavMenu Color="Color.Primary" class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+        </NavLink>
+    </div>
+    <!--
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="counter">
+            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="weather">
+            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="auth">
+            <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+        </NavLink>
+    </div>-->
+
+    <AuthorizeView>
+        <Authorized>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Account/Manage">
+                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                </NavLink>
+            </div>
+            @if (!_userService.HasConnectedAccount)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Minecraft/Account/Register">
+                        <span class="bi minecraft-icon" aria-hidden="true"></span> Connect Minecraft
+                    </NavLink>
+                </div>
+            }
+            else
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Minecraft/Account/Statistics">
+                        <span class="bi minecraft-icon" aria-hidden="true"></span> Minecraft
+                    </NavLink>
+                </div>
+            }
+            <div class="nav-item px-3">
+                <form action="Account/Logout" method="post">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="nav-link">
+                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                    </button>
+                </form>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Account/Register">
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Account/Login">
+                    <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                </NavLink>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+    <!--
+    <div class="nav-item px-6" style="position:fixed;bottom:0;">
+        <form action="https://minecraftservery.eu/server" style="max-width:350px;" novalidate>
+            <input type="hidden" name="id" value="1743">
+            @if (_userService.HasConnectedAccount)
+            {
+                <input type="text" style="background:#f1f3f4;text-align:center;width:100%;font-size:15px;box-sizing:border-box;padding:10px;margin-bottom:10px;border:none;border-radius:3px;" name="nick" placeholder="Přezdívka" value="@_userService.ApplicationUser.mcNickname">
+            }
+            else
+            {
+                <input type="text" style="background:#f1f3f4;text-align:center;width:100%;font-size:15px;box-sizing:border-box;padding:10px;margin-bottom:10px;border:none;border-radius:3px;" name="nick" placeholder="Přezdívka" value="">
+            }
+            <br>
+            <input type="submit" class="btn-primary" style="text-align:center;font-size:15px;font-weight:600;width:100%;border:none;cursor:pointer;padding:10px;border-radius:3px;text-decoration:none;" value="Hlasovat na 
+MinecraftServery.eu">
+        </form>
+    </div>
+    -->
+</MudNavMenu>
+@code {
+    private string? currentUrl;
+
+    protected override async void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+        _refreshService.PageRefreshRequested += Refresh;
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        try
+        {
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("NavMenu Refresh() error: " + ex.Message);
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        _refreshService.PageRefreshRequested -= Refresh;
+    }
+}
+

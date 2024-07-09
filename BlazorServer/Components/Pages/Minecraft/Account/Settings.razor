@@ -1,0 +1,38 @@
+@page "/Minecraft/Account/Settings"
+
+@inject MinecraftUserManager _mcUserManager
+@inject UserService _userService
+@inject ISnackbar _snack
+@inject IRefreshService _refreshService
+@inject NavigationManager _navManager
+
+@attribute [PermissionsAuthorize("connectedaccount")]
+
+@implements IDisposable
+
+<PageTitle>Game Account Settings</PageTitle>
+
+<h1>Game Account Settings</h1>
+
+<button @onclick="DisconnectAccount" class="w-100 btn btn-lg btn-danger">Disconnect Minecraft Account</button>
+
+@code{
+    //TODO Dispose
+
+    private async Task DisconnectAccount(){
+        string result = await _mcUserManager.DisconnectMinecraftAccount(_userService.ApplicationUser);
+        await _userService.DisconnectGameAccount();
+        _snack.Add(result, Severity.Success);
+        _refreshService.CallServiceRefresh();
+        if(result == ""){
+
+        }else{
+            _navManager.NavigateTo("/");
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+    }
+
+}

@@ -1,0 +1,39 @@
+﻿@using Highgeek.McWebApp.Common.Models.mcwebapp1_cms
+@using Highgeek.McWebApp.Common.Models.Contexts
+@using Highgeek.McWebApp.Common.Helpers
+
+@inject ILogger<MainCarouselComponent> _logger
+@inject McWebApp1CmsContext _cmsContext
+@implements IDisposable
+
+
+<MudCarousel Class="mud-width-full" Style="position:center; max-height:600px; height:550px;" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="object" SelectedIndexChanged=IndexChanged>
+    <BulletTemplate Context="selected">
+        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+            <span class="mud-icon-button-label">
+                @if (selected)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.ArrowUpward" Class="mud-text-primary" Size="Size.Medium" Style="margin-top:20px" />
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Minimize" Class="mud-text-secondary" Size="Size.Large" />
+                }
+            </span>
+        </div>
+    </BulletTemplate>
+    <ChildContent>
+        @foreach (var item in carouselContent)
+        {
+            <MudCarouselItem Transition="transition" Color="@Color.Primary">
+                <div class="d-flex" style="height:100%">
+                    <MudImage Src="@item.Imageurl" Class="d-block w-100" Alt="..." ObjectFit="ObjectFit.Cover" />
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                    <MudText Class="mx-auto overflow-auto mud-text-primary">@((MarkupString)item.Header)</MudText>
+                    <MudText Class="mx-auto overflow-auto mud-text-primary">@((MarkupString)item.Content)</MudText>
+                </div>
+            </MudCarouselItem>
+        }
+    </ChildContent>
+</MudCarousel>

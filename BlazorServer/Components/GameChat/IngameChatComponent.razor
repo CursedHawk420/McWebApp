@@ -1,0 +1,130 @@
+﻿@inject IRedisUpdateService _iRedisUpdateService
+@inject GameChatService _gameChatService
+@inject ISnackbar _snack
+@inject IJSRuntime js
+@inject ILogger<IngameChatComponent> _logger
+@implements IDisposable
+@if (loadingComplete)
+{
+    <MudPaper Class="" Style="position:fixed; right:4rem; bottom:4rem; background-color:#212121">
+        <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
+        </MudPaper>
+        <MudPaper @ref="_chatField" Style="height:30rem;  background-color:#212121; overflow-y:scroll;" class="scrollchatarea">
+            <MudList Clickable="false" Dense="true" DisableGutters="false">
+                @foreach (var entry in chat)
+                {
+                    <MudListItem Text="@DeserializeMessage(entry)" />
+
+                }
+            </MudList>
+        </MudPaper>
+        <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
+            <MudTextField @ref="RefEntryField" @bind-Value="@textInput" Variant="Variant.Text" OnKeyDown="TextFieldOnKeyDown" Disabled="disableChatInput" Immediate="true" />
+            
+        </MudPaper>
+    </MudPaper>
+}
+@code {
+    //<MudTextField ShrinkLabel AutoGrow Variant="Variant.Text" OnKeyDown="TextFieldOnKeyDown" Disabled="disableChatInput" Value="textInput"/>
+    private bool loadingComplete = false;
+    private bool disableChatInput = false;
+    private List<string> keys = new List<string>();
+    private List<RedisChatEntryAdapter> chat = new List<RedisChatEntryAdapter>();
+    private MudTextField<string> RefEntryField;
+
+    private string textInput = "";
+
+    private MudPaper _chatField;
+
+
+    protected override async void OnInitialized()
+    {
+        _iRedisUpdateService.ChatChanged += c_RenderNewChatEntry;
+
+        await InvokeAsync(async () =>
+        {
+            await LoadChatFromRedis("global");
+            loadingComplete = true;
+            StateHasChanged();
+        });
+        await ScrollChatWindowToBottom();
+    }
+
+    async void TextFieldOnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key is "Enter" or "NumppadEnter")
+        {
+            RefEntryField.TextUpdateSuppression = false;
+
+            await _gameChatService.SendMessage(await _gameChatService.CreateMessage(textInput));
+
+            textInput = string.Empty;
+            await InvokeAsync(StateHasChanged);
+            await Task.Run(async () =>
+            {
+                await Task.Delay(150);
+                RefEntryField.TextUpdateSuppression = true;
+            });
+        }
+    }
+
+    private async Task LoadChatFromRedis(string channel)
+    {
+        keys = await RedisService.GetKeysList("*chat:" + channel + "*");
+        keys = keys.OrderByDescending(i => i).ToList();
+        if (keys.Count > 0)
+        {
+            int max;
+            if (keys.Count < 50)
+            {
+                max = keys.Count;
+            }
+            else
+            {
+                max = 50; 
+            }
+            for (int i = 0; i < max; i++)
+            {
+
+                chat.Add(RedisChatEntryAdapter.FromJson(await RedisService.GetFromRedis(keys[i])));
+            }
+            chat = chat.OrderBy(i => i.Datetime).ToList();
+        }
+    }
+
+    public static string DeserializeMessage(RedisChatEntryAdapter message)
+    {
+        return message.Datetime + " " + message.Username + ": " + message.Message;
+    }
+
+    private async void c_RenderNewChatEntry(object sender, RedisChatEntryAdapter entry)
+    {
+        _snack.Add(DeserializeMessage(entry));
+        await InvokeAsync(async () =>
+        {
+            chat.Add(entry);
+            chat = chat.OrderBy(i => i.Datetime).ToList();
+            StateHasChanged();
+        });
+        await ScrollChatWindowToBottom();
+    }
+
+    private async Task ScrollChatWindowToBottom()
+    {
+        await Task.Delay(100);
+        try
+        {
+            await js.InvokeVoidAsync("scrollToBottom", "scrollchatarea");
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning("ScrollChatWindowToBottom() threw exception: " + ex.Message);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        _iRedisUpdateService.ChatChanged -= c_RenderNewChatEntry;
+        _gameChatService.DisposeAsync();
+    }
+}

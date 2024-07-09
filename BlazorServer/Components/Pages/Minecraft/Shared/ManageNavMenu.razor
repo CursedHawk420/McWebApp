@@ -1,0 +1,57 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserService _userService
+@inject IRefreshService _refreshService
+
+@implements IAsyncDisposable
+
+<ul class="nav nav-pills flex-column">
+    <AuthorizeView Policy="connectedaccount">
+        <NotAuthorized>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="/Minecraft/Account/Register" Match="NavLinkMatch.All">Connect Account</NavLink>
+            </li>
+        </NotAuthorized>
+        <Authorized>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="Minecraft/Account/Statistics">Statistics</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="Minecraft/Account/Inventory">Inventory</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="Minecraft/Account/Skin">Skin</NavLink>
+            </li>
+            <!--
+            <li class="nav-item">
+                <NavLink class="nav-link" href="Minecraft/Account/Pets">Pets</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="Minecraft/Account/Talismans">Talismans</NavLink>
+            </li>-->
+            <li class="nav-item">
+                <NavLink class="nav-link" href="Minecraft/Account/Settings">Settings</NavLink>
+            </li>
+        </Authorized>
+    </AuthorizeView>
+</ul>
+
+@code {
+    //TODO Dispose
+
+    protected override async Task OnInitializedAsync()
+    {
+        _refreshService.PageRefreshRequested += Refresh;
+
+        Refresh();
+    }
+
+    public async void Refresh()
+    {
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _refreshService.PageRefreshRequested -= Refresh;
+    }
+}

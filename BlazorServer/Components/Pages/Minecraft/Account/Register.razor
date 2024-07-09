@@ -1,0 +1,71 @@
+@page "/Minecraft/Account/Register"
+
+@layout MinecraftManageLayout
+
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+@inject MinecraftUserManager _mcUserManager
+@inject UserService _userService
+@inject ISnackbar _snack
+@inject NavigationManager _navManager
+@inject IRefreshService _refreshService
+
+@attribute [PermissionsAuthorize("disconnectedaccount")]
+
+<PageTitle>Connect Minecraft</PageTitle>
+
+<h3>Connect Minecraft</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="Input" FormName="connect-minecraft" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText type="text" @bind-Value="Input.Nickname" class="form-control" placeholder="Ingame Nickname" />
+                <label for="username" class="form-label" >Nickname</label>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="password" aria-required="true" placeholder="Enter your ingame password." />
+                <label for="password" class="form-label">Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Connect Account</button>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    //TODO Dispose
+
+    private async Task OnValidSubmitAsync(){
+        string result = await _mcUserManager.RegisterMcUser(Input.Nickname, Input.Password, _userService.ApplicationUser);
+        if (result == "Účet připojen úspěšně!")
+        {
+            _snack.Add(result, Severity.Success);
+            _navManager.NavigateTo("Minecraft/Account/Statistics");
+            _refreshService.CallServiceRefresh();
+        }
+        else
+        {
+            _snack.Add(result, Severity.Error);
+        }
+    }
+    
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+
+    private sealed class InputModel
+    {
+        [Required]
+        [Display(Name = "Nickname")]
+        public string? Nickname { get; set; } = "";
+        
+        [Required]
+        [Display(Name = "Password")]
+        public string Password { get; set; } = "";
+    }
+}

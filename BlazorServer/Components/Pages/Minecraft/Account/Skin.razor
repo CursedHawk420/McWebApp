@@ -1,0 +1,129 @@
+@page "/Minecraft/Account/Skin"
+
+@using MineSkinApi.Model;
+
+@inject UserService _userService
+@inject MinecraftUserManager _mcUserManager
+@inject SkinManager _skinManager
+@inject MineskinApiCommunication _mineSkinApi
+@inject ISnackbar _snack
+@inject IRefreshService _refreshService
+
+@implements IAsyncDisposable
+
+@attribute [PermissionsAuthorize("connectedaccount")]
+
+<PageTitle>Skin Changer</PageTitle>
+<h1>Skin Changer</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-floating mb-3">
+            <InputText type="text" Value="@Url" class="form-control" placeholder="Skin url" ValueChanged="TryRenderSkin" ValueExpression="() => Url" />
+            <label for="url" class="form-label">Url</label>
+        </div>
+        <button style="margin-bottom:0.5rem" @onclick="SaveSkin" class="w-100 btn btn-lg btn-primary">Save Skin</button>
+        <button @onclick="ClearSkin" class="w-100 btn btn-lg btn-danger">Clear Skin</button>
+    </div>
+    <div class="col-md-6">
+        <div>
+            <MudImage Src="@ImageUrl" Style=" margin:auto; display: block;"></MudImage>
+        </div>
+    </div>
+</div>
+
+@code{
+
+    private GenerateUrlPost200Response mineskinResponse;
+
+    public string Url;
+
+    private string Result;
+
+    private bool ImageSet = false;
+
+    private string ImageUrl;
+
+    protected override void OnInitialized()
+    {
+        ImageUrl = "https://visage.surgeplay.com/full/384/" + _userService.ApplicationUser.SkinHeadPicture;
+    }
+
+    private async Task SaveSkin()
+    {
+
+        if (!string.IsNullOrEmpty(Url))
+        {
+            /*Uri uriResult;
+            bool result = Uri.TryCreate(Url, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+                if (result)
+                {
+                mineskinResponse = _mineSkinApi.UrlSkin(Url);
+                Result = await _skinManager.UpdateSkinAsync(mineskinResponse, _userService.ApplicationUser, Url);
+                await _skinManager.SetHeadPicture(mineskinResponse, _userService.ApplicationUser);
+                _refreshService.CallServiceRefresh();
+                _snack.Add(Result, Severity.Success);
+            }*/
+            if (mineskinResponse is not null)
+            {
+                await _skinManager.UpdateSkinAsync(mineskinResponse, _userService.ApplicationUser, Url);
+                Result = await _skinManager.SetHeadPicture(mineskinResponse, _userService.ApplicationUser);
+                _userService.ApplicationUser.SkinHeadPicture = mineskinResponse.Data.Texture.Url.Remove(0, 38);
+                _refreshService.CallPageRefresh();
+                _snack.Add(Result, Severity.Success);
+            }
+        }
+    }
+
+    private async Task TryRenderSkin(string value)
+    {
+        Url = value;
+        await Task.Delay(100);
+        Uri uriResult;
+        bool result = Uri.TryCreate(Url, UriKind.Absolute, out uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        if (result)
+        {
+            //mineskinResponse = null;
+            mineskinResponse = _mineSkinApi.UrlSkin(Url);
+            if(mineskinResponse is not null)
+            {
+                ImageUrl = "https://visage.surgeplay.com/full/384/" + mineskinResponse.Data.Texture.Url.Remove(0, 38);
+                ImageSet = true;
+                StateHasChanged();
+            }
+            else
+            {
+                _snack.Add("Nepovedlo se naèíst skin z URL.", Severity.Error);
+            }
+        }
+        else
+        {
+            _snack.Add("Neplatná URL.", Severity.Error);
+        }
+    }
+
+    private async Task ClearSkin()
+    {
+        await _skinManager.DefaultSkin(null, _userService.ApplicationUser, null);
+        _snack.Add("Skin byl odstranìn.", Severity.Success);
+    }
+
+    private async Task TryUpdateSkinOnServer()
+    {
+        //TODO check if player is online, than update
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        ImageUrl = null;
+        ImageSet = false;
+        Result = null;
+        Url = null;
+        mineskinResponse = null;
+
+        await _skinManager.DisposeAsync();
+    }
+}

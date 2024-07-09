@@ -1,0 +1,39 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+@if (HttpContext is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row justify-content-center d-flex" style="width: 100%;">
+        <div class="col-10 h-100" style="background-color: #212121;margin-top: 2rem ;padding-right:3rem;padding-left:3rem;padding-bottom:3rem;padding-top:1rem;max-width:550px">
+            <div >
+                <a href="/" >
+                    <MudImage Src="https://images.highgeek.eu/highgeek_logo-1024x1024.png" Style="max-width:128px; max-height:128px;margin:auto; display: block; " />
+                </a>
+            </div>
+            @Body
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+
+
+    protected override void OnParametersSet()
+    {
+        if (HttpContext is null)
+        {
+            //HttpContext = httpContextAccessor.HttpContext;
+            // If this code runs, we're currently rendering in interactive mode, so there is no HttpContext.
+            // The identity pages need to set cookies, so they require an HttpContext. To achieve this we
+            // must transition back from interactive mode to a server-rendered page.
+            NavigationManager.Refresh(forceReload: true);
+        }
+    }
+}

@@ -1,0 +1,58 @@
+﻿@page "/"
+@implements IDisposable
+<!--
+<MainCarouselComponent />
+-->
+
+<PageTitle>HighGeek</PageTitle>
+
+<div class="container">
+    <div class="row">
+    <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">Vítejte na HighGeeku!</MudText>
+    </div>
+    
+    <div class="row mx-auto" style="height: 50em; width:98%">
+        <MudCarousel Class="justify-center" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="CarouselContent">
+            @foreach (var item in carousel)
+            {
+                <MudCarouselItem Transition="transition" Color="@Color.Transparent" Style="">
+                    <MudImage Src="@item.Imageurl" Alt="Swedish Farm House" Style="width:100%;" Class="" />
+                    <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)item.Header)</MudText>
+                    <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)item.Content)</MudText>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
+    </div>
+</div>
+@code {
+    private bool arrows = true;
+    private bool bullets = true;
+    private bool enableSwipeGesture = true;
+    private bool autocycle = true;
+    private Transition transition = Transition.Slide;
+
+    private McWebApp1CmsContext _cmsContext = new McWebApp1CmsContext();
+
+    List<CarouselContent> carousel = new List<CarouselContent>();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetCarouselContents();
+        return Task.CompletedTask;
+    }
+
+    public void GetCarouselContents()
+    {
+        var data = _cmsContext.CarouselContents.OrderBy(c => c.Order);
+
+        carousel = data.ToList();
+        carousel.RemoveAll(s => s.Visible == false);
+    }
+
+    public void Dispose()
+    {
+        carousel = null;
+
+        _cmsContext.Dispose();
+    }
+}

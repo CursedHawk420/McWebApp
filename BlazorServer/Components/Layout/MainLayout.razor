@@ -1,0 +1,139 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inherits LayoutComponentBase
+@inject UserManager<ApplicationUser> _userManager
+@inject IRefreshService _refreshService
+@inject UserService _userService
+@inject ILogger<MainLayout> _logger
+
+@implements IDisposable
+
+<MudThemeProvider Theme="_themeManager.Theme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<!--<MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))"  />
+<MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme"  />-->
+
+<MudLayout>
+    <MudAppBar >
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <a href="/" class="link-hover">
+            <MudText>HighGeek</MudText>
+        </a>
+
+        @if (_userService.HasConnectedAccount)
+        {
+            <MudSpacer />
+            <a href="/Minecraft/Account/Statistics">
+                <MudAvatar>
+                    <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">
+
+                    </MudImage>
+                </MudAvatar>
+            </a>
+        }
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_drawerOpen" Color="Color.Dark">
+        <NavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+            @if (_userService.Loaded)
+            {
+                @Body
+                <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton/>
+            }
+            else
+            {
+                <h1>Loading...</h1>
+            }
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    bool _drawerOpen = false;
+
+    ApplicationUser user;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async void OnInitialized()
+    {
+        _themeManager.Theme = Highgeek.McWebApp.Common.Helpers.ThemeHelper.CustomTheme;
+        _refreshService.PageRefreshRequested += Refresh;
+        _refreshService.ApplicationUserRefreshRequested += UserInit;
+        UserInit();
+    }
+
+    private async void UserInit()
+    {
+        try
+        {
+            user = await _userManager.GetUserAsync(authenticationState.Result.User);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("MainLayout UserInit() error: "+ex.Message);
+        }
+
+        if (user is not null)
+        {
+            _userService.ApplicationUser = user;
+            await _userService.UserServiceInitAsync();
+            Refresh();
+        }
+        else
+        {
+            _userService.Loaded = true;
+            Refresh();
+        }
+    }
+
+    private void Refresh()
+    {
+        try
+        {
+            StateHasChanged();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning("MainLayout Refresh() error: " + ex.Message);
+        }
+    }
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+
+    private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
+    public bool _themeManagerOpen = false;
+
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+    void UpdateTheme(ThemeManagerTheme value)
+    {
+        _themeManager = value;
+        StateHasChanged();
+    }
+
+    void IDisposable.Dispose()
+    {
+        _themeManager = null;
+        authenticationState = null;
+        user = null;
+        _refreshService.PageRefreshRequested -= Refresh;
+    }
+}

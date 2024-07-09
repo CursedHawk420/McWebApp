@@ -1,0 +1,69 @@
+﻿@inject ISnackbar _snack
+@inject UserService _userService
+@inject IRefreshService _refreshService
+
+@implements IAsyncDisposable
+
+
+<MudFab Color="Color.Primary" StartIcon="@Icons.Material.TwoTone.Chat" OnClick="ChatButtonClicked" Style="position: fixed; bottom:0; right:0; margin-bottom: 2.0rem; margin-right:2.0rem " />
+@if (_userService.LpUser is not null)
+{
+    @if (IsChatOpen)
+    {
+        <IngameChatComponent @ref=ingameChatComponent/>
+    }
+}
+
+@code {
+    public bool IsChatOpen = false;
+
+    IngameChatComponent ingameChatComponent;
+
+    protected override async void OnInitialized()
+    {
+        _refreshService.PageRefreshRequested += Refresh;
+    }
+
+    private async void Refresh(){
+        
+        if (_userService.ApplicationUser is null){
+            IsChatOpen = false;
+        }
+        if (_userService.LpUser is null){
+            IsChatOpen = false;
+        }
+        StateHasChanged();
+    }
+
+    public async void ChatButtonClicked()
+    {
+        if (_userService.ApplicationUser is null){
+            _snack.Add("Pro používání chatu musíte být přihlášeni a mít propojený herní účet.", Severity.Warning);
+            return;
+        }
+        if (_userService.LpUser is null){
+            _snack.Add("Propojte si herní účet.", Severity.Warning);
+            return;
+        }
+        if (IsChatOpen)
+        {
+            IsChatOpen = false;
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+            });
+        }
+        else
+        {
+            IsChatOpen = true;
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+            });
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync(){
+        _refreshService.PageRefreshRequested -= Refresh;
+    }
+}

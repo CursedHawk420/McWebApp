@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{13E783EA-6B21-4D2B-927B-BC82FD939169}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorServer", "BlazorServer\BlazorServer.csproj", "{FB3B790E-0271-47A3-BF37-168BA1130685}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{ECDB0A79-FB83-457A-ACC9-56D934957165}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13E783EA-6B21-4D2B-927B-BC82FD939169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13E783EA-6B21-4D2B-927B-BC82FD939169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13E783EA-6B21-4D2B-927B-BC82FD939169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13E783EA-6B21-4D2B-927B-BC82FD939169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB3B790E-0271-47A3-BF37-168BA1130685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB3B790E-0271-47A3-BF37-168BA1130685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB3B790E-0271-47A3-BF37-168BA1130685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB3B790E-0271-47A3-BF37-168BA1130685}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECDB0A79-FB83-457A-ACC9-56D934957165}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECDB0A79-FB83-457A-ACC9-56D934957165}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECDB0A79-FB83-457A-ACC9-56D934957165}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECDB0A79-FB83-457A-ACC9-56D934957165}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {300F3DD1-375C-4358-8926-B91F19A29F75}
+	EndGlobalSection
+EndGlobal
