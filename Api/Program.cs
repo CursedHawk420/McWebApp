@@ -2,6 +2,7 @@ using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Services;
+using Highgeek.McWebApp.Api.Services.Redis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -37,7 +38,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<UsersDbContext>();
 
-builder.Services.AddScoped<LuckPermsService>();
+builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddScoped<ImageCacheService>();
 builder.Services.AddScoped<MinecraftUserManager>();
 
@@ -48,6 +49,11 @@ builder.Services.AddScoped<MineSkinApi.Client.Configuration>();
 builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 
+builder.Services.AddSingleton<IApiRedisUpdateService, ApiRedisUpdateService>();
+
+builder.Services.AddSingleton<ApiRedisListenerService>();
+builder.Services.AddHostedService(
+    provider => provider.GetRequiredService<ApiRedisListenerService>());
 
 builder.Services.AddControllersWithViews();
 
