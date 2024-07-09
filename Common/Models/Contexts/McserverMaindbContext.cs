@@ -70,6 +70,10 @@ public partial class McserverMaindbContext : DbContext
 
     public virtual DbSet<WebPlayerDatum> WebPlayerData { get; set; }
 
+    public virtual DbSet<Xconomy> Xconomies { get; set; }
+
+    public virtual DbSet<Xconomyrecord> Xconomyrecords { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString));
 
@@ -583,6 +587,70 @@ public partial class McserverMaindbContext : DbContext
             entity.Property(e => e.Uuid)
                 .HasColumnType("text")
                 .HasColumnName("uuid");
+        });
+
+        modelBuilder.Entity<Xconomy>(entity =>
+        {
+            entity.HasKey(e => e.Uid).HasName("PRIMARY");
+
+            entity
+                .ToTable("xconomy")
+                .HasCharSet("utf8mb3")
+                .UseCollation("utf8mb3_general_ci");
+
+            entity.Property(e => e.Uid)
+                .HasMaxLength(50)
+                .HasColumnName("UID");
+            entity.Property(e => e.Balance)
+                .HasColumnType("double(20,2)")
+                .HasColumnName("balance");
+            entity.Property(e => e.Hidden)
+                .HasColumnType("int(5)")
+                .HasColumnName("hidden");
+            entity.Property(e => e.Player)
+                .HasMaxLength(50)
+                .HasColumnName("player");
+        });
+
+        modelBuilder.Entity<Xconomyrecord>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity
+                .ToTable("xconomyrecord")
+                .HasCharSet("utf8mb3")
+                .UseCollation("utf8mb3_general_ci");
+
+            entity.Property(e => e.Id)
+                .HasColumnType("int(20)")
+                .HasColumnName("id");
+            entity.Property(e => e.Amount)
+                .HasColumnType("double(20,2)")
+                .HasColumnName("amount");
+            entity.Property(e => e.Balance)
+                .HasColumnType("double(20,2)")
+                .HasColumnName("balance");
+            entity.Property(e => e.Command)
+                .HasMaxLength(255)
+                .HasColumnName("command");
+            entity.Property(e => e.Comment)
+                .HasMaxLength(255)
+                .HasColumnName("comment");
+            entity.Property(e => e.Datetime)
+                .HasColumnType("datetime")
+                .HasColumnName("datetime");
+            entity.Property(e => e.Operation)
+                .HasMaxLength(50)
+                .HasColumnName("operation");
+            entity.Property(e => e.Player)
+                .HasMaxLength(50)
+                .HasColumnName("player");
+            entity.Property(e => e.Type)
+                .HasMaxLength(50)
+                .HasColumnName("type");
+            entity.Property(e => e.Uid)
+                .HasMaxLength(50)
+                .HasColumnName("uid");
         });
 
         OnModelCreatingPartial(modelBuilder);

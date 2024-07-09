@@ -18,6 +18,9 @@ namespace Highgeek.McWebApp.Common.Services
 
         event Action ChatWindowClosehRequested;
         void CallChatWindowClose();
+
+        event Action MainNavMenuClosehRequested;
+        void CallMainNavMenuClose();
     }
     public class RefreshService : IRefreshService
     {
@@ -46,6 +49,12 @@ namespace Highgeek.McWebApp.Common.Services
         public void CallChatWindowClose()
         {
             ChatWindowClosehRequested?.Invoke();
+        }
+
+        public event Action MainNavMenuClosehRequested;
+        public void CallMainNavMenuClose()
+        {
+            MainNavMenuClosehRequested?.Invoke();
         }
     }
 }

@@ -70,6 +70,7 @@
         _themeManager.Theme = Highgeek.McWebApp.Common.Helpers.ThemeHelper.CustomTheme;
         _refreshService.PageRefreshRequested += Refresh;
         _refreshService.ApplicationUserRefreshRequested += UserInit;
+        _refreshService.MainNavMenuClosehRequested += DrawerClose;
         UserInit();
     }
 
@@ -113,6 +114,11 @@
     {
         _drawerOpen = !_drawerOpen;
     }
+    void DrawerClose()
+    {
+        _drawerOpen = false;
+        StateHasChanged();
+    }
 
 
     private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
@@ -135,5 +141,7 @@
         authenticationState = null;
         user = null;
         _refreshService.PageRefreshRequested -= Refresh;
+        _refreshService.ApplicationUserRefreshRequested -= UserInit;
+        _refreshService.MainNavMenuClosehRequested -= DrawerClose;
     }
 }

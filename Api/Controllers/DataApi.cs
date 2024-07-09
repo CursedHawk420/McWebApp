@@ -28,5 +28,21 @@ namespace Highgeek.McWebApp.Api.Controllers
             MinecraftUser user = await _minecraftUserManager.GetUserByNameAsync(name);
             return Json(user);
         }
+
+        [AllowAnonymous]
+        [HttpGet("api/data/money/uuid/{uuid}")]
+        public async Task<IActionResult> GetXconomyFromUuid(string uuid)
+        {
+            var user = await _luckPermsService.GetXconomyFromUuid(uuid);
+            return Json(user);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("api/data/money/uuid/{name}")]
+        public async Task<IActionResult> GetXconomyFromName(string name)
+        {
+            var user = await _luckPermsService.GetXconomyFromName(name);
+            return Json(user);
+        }
     }
 }

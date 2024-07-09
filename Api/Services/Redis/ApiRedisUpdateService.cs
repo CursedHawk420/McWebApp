@@ -62,6 +62,13 @@ namespace Highgeek.McWebApp.Api.Services.Redis
                 chatEntry.Prefix = LuckUser.Metadata.Prefix;
                 chatEntry.Suffix = LuckUser.Metadata.Suffix;
                 chatEntry.PlayerUuid = LuckUser.UniqueId.ToString();
+
+                var xcon = await _luckPermsService.GetXconomyFromUuid(chatEntry.PlayerUuid);
+                if (xcon is not null)
+                {
+                    chatEntry.Nickname = xcon.Player;
+                    chatEntry.Username = xcon.Player;
+                }
             }
             else
             {

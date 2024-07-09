@@ -132,6 +132,7 @@ MinecraftServery.eu">
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
+        _refreshService.CallMainNavMenuClose();
     }
 
     public void Dispose()

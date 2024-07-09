@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Models.Contexts;
+using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using LuckPermsApi.Api;
 using LuckPermsApi.Client;
 using LuckPermsApi.Model;
@@ -163,6 +165,36 @@ namespace Highgeek.McWebApp.Common.Services
                 }
             }
             return false;
+        }
+
+        public async Task<Xconomy> GetXconomyFromUuid(string uuid)
+        {
+            var db = new McserverMaindbContext();
+            var result = db.Xconomies.FirstOrDefault(x => x.Uid == uuid);
+            await db.DisposeAsync();
+            if (result is not null)
+            {
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<Xconomy> GetXconomyFromName(string name)
+        {
+            var db = new McserverMaindbContext();
+            var result = db.Xconomies.FirstOrDefault(x => x.Player == name);
+            await db.DisposeAsync();
+            if (result is not null)
+            {
+                return result;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

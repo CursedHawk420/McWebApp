@@ -25,9 +25,18 @@
 
 <body>
     <Routes @rendermode="RenderModeForPage" />
-    <script src="_framework/blazor.web.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="scripts.js"></script>
+    <script src="_framework/blazor.web.js" autostart="false"></script>
+    <script>
+
+        Blazor.start().then(() => {
+            Blazor.defaultReconnectionHandler._reconnectCallback = function (d) {
+                document.location.reload();
+            }
+        });
+    </script>
+
 </body>
 
 </html>
