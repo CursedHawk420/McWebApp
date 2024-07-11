@@ -21,6 +21,7 @@ var connectionStringCms = configuration.GetConnectionString("PostgresCmsConnecti
 var connectionStringMC = configuration.GetConnectionString("MysqlMCServerConnection");
 var connectionStringMC_data = configuration.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
 var connectionStringMC_eco = configuration.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
+var connectionStringMC_husksync = configuration.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
 
 //users dbcontext Postgress
 builder.Services.AddDbContext<UsersDbContext>(options => options.UseNpgsql(connectionStringUsers), ServiceLifetime.Scoped);
@@ -31,6 +32,7 @@ builder.Services.AddDbContext<McWebApp1CmsContext>(options => options.UseNpgsql(
 builder.Services.AddDbContext<McserverMaindbContext>(options => options.UseMySql(connectionStringMC, MariaDbServerVersion.AutoDetect(connectionStringMC), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverDatadbContext>(options => options.UseMySql(connectionStringMC_data, MariaDbServerVersion.AutoDetect(connectionStringMC_data), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverEcoDataContext>(options => options.UseMySql(connectionStringMC_eco, MariaDbServerVersion.AutoDetect(connectionStringMC_eco), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
+builder.Services.AddDbContext<McserverHusksyncContext>(options => options.UseMySql(connectionStringMC_husksync, MariaDbServerVersion.AutoDetect(connectionStringMC_husksync), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
