@@ -49,6 +49,9 @@
         [JsonProperty("playeruuid", NullValueHandling = NullValueHandling.Ignore)]
         public string? PlayerUuid { get; set; }
 
+        [JsonProperty("prettyservername", NullValueHandling = NullValueHandling.Ignore)]
+        public string? PrettyServerName { get; set; }
+
     }
     public partial class RedisChatEntryAdapter
     {

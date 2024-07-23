@@ -40,7 +40,7 @@ namespace Highgeek.McWebApp.Api.Services.Redis
             await _subscriber.SubscribeAsync("*", async (channel, message) =>
             {
                 var key = GetKey(channel);
-                _logger.LogInformation("Key: " + key + " channel: " + channel + " message: " + message);
+                //_logger.LogInformation("Key: " + key + " channel: " + channel + " message: " + message);
                 if (key == "set")
                 {
 

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using Discord.Commands;
+using Highgeek.McWebApp.Api.Services.Discord;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +58,11 @@ builder.Services.AddSingleton<IApiRedisUpdateService, ApiRedisUpdateService>();
 builder.Services.AddSingleton<ApiRedisListenerService>();
 builder.Services.AddHostedService(
     provider => provider.GetRequiredService<ApiRedisListenerService>());
+
+builder.Services.AddSingleton<CommandService>();
+builder.Services.AddSingleton<DiscordBackgroundService>();
+builder.Services.AddHostedService(
+    provider => provider.GetRequiredService<DiscordBackgroundService>());
 
 builder.Services.AddControllersWithViews();
 

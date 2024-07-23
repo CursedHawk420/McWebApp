@@ -7,11 +7,15 @@ namespace Highgeek.McWebApp.Api.Services.Redis
     public interface IApiRedisUpdateService
     {
         public void Send(string stringToAdd);
+
+        public event EventHandler<RedisChatEntryAdapter> ChatChanged;
     }
     public class ApiRedisUpdateService : IApiRedisUpdateService
     {
         private readonly LuckPermsService _luckPermsService;
         private readonly ILogger<ApiRedisUpdateService> _logger;
+
+        public event EventHandler<RedisChatEntryAdapter> ChatChanged;
 
         public ApiRedisUpdateService(LuckPermsService luckPermsService, ILogger<ApiRedisUpdateService> logger)
         {
@@ -38,6 +42,12 @@ namespace Highgeek.McWebApp.Api.Services.Redis
             }
             switch (type)
             {
+                case "chat":
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production")
+                    {
+                        await ChatEvent(Uuid);
+                    }
+                    return;
                 case "prechat":
                     if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
                     {
@@ -82,6 +92,15 @@ namespace Highgeek.McWebApp.Api.Services.Redis
             chatEntry.Uuid = uuid;
 
             await RedisService.SetInRedis(uuid, chatEntry.ToJson());
+        }
+
+        public async Task ChatEvent(string uuid)
+        {
+            string json = await RedisService.GetFromRedis(uuid);
+            if (json == null) return;
+            RedisChatEntryAdapter chatEntry = RedisChatEntryAdapter.FromJson(json);
+
+            ChatChanged?.Invoke(this, chatEntry);
         }
     }
 }
