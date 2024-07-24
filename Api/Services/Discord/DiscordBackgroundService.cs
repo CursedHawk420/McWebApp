@@ -1,12 +1,15 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Webhook;
 using Discord.WebSocket;
 using Highgeek.McWebApp.Api.Services.Redis;
 using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.Adapters;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Microsoft.AspNetCore;
 using Microsoft.CodeAnalysis.Rename;
+using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.X509;
 
 namespace Highgeek.McWebApp.Api.Services.Discord
@@ -41,13 +44,26 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             _client = new DiscordSocketClient();
 
             _redisUpdateService.ChatChanged += SendChatMessageToDiscord;
+
             redisMap = ConfigProvider.Instance.GetConfigurationManager().GetSection("DiscordChannelBinding").GetChildren().ToDictionary(x => x.Key, x => Convert.ToUInt64(x.Value));
             discordMap = ConfigProvider.Instance.GetConfigurationManager().GetSection("DiscordChannelBinding").GetChildren().ToDictionary(x => Convert.ToUInt64(x.Value), x => x.Key);
 
+            LoadChannelSettings(null, null);
 
-            foreach (var key in RedisService.GetKeysList("settings:server:chat:channels:*").Result)
+            _redisUpdateService.SettingsChanged += LoadChannelSettings;
+        }
+
+        public async void LoadChannelSettings(object sender, string uuid)
+        {
+            _logger.LogInformation($"Trying to load settigns");
+            if (uuid.IsNullOrEmpty() || uuid.StartsWith("settings:server:chat:channels"))
             {
-                channelSettings.Add(ChannelSettingsAdapter.FromJson(RedisService.GetFromRedis(key).Result));
+                channelSettings.Clear();
+                _logger.LogInformation($"Loading channel settings from redis.");
+                foreach (var key in RedisService.GetKeysList("settings:server:chat:channels:*").Result)
+                {
+                    channelSettings.Add(ChannelSettingsAdapter.FromJson(RedisService.GetFromRedis(key).Result));
+                }
             }
         }
 
@@ -127,10 +143,15 @@ namespace Highgeek.McWebApp.Api.Services.Discord
         //discord bot receives some message from discord
         public async Task MessageFromDiscordReceived(SocketMessage socketMessage)
         {
-
-            foreach (var channel in channelSettings)
+            //_logger.LogInformation($"DiscordSocketListener MessageReceived SOURCE: " + socketMessage.Source.ToString());
+            //_logger.LogInformation($"DiscordSocketListener MessageReceived ID: " + socketMessage.Author.Id.ToString());
+            if (socketMessage.Source == MessageSource.Webhook)
             {
-                _logger.LogInformation($"DiscordSocketListener channelSettings: " + channel.FancyName);
+                return;
+            }
+            if (discordMap[socketMessage.Channel.Id] == null)
+            {
+                return;
             }
 
             try
@@ -197,6 +218,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 {
                     try
                     {
+                        await BuildWebhookMessage(chatEntryAdapter);
                         _logger.LogInformation("keyValuePairs[chatEntryAdapter.Channel]: " + redisMap[chatEntryAdapter.Channel].ToString());
                     }
                     catch (Exception ex)
@@ -209,6 +231,49 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             {
                 cachedMessages.Add(chatEntryAdapter);
             }
+        }
+
+        public async Task BuildWebhookMessage(RedisChatEntryAdapter chatEntry)
+        {
+            var channel = await _client.GetChannelAsync(redisMap[chatEntry.Channel]);
+            var webhook = await GetWebhook(channel as IIntegrationChannel);
+            await ExecuteWebhook(chatEntry, webhook);
+
+        }
+
+
+        public async Task ExecuteWebhook(RedisChatEntryAdapter chatEntry, IWebhook webhook)
+        {
+
+            var webhookClient = new DiscordWebhookClient(webhook);
+
+            string random = new UUID().ToString();
+            string avatarUrl = "https://api.highgeek.eu/api/skins/playerhead/" + chatEntry.Username + "?" + random;
+
+            var messageId = await webhookClient.SendMessageAsync(text: chatEntry.Message, avatarUrl: avatarUrl, username: chatEntry.Nickname);
+
+            _logger.LogInformation($"DiscordSocketListener ExecuteWebhook: \n" + messageId.ToString());
+
+        }
+
+        public async Task<IWebhook> GetWebhook(IIntegrationChannel channel)
+        {
+            foreach (var hook in _guild.GetWebhooksAsync().Result)
+            {
+                if (hook != null)
+                {
+                    if (hook.Name == "McWebAppWebhook " + channel.Id)
+                    {
+                        return hook;
+                    }
+                }
+            }
+            return await CreateWebhook(channel);
+        }
+
+        public async Task<IWebhook> CreateWebhook(IIntegrationChannel channel)
+        {
+            return await channel.CreateWebhookAsync("McWebAppWebhook " + channel.Id);
         }
     }
 }

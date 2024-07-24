@@ -9,6 +9,8 @@ namespace Highgeek.McWebApp.Api.Services.Redis
         public void Send(string stringToAdd);
 
         public event EventHandler<RedisChatEntryAdapter> ChatChanged;
+
+        public event EventHandler<string> SettingsChanged;
     }
     public class ApiRedisUpdateService : IApiRedisUpdateService
     {
@@ -16,6 +18,7 @@ namespace Highgeek.McWebApp.Api.Services.Redis
         private readonly ILogger<ApiRedisUpdateService> _logger;
 
         public event EventHandler<RedisChatEntryAdapter> ChatChanged;
+        public event EventHandler<string> SettingsChanged;
 
         public ApiRedisUpdateService(LuckPermsService luckPermsService, ILogger<ApiRedisUpdateService> logger)
         {
@@ -33,6 +36,8 @@ namespace Highgeek.McWebApp.Api.Services.Redis
             try
             {
                 type = Uuid.Substring(0, Uuid.IndexOf(":"));
+                _logger.LogWarning("Uuid is: " + Uuid);
+                _logger.LogWarning("type is: " + type);
             }
             catch (Exception ex)
             {
@@ -53,6 +58,9 @@ namespace Highgeek.McWebApp.Api.Services.Redis
                     {
                         await PrechatEvent(Uuid);
                     }
+                    return;
+                case "settings":
+                    await SettingsEvent(Uuid);
                     return;
                 default:
                     return;
@@ -101,6 +109,12 @@ namespace Highgeek.McWebApp.Api.Services.Redis
             RedisChatEntryAdapter chatEntry = RedisChatEntryAdapter.FromJson(json);
 
             ChatChanged?.Invoke(this, chatEntry);
+        }
+
+        public async Task SettingsEvent(string uuid)
+        {
+            _logger.LogWarning("Invokig SettingsChanged: " + Uuid);
+            SettingsChanged?.Invoke(this, uuid);
         }
     }
 }
