@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
-using Highgeek.McWebApp.Api.Services.Redis;
 using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.Adapters;
 using Highgeek.McWebApp.Common.Services;
@@ -16,7 +15,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 {
     public class DiscordBackgroundService : BackgroundService
     {
-        private readonly IApiRedisUpdateService _redisUpdateService;
+        private readonly IRedisUpdateService _redisUpdateService;
         private readonly LuckPermsService _luckPermsService;
         public readonly DiscordSocketClient _client;
         public readonly CommandService _command;
@@ -32,7 +31,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
         private readonly Dictionary<string, ulong> redisMap = new Dictionary<string, ulong>();
         private readonly Dictionary<ulong, string> discordMap = new Dictionary<ulong, string>();
 
-        public DiscordBackgroundService(ILogger<DiscordBackgroundService> logger, IApiRedisUpdateService apiRedisUpdateService, CommandService commandService, LuckPermsService luckPermsService)
+        public DiscordBackgroundService(ILogger<DiscordBackgroundService> logger, IRedisUpdateService apiRedisUpdateService, CommandService commandService, LuckPermsService luckPermsService)
         {
             _botToken = ConfigProvider.Instance.GetConfigString("DiscordAuthOptions:DiscordBotToken");
             _guildId = Convert.ToUInt64(ConfigProvider.Instance.GetConfigString("DiscordAuthOptions:DiscordGuildId"));
@@ -43,14 +42,15 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             _command = commandService;
             _client = new DiscordSocketClient();
 
-            _redisUpdateService.ChatChanged += SendChatMessageToDiscord;
-
             redisMap = ConfigProvider.Instance.GetConfigurationManager().GetSection("DiscordChannelBinding").GetChildren().ToDictionary(x => x.Key, x => Convert.ToUInt64(x.Value));
             discordMap = ConfigProvider.Instance.GetConfigurationManager().GetSection("DiscordChannelBinding").GetChildren().ToDictionary(x => Convert.ToUInt64(x.Value), x => x.Key);
 
             LoadChannelSettings(null, null);
 
+
+            _redisUpdateService.ChatChanged += SendChatMessageToDiscord;
             _redisUpdateService.SettingsChanged += LoadChannelSettings;
+            _redisUpdateService.PreChatChanged += LegacyPreChatEvent;
         }
 
         public async void LoadChannelSettings(object sender, string uuid)
@@ -274,6 +274,30 @@ namespace Highgeek.McWebApp.Api.Services.Discord
         public async Task<IWebhook> CreateWebhook(IIntegrationChannel channel)
         {
             return await channel.CreateWebhookAsync("McWebAppWebhook " + channel.Id);
+        }
+
+
+
+        public async void LegacyPreChatEvent(object sender, RedisChatEntryAdapter chatEntry)
+        {
+            var LuckUser = await _luckPermsService.GetUserAsync(await _luckPermsService.GetUserUuidAsync(chatEntry.Username));
+            if (LuckUser is not null)
+            {
+                chatEntry.Prefix = LuckUser.Metadata.Prefix;
+                chatEntry.Suffix = LuckUser.Metadata.Suffix;
+                chatEntry.PlayerUuid = LuckUser.UniqueId.ToString();
+            }
+            else
+            {
+                chatEntry.Prefix = "§6[Pleb] §f";
+                chatEntry.Suffix = "§f";
+                chatEntry.PlayerUuid = "00000000-0000-0000-0000-000000000000";
+            }
+
+            await RedisService.DelFromRedis(chatEntry.Uuid);
+            chatEntry.Uuid = chatEntry.Uuid.Replace("prechat", "chat");
+
+            await RedisService.SetInRedis(chatEntry.Uuid, chatEntry.ToJson());
         }
     }
 }

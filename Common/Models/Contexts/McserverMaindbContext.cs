@@ -28,9 +28,13 @@ public partial class McserverMaindbContext : DbContext
 
     public virtual DbSet<Authme> Authmes { get; set; }
 
-    public virtual DbSet<DiscordsrvAccount> DiscordsrvAccounts { get; set; }
+    public virtual DbSet<DiscordAccount> DiscordAccounts { get; set; }
 
-    public virtual DbSet<DiscordsrvCode> DiscordsrvCodes { get; set; }
+    public virtual DbSet<DiscordCode> DiscordCodes { get; set; }
+
+    public virtual DbSet<DiscordSrvAccount> DiscordsrvAccounts { get; set; }
+
+    public virtual DbSet<DiscordSrvCode> DiscordsrvCodes { get; set; }
 
     public virtual DbSet<EfmigrationsHistory> EfmigrationsHistories { get; set; }
 
@@ -63,6 +67,8 @@ public partial class McserverMaindbContext : DbContext
     public virtual DbSet<SrUrlSkin> SrUrlSkins { get; set; }
 
     public virtual DbSet<VentureChat> VentureChats { get; set; }
+
+    public virtual DbSet<VirtualInventory> VirtualInventories { get; set; }
 
     public virtual DbSet<MinecraftUser> WebMinecraftusers { get; set; }
 
@@ -145,7 +151,51 @@ public partial class McserverMaindbContext : DbContext
             entity.Property(e => e.Z).HasColumnName("z");
         });
 
-        modelBuilder.Entity<DiscordsrvAccount>(entity =>
+        modelBuilder.Entity<DiscordAccount>(entity =>
+        {
+            entity.HasKey(e => e.Link).HasName("PRIMARY");
+
+            entity.ToTable("discord_accounts");
+
+            entity.HasIndex(e => e.Discord, "accounts_discord_uindex").IsUnique();
+
+            entity.HasIndex(e => e.Uuid, "accounts_uuid_uindex").IsUnique();
+
+            entity.Property(e => e.Link)
+                .HasColumnType("int(11)")
+                .HasColumnName("link");
+            entity.Property(e => e.Discord)
+                .HasMaxLength(32)
+                .HasColumnName("discord");
+            entity.Property(e => e.Playername)
+                .HasMaxLength(32)
+                .HasColumnName("playername");
+            entity.Property(e => e.Uuid)
+                .HasMaxLength(36)
+                .HasColumnName("uuid");
+        });
+
+        modelBuilder.Entity<DiscordCode>(entity =>
+        {
+            entity.HasKey(e => e.Code).HasName("PRIMARY");
+
+            entity.ToTable("discord_codes");
+
+            entity.HasIndex(e => e.Uuid, "codes_uuid_uindex").IsUnique();
+
+            entity.Property(e => e.Code)
+                .HasMaxLength(4)
+                .IsFixedLength()
+                .HasColumnName("code");
+            entity.Property(e => e.Expiration)
+                .HasColumnType("bigint(20)")
+                .HasColumnName("expiration");
+            entity.Property(e => e.Uuid)
+                .HasMaxLength(36)
+                .HasColumnName("uuid");
+        });
+
+        modelBuilder.Entity<DiscordSrvAccount>(entity =>
         {
             entity.HasKey(e => e.Link).HasName("PRIMARY");
 
@@ -166,7 +216,7 @@ public partial class McserverMaindbContext : DbContext
                 .HasColumnName("uuid");
         });
 
-        modelBuilder.Entity<DiscordsrvCode>(entity =>
+        modelBuilder.Entity<DiscordSrvCode>(entity =>
         {
             entity.HasKey(e => e.Code).HasName("PRIMARY");
 
@@ -529,6 +579,34 @@ public partial class McserverMaindbContext : DbContext
             entity.Property(e => e.Uuid)
                 .HasColumnType("text")
                 .HasColumnName("UUID");
+        });
+
+        modelBuilder.Entity<VirtualInventory>(entity =>
+        {
+            entity.HasKey(e => e.InventoryUuid).HasName("PRIMARY");
+
+            entity.ToTable("virtual_inventories");
+
+            entity.Property(e => e.InventoryUuid)
+                .HasMaxLength(100)
+                .HasColumnName("inventory_uuid");
+            entity.Property(e => e.InventoryName)
+                .HasMaxLength(100)
+                .HasColumnName("inventory_name");
+            entity.Property(e => e.Jsondata).HasColumnName("jsondata");
+            entity.Property(e => e.LastUpdated)
+                .HasMaxLength(255)
+                .HasColumnName("last_updated");
+            entity.Property(e => e.PlayerName)
+                .HasMaxLength(16)
+                .HasColumnName("player_name");
+            entity.Property(e => e.PlayerUuid)
+                .HasMaxLength(100)
+                .HasColumnName("player_uuid");
+            entity.Property(e => e.Size)
+                .HasColumnType("int(11)")
+                .HasColumnName("size");
+            entity.Property(e => e.Web).HasColumnName("web");
         });
 
         modelBuilder.Entity<MinecraftUser>(entity =>

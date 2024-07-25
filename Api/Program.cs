@@ -2,13 +2,13 @@ using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Services;
-using Highgeek.McWebApp.Api.Services.Redis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Discord.Commands;
 using Highgeek.McWebApp.Api.Services.Discord;
+using Highgeek.McWebApp.Common.Services.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,11 +53,11 @@ builder.Services.AddScoped<MineSkinApi.Client.Configuration>();
 builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 
-builder.Services.AddSingleton<IApiRedisUpdateService, ApiRedisUpdateService>();
+builder.Services.AddSingleton<IRedisUpdateService, RedisUpdateService>();
 
-builder.Services.AddSingleton<ApiRedisListenerService>();
+builder.Services.AddSingleton<RedisListenerService>();
 builder.Services.AddHostedService(
-    provider => provider.GetRequiredService<ApiRedisListenerService>());
+    provider => provider.GetRequiredService<RedisListenerService>());
 
 builder.Services.AddSingleton<CommandService>();
 builder.Services.AddSingleton<DiscordBackgroundService>();

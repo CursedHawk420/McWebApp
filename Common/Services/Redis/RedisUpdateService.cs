@@ -13,7 +13,11 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<RedisChatEntryAdapter> ChatChanged;
 
+        public event EventHandler<RedisChatEntryAdapter> PreChatChanged;
+
         public event EventHandler<string> OtherRedisSetChange;
+
+        public event EventHandler<string> SettingsChanged;
     }
 
     public class RedisUpdateService : IRedisUpdateService
@@ -23,7 +27,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<InventoryPositionInfo> InventoryChanged;
         public event EventHandler<RedisChatEntryAdapter> ChatChanged;
+        public event EventHandler<RedisChatEntryAdapter> PreChatChanged;
         public event EventHandler<string> OtherRedisSetChange;
+        public event EventHandler<string> SettingsChanged;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -58,7 +64,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     await ChatEvent(Uuid);
                     return;
                 case "prechat":
-                    //await PrechatEvent(Uuid);
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+                    {
+                        await PrechatEvent(Uuid);
+                    }
+                    return;
+                case "settings":
+                    await SettingsEvent(Uuid);
                     return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
@@ -92,30 +104,17 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public async Task PrechatEvent(string uuid)
         {
-            //happens when mcserver receives discord guild message, we need to get player data before we send RedisService.SetInRedis() and goes to ChatEvent()
             string json = await RedisService.GetFromRedis(uuid);
             if (json == null) return;
             RedisChatEntryAdapter chatEntry = RedisChatEntryAdapter.FromJson(json);
 
-            var LuckUser = await _luckPermsService.GetUserAsync(await _luckPermsService.GetUserUuidAsync(chatEntry.Username));
-            if (LuckUser is not null)
-            {
-                chatEntry.Prefix = LuckUser.Metadata.Prefix;
-                chatEntry.Suffix = LuckUser.Metadata.Suffix;
-                chatEntry.PlayerUuid = LuckUser.UniqueId.ToString();
-            }
-            else
-            {
-                chatEntry.Prefix = "§6[Pleb] §f";
-                chatEntry.Suffix = "§f";
-                chatEntry.PlayerUuid = "00000000-0000-0000-0000-000000000000";
-            }
+            PreChatChanged?.Invoke(this, chatEntry);
+        }
 
-            await RedisService.DelFromRedis(uuid);
-            uuid = uuid.Replace("prechat", "chat");
-            chatEntry.Uuid = uuid;
-
-            await RedisService.SetInRedis(uuid, chatEntry.ToJson());
+        public async Task SettingsEvent(string uuid)
+        {
+            _logger.LogWarning("Invokig SettingsChanged: " + Uuid);
+            SettingsChanged?.Invoke(this, uuid);
         }
 
     }

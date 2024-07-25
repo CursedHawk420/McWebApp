@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Highgeek.McWebApp.Common.Models.mcserver_maindb;
 
-public partial class DiscordsrvCode
+public partial class DiscordSrvCode
 {
     public string Code { get; set; } = null!;
 

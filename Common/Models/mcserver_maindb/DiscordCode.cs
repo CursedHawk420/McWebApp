@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Highgeek.McWebApp.Common.Models.mcserver_maindb;
 
-public partial class DiscordSrvAccount
+public partial class DiscordCode
 {
-    public int Link { get; set; }
-
-    public string Discord { get; set; } = null!;
+    public string Code { get; set; } = null!;
 
     public string Uuid { get; set; } = null!;
+
+    public long Expiration { get; set; }
 }
