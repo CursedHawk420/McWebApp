@@ -3,13 +3,23 @@ using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Models.Adapters;
+using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
+using Highgeek.McWebApp.Common.Models.Contexts;
+using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
+using LuckPermsApi.Model;
 using Microsoft.AspNetCore;
 using Microsoft.CodeAnalysis.Rename;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Org.BouncyCastle.X509;
+using StackExchange.Redis;
+using System.Collections.Generic;
+using System.Data;
 
 namespace Highgeek.McWebApp.Api.Services.Discord
 {
@@ -26,10 +36,15 @@ namespace Highgeek.McWebApp.Api.Services.Discord
         private bool cacheMessages = true;
         private List<RedisChatEntryAdapter> cachedMessages = new List<RedisChatEntryAdapter>();
 
+        private readonly McserverMaindbContext _mcMainContext;
+
         public List<ChannelSettingsAdapter> channelSettings = new List<ChannelSettingsAdapter> { };
 
-        private readonly Dictionary<string, ulong> redisMap = new Dictionary<string, ulong>();
-        private readonly Dictionary<ulong, string> discordMap = new Dictionary<ulong, string>();
+        public List<DiscordPair> channelPairs = new List<DiscordPair> { };
+        public List<DiscordPair> rolePairs = new List<DiscordPair> { };
+
+        //private readonly Dictionary<string, ulong> redisMap = new Dictionary<string, ulong>();
+        //private readonly Dictionary<ulong, string> discordMap = new Dictionary<ulong, string>();
 
         public DiscordBackgroundService(ILogger<DiscordBackgroundService> logger, IRedisUpdateService apiRedisUpdateService, CommandService commandService, LuckPermsService luckPermsService)
         {
@@ -37,23 +52,32 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             _guildId = Convert.ToUInt64(ConfigProvider.Instance.GetConfigString("DiscordAuthOptions:DiscordGuildId"));
             _redisUpdateService = apiRedisUpdateService;
             _luckPermsService = luckPermsService;
-
             _logger = logger;
             _command = commandService;
-            _client = new DiscordSocketClient();
+            DiscordSocketConfig config = new DiscordSocketConfig
+            {
+                LogLevel = LogSeverity.Debug,
+                AlwaysDownloadUsers = true,
+                MessageCacheSize = 100,
+                GatewayIntents = GatewayIntents.All
+            };
+            _client = new DiscordSocketClient(config);
 
-            redisMap = ConfigProvider.Instance.GetConfigurationManager().GetSection("DiscordChannelBinding").GetChildren().ToDictionary(x => x.Key, x => Convert.ToUInt64(x.Value));
-            discordMap = ConfigProvider.Instance.GetConfigurationManager().GetSection("DiscordChannelBinding").GetChildren().ToDictionary(x => Convert.ToUInt64(x.Value), x => x.Key);
-
-            LoadChannelSettings(null, null);
-
+            LoadSettings(null, null);
 
             _redisUpdateService.ChatChanged += SendChatMessageToDiscord;
-            _redisUpdateService.SettingsChanged += LoadChannelSettings;
+            _redisUpdateService.SettingsChanged += LoadSettings;
             _redisUpdateService.PreChatChanged += LegacyPreChatEvent;
+            _redisUpdateService.LuckpermsChanged += LuckpermsChangedEvent;
+            _mcMainContext = GetMaindbContext();
         }
 
-        public async void LoadChannelSettings(object sender, string uuid)
+        private McserverMaindbContext GetMaindbContext()
+        {
+            return new McserverMaindbContext();
+        }
+
+        public async void LoadSettings(object sender, string uuid)
         {
             _logger.LogInformation($"Trying to load settigns");
             if (uuid.IsNullOrEmpty() || uuid.StartsWith("settings:server:chat:channels"))
@@ -65,6 +89,32 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                     channelSettings.Add(ChannelSettingsAdapter.FromJson(RedisService.GetFromRedis(key).Result));
                 }
             }
+
+            if (uuid.IsNullOrEmpty() || uuid.Equals("settings:mcwebapp:discord:channels"))
+            {
+                _logger.LogInformation($"Loading discord channel settings pairs from redis.");
+                DiscordPairing discordPairsList = DiscordPairing.FromJson(await RedisService.GetFromRedis("settings:mcwebapp:discord:channels"));
+                channelPairs = discordPairsList.DiscordPairs.ToList();
+            }
+            if (uuid.IsNullOrEmpty() || uuid.Equals("settings:mcwebapp:discord:roles"))
+            {
+                _logger.LogInformation($"Loading discord roles settings pairs from redis.");
+
+                DiscordPairing discordPairsList = DiscordPairing.FromJson(RedisService.GetFromRedis("settings:mcwebapp:discord:roles").Result);
+                rolePairs = discordPairsList.DiscordPairs.ToList();
+            }
+        }
+
+
+
+        public static DiscordPair GetMatchingDiscordId(List<DiscordPair> discordPairs, string toFind)
+        {
+            return discordPairs.FirstOrDefault(i => i.Name == toFind);
+        }
+
+        public static DiscordPair GetMatchingName(List<DiscordPair> discordPairs, ulong toFind)
+        {
+            return discordPairs.FirstOrDefault(i => i.DiscordId == toFind);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -149,7 +199,17 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             {
                 return;
             }
-            if (discordMap[socketMessage.Channel.Id] == null)
+            if (socketMessage.Channel.GetChannelType() == ChannelType.DM && socketMessage.Content.Length == 6)
+            {
+                IUser user = socketMessage.Author;
+
+                var statusCode = await CheckCodeAsync(socketMessage.Content.ToUpper());
+
+                if (statusCode.Success){
+                    await LinkAccount(user, (DiscordCode) statusCode.Object);
+                }
+            }
+            if (GetMatchingName(channelPairs, socketMessage.Channel.Id) == null)
             {
                 return;
             }
@@ -160,7 +220,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 _logger.LogInformation($"DiscordSocketListener MessageReceived: " + message.Content);
                 RedisChatEntryAdapter redisChat = new RedisChatEntryAdapter();
 
-                redisChat.Channel = discordMap[message.Channel.Id];
+                redisChat.Channel = GetMatchingName(channelPairs, message.Channel.Id).Name;
                 ChannelSettingsAdapter channelSetting = channelSettings.FirstOrDefault(x => x.Name == redisChat.Channel);
 
                 if(channelSetting == null)
@@ -197,7 +257,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 await RedisService.SetInRedis(redisChat.Uuid, redisChat.ToJson());
 
 
-                _logger.LogInformation($"DiscordSocketListener MessageReceived channel id: " + discordMap[message.Channel.Id]);
+                _logger.LogInformation($"DiscordSocketListener MessageReceived channel id: " + GetMatchingName(channelPairs, message.Channel.Id).Name);
 
             }
             catch (Exception ex)
@@ -219,7 +279,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                     try
                     {
                         await BuildWebhookMessage(chatEntryAdapter);
-                        _logger.LogInformation("keyValuePairs[chatEntryAdapter.Channel]: " + redisMap[chatEntryAdapter.Channel].ToString());
+                        _logger.LogInformation("keyValuePairs[chatEntryAdapter.Channel]: " + GetMatchingDiscordId(channelPairs, chatEntryAdapter.Channel).DiscordId);
                     }
                     catch (Exception ex)
                     {
@@ -235,7 +295,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
         public async Task BuildWebhookMessage(RedisChatEntryAdapter chatEntry)
         {
-            var channel = await _client.GetChannelAsync(redisMap[chatEntry.Channel]);
+            var channel = await _client.GetChannelAsync(GetMatchingDiscordId(channelPairs, chatEntry.Channel).DiscordId);
             var webhook = await GetWebhook(channel as IIntegrationChannel);
             await ExecuteWebhook(chatEntry, webhook);
 
@@ -298,6 +358,69 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             chatEntry.Uuid = chatEntry.Uuid.Replace("prechat", "chat");
 
             await RedisService.SetInRedis(chatEntry.Uuid, chatEntry.ToJson());
+        }
+
+        public async void LuckpermsChangedEvent(object sender, LuckpermsRedisLogAdapter log)
+        {
+            //DiscordAccount discordAccount = await _mcMainContext.DiscordAccounts.FirstOrDefaultAsync(x => x.Uuid == log.TargetUuid.ToString());
+            //await UpdateDiscordRoles(discordAccount);
+        }
+
+        public async Task UpdateDiscordRoles(DiscordAccount discordAccount)
+        {
+            User luckUser = await _luckPermsService.GetUserAsync(discordAccount.Uuid);
+            
+            var list = new List<ulong>();
+            ulong Ulong = Convert.ToUInt64(discordAccount.Discord);
+            list.Add(await TransformLuckpermsRoleToDiscord(luckUser.Metadata.PrimaryGroup));
+            IGuildUser user = _guild.GetUser(Ulong);
+            await user.ModifyAsync(x => {
+                x.Nickname = discordAccount.Playername;
+            });
+            AddDiscordRoles(user, list);
+        }
+
+        public async Task<ulong> TransformLuckpermsRoleToDiscord(string role) 
+        {
+            return GetMatchingDiscordId(rolePairs, role).DiscordId;
+        }
+
+        public async Task AddDiscordRoles(IGuildUser user, List<ulong> rolesToAdd)
+        {
+            await (user as IGuildUser).AddRolesAsync(rolesToAdd);
+        }
+
+
+        public async Task<StatusModel> CheckCodeAsync(string code)
+        {
+            var discordCodeEntry = await _mcMainContext.DiscordCodes.FirstOrDefaultAsync(c => c.Code == code);
+            if (discordCodeEntry is not null && discordCodeEntry.Code == code)
+            {
+
+                return new StatusModel("Successfully connected account!", discordCodeEntry);
+            }
+            else
+            {
+                return new StatusModel("Wrong linking code.", "Wrong linking code");
+            }
+        }
+
+        public async Task LinkAccount(IUser discordUser, DiscordCode discordCode)
+        {
+            var xconomy = await _mcMainContext.Xconomies.FirstOrDefaultAsync(x => x.Uid == discordCode.Uuid);
+            DiscordAccount discordAccount = new DiscordAccount();
+            discordAccount.Discord = discordUser.Id.ToString();
+            discordAccount.Uuid = discordCode.Uuid.ToString();
+            discordAccount.Playername = xconomy.Player;
+
+
+            await _mcMainContext.DiscordAccounts.AddAsync(discordAccount);
+            await _mcMainContext.SaveChangesAsync();
+
+            PlayerServerSettings playerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:" + xconomy.Player));
+            playerServerSettings.hasConnectedDiscord = true;
+            await RedisService.SetInRedis("players:settings:" + xconomy.Player, JsonConvert.SerializeObject(playerServerSettings));
+            await UpdateDiscordRoles(discordAccount);
         }
     }
 }

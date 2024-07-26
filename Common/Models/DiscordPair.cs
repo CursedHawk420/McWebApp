@@ -1,0 +1,48 @@
+﻿
+using System;
+using System.Collections.Generic;
+
+using System.Globalization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace Highgeek.McWebApp.Common.Models
+{
+    public partial class DiscordPairing
+    {
+        [JsonProperty("DiscordPairs")]
+        public DiscordPair[] DiscordPairs { get; set; }
+    }
+
+    public partial class DiscordPair
+    {
+        [JsonProperty("DiscordId")]
+        public ulong DiscordId { get; set; }
+
+        [JsonProperty("Name")]
+        public string Name { get; set; }
+    }
+
+    public partial class DiscordPairing
+    {
+        public static DiscordPairing FromJson(string json) => JsonConvert.DeserializeObject<DiscordPairing>(json, Highgeek.McWebApp.Common.Models.DiscordPairingConverter.Settings);
+    }
+
+    public static class Serialize
+    {
+        public static string ToJson(this DiscordPairing self) => JsonConvert.SerializeObject(self, Highgeek.McWebApp.Common.Models.DiscordPairingConverter.Settings);
+    }
+
+    internal static class DiscordPairingConverter
+    {
+        public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+        {
+            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            DateParseHandling = DateParseHandling.None,
+            Converters =
+            {
+                new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
+            },
+        };
+    }
+}

@@ -64,7 +64,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             await _subscriber.SubscribeAsync("*", async (channel, message) =>
             {
                 var key = GetKey(channel);
-                _logger.LogInformation("Key: " + key + " channel: " + channel + " message: " + message);
+                //_logger.LogInformation("Key: " + key + " channel: " + channel + " message: " + message);
                 if (key == "set")
                 {
                     //_logger.LogInformation("RedisListenerAsync triggers VinvUpdatedEventArgs with uuid: " + message);

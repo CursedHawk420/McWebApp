@@ -184,7 +184,7 @@ public partial class McserverMaindbContext : DbContext
             entity.HasIndex(e => e.Uuid, "codes_uuid_uindex").IsUnique();
 
             entity.Property(e => e.Code)
-                .HasMaxLength(4)
+                .HasMaxLength(6)
                 .IsFixedLength()
                 .HasColumnName("code");
             entity.Property(e => e.Expiration)

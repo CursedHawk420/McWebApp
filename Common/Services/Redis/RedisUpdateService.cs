@@ -1,4 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Models.Adapters;
+using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Highgeek.McWebApp.Common.Models.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> OtherRedisSetChange;
 
         public event EventHandler<string> SettingsChanged;
+
+        public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
     }
 
     public class RedisUpdateService : IRedisUpdateService
@@ -30,6 +33,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<RedisChatEntryAdapter> PreChatChanged;
         public event EventHandler<string> OtherRedisSetChange;
         public event EventHandler<string> SettingsChanged;
+        public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -72,11 +76,23 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 case "settings":
                     await SettingsEvent(Uuid);
                     return;
+                case "luckperms":
+                    await LuckpermsEvent(Uuid);
+                    return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
                     return;
             }
 
+        }
+
+        public async Task LuckpermsEvent(string uuid)
+        {
+            if (uuid.StartsWith("luckperms:log:toresolve:"))
+            {
+
+                LuckpermsChanged?.Invoke(this, LuckpermsRedisLogAdapter.FromJson(await RedisService.GetFromRedis(uuid)));
+            }
         }
 
         public async Task InventoryEvent(string uuid, string type)
