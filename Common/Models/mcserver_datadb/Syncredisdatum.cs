@@ -1,8 +1,9 @@
-﻿using System;
+﻿/*using System;
 using System.Collections.Generic;
 using Highgeek.McWebApp.Common.Models.Minecraft;
 
 namespace Highgeek.McWebApp.Common.Models.mcserver_datadb;
+
 
 public partial class Syncredisdatum
 {
@@ -39,4 +40,4 @@ public class InventoryData
     public Syncredisdatum? Syncredisdatum { get; set; }
     public List<GameItem?>? Items { get; set; }
 
-}
+}*/

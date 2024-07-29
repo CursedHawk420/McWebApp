@@ -1,0 +1,105 @@
+﻿@inject InventoryManagerService _inventoryManager
+@inject ILogger<InventoryTabs> _logger
+@inject UserService _userService
+
+@implements IDisposable
+@if (loadingComplete)
+{
+    @if (invData != null)
+    {
+        <div class="row">
+        <div class="col-md-6">
+        @if (vinvData.Count > 1)
+        {
+
+                    <MudSelect T="VirtualInventory" @bind-Value="@selectedVinv" ToStringFunc="@converter" Label="Select your inventory" Variant="Variant.Outlined" Class="" SelectedValuesChanged=SelectedChanged>
+                @foreach (var inv in vinvData)
+                {
+                    <MudSelectItem Value="@inv" />
+                }
+                    </MudSelect>
+                }
+            </div>
+            <div class="col-md-6">
+        @if (winvData.Count > 1)
+        {
+
+                    <MudSelect T="VirtualInventory" @bind-Value="@selectedWinv" ToStringFunc="@converter" Label="Select your web inventory" Variant="Variant.Outlined" Class="" SelectedValuesChanged=SelectedChanged>
+                @foreach (var inv in winvData)
+                {
+                    <MudSelectItem Value="@inv" />
+                }
+                    </MudSelect>
+                }
+            </div>
+        </div>
+
+        @if (selectedVinv != null)
+        {
+            <InventoryComponent syncredisdatum="@selectedVinv" winvsyncredisdatum="@selectedWinv" @ref="inventoryComponent" />
+        }
+
+    }
+
+}
+
+@code {
+    //https://mudblazor.com/components/select#custom-converter
+
+    //TODO kdyz je jen jeden tak nevytvaret select boxy vubec
+    //TODO novej selectbox i pro winv
+
+    private List<VirtualInventory> invData = new List<VirtualInventory>();
+    private bool loadingComplete = false;
+    protected InventoryComponent inventoryComponent;
+
+
+    private List<VirtualInventory> winvData = new List<VirtualInventory>();
+    private List<VirtualInventory> vinvData = new List<VirtualInventory>();
+
+    private VirtualInventory selectedVinv;
+    private VirtualInventory selectedWinv;
+
+    protected override async void OnInitialized()
+    {
+        
+        _inventoryManager.mcusername = _userService.ApplicationUser.mcNickname;
+        _inventoryManager.mcuuid = _userService.ApplicationUser.mcUUID;
+
+        await InvokeAsync(async () =>
+        {
+            invData = await _inventoryManager.GetInventoriesData(_userService.ApplicationUser.mcUUID);
+            
+            foreach (var datum in invData)
+            {
+                if (datum.Web == true)
+                {
+                    winvData.Add(datum);
+                }
+                else
+                {
+                    vinvData.Add(datum);
+                }
+            }
+            selectedVinv = vinvData[0];
+            selectedWinv = winvData[0];
+
+            loadingComplete = true;
+            StateHasChanged();
+        });
+    }
+
+    public async Task SelectedChanged(IEnumerable<VirtualInventory> newselection)
+    {
+        await inventoryComponent.RefreshInventory();
+    }
+
+    Func<VirtualInventory, string> converter = p => p?.InventoryName;
+
+    void IDisposable.Dispose()
+    {
+        //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
+        //_userManager.Dispose();
+        _inventoryManager.Dispose();
+    }
+}

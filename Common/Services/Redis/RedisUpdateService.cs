@@ -1,6 +1,6 @@
 ﻿using Highgeek.McWebApp.Common.Models.Adapters;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
-using Highgeek.McWebApp.Common.Models.Models;
+using Highgeek.McWebApp.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

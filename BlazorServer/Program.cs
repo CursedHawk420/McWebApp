@@ -96,6 +96,9 @@ builder.Services.AddScoped<IRefreshService, RefreshService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GameChatService>();
 
+builder.Services.AddScoped<InventoryManagerService>();
+builder.Services.AddScoped<ImageCacheService>();
+
 builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddSingleton<IRedisUpdateService, RedisUpdateService>();
 

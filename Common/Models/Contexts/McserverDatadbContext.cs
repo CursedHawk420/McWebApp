@@ -108,7 +108,7 @@ public partial class McserverDatadbContext : DbContext
 
     public virtual DbSet<Playerdatum> Playerdata { get; set; }
 
-    public virtual DbSet<Syncredisdatum> Syncredisdata { get; set; }
+    //public virtual DbSet<Syncredisdatum> Syncredisdata { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString));
@@ -1851,7 +1851,7 @@ public partial class McserverDatadbContext : DbContext
             entity.Property(e => e.Statistics).HasColumnName("statistics");
         });
 
-        modelBuilder.Entity<Syncredisdatum>(entity =>
+        /*modelBuilder.Entity<Syncredisdatum>(entity =>
         {
             entity.HasKey(e => e.InventoryUuid).HasName("PRIMARY");
 
@@ -1877,7 +1877,7 @@ public partial class McserverDatadbContext : DbContext
                 .HasColumnType("int(11)")
                 .HasColumnName("size");
             entity.Property(e => e.Web).HasColumnName("web");
-        });
+        });*/
 
         OnModelCreatingPartial(modelBuilder);
     }

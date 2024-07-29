@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Highgeek.McWebApp.Common.Models.Models
+namespace Highgeek.McWebApp.Common.Models
 {
     public class InventoryPositionInfo
     {

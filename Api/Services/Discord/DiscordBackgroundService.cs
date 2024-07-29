@@ -269,11 +269,13 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
 
                 _logger.LogInformation($"DiscordSocketListener MessageReceived channel id: " + GetMatchingName(channelPairs, message.Channel.Id).Name);
+                return;
 
             }
             catch (Exception ex)
             {
                 _logger.LogInformation($"DiscordSocketListener MessageReceived exception: \n" + ex.Message);
+                return;
             }
 
         }

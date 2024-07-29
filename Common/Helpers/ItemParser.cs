@@ -1,5 +1,7 @@
 ﻿using Highgeek.McWebApp.Common.Models.Minecraft;
 using Newtonsoft.Json;
+using Minesharp.Nbt.Reader;
+using SharpNBT;
 
 namespace Highgeek.McWebApp.Common.Helpers
 {
@@ -8,9 +10,32 @@ namespace Highgeek.McWebApp.Common.Helpers
 
         public static async Task<GameItem> CreateItem(string jsonString, int position, string originUuid)
         {
+            GameItem gameItem = new GameItem();
+            CompoundTag compoundTag = SharpNBT.SNBT.StringNbt.Parse(jsonString);
+            gameItem.CompoundTag = compoundTag;
+
+            gameItem.name = ((StringTag) compoundTag["id"]).Value;
+            gameItem.Json = jsonString;
+
+
+            int amount;
+            try
+            {
+                amount = compoundTag.Get<IntTag>("count");
+            }
+            catch (Exception ex)
+            {
+                amount = 1;
+                //Logger.LogError(ex.Message);
+            }
+            gameItem.Amount = amount;
+
+
+
+            /*
             var keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonString);
 
-            GameItem gameItem = new GameItem();
+
             gameItem.Json = jsonString;
 
             string type = keyValuePairs["type"].ToString();
@@ -70,12 +95,12 @@ namespace Highgeek.McWebApp.Common.Helpers
             gameItem.Amount = amount;
             //ImagesToCache.Add(texture, texturename);
             //gameItem.OriginUuid = originUuid;
-
+            
             if (type != "AIR")
             {
                 gameItem.Identifier = originUuid;
 
-            }
+            }*/
             return gameItem;
         }
 
