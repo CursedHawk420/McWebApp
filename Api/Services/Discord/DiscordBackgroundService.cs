@@ -10,16 +10,12 @@ using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Humanizer;
 using LuckPermsApi.Model;
-using Microsoft.AspNetCore;
-using Microsoft.CodeAnalysis.Rename;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using Org.BouncyCastle.X509;
-using StackExchange.Redis;
-using System.Collections.Generic;
-using System.Data;
+using System.Text.RegularExpressions;
 
 namespace Highgeek.McWebApp.Api.Services.Discord
 {
@@ -217,6 +213,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             try
             {
                 IMessage message = await _guild.GetTextChannel(socketMessage.Channel.Id).GetMessageAsync(socketMessage.Id);
+                IGuildUser guildUser = _guild.GetUser(message.Author.Id);
                 _logger.LogInformation($"DiscordSocketListener MessageReceived: " + message.Content);
                 RedisChatEntryAdapter redisChat = new RedisChatEntryAdapter();
 
@@ -227,32 +224,46 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 {
                     return;
                 }
+                DateTime dateTime = DateTime.UtcNow;
+
+                string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF");
 
                 redisChat.Source = "discord";
                 redisChat.Servername = "discord";
                 redisChat.PrettyServerName = "&2Disc";
                 redisChat.Channelprefix = channelSetting.Prefix;
-                redisChat.Datetime = DateTimeOffset.Now;
+                redisChat.Datetime = dateTime;
                 redisChat.Message = message.Content;
 
-
-                /*
-                todo: linking discord with web and mc account
-                redisChat.Suffix;
-                redisChat.Prefix;
-                redisChat.PlayerUuid;
-                redisChat.Primarygroup;
-                redisChat.Username;
-                redisChat.Nickname;
-                 */
-
-                redisChat.Prefix = "§6[Pleb] §f";
-                redisChat.Suffix = "&f";
-                redisChat.Primarygroup = "default";
-                redisChat.Nickname = message.Author.Username;
                 redisChat.Username = message.Author.Username;
 
-                redisChat.Uuid = "chat:" + redisChat.Channel + ":" + redisChat.Datetime + ":" + redisChat.Username;
+                if (guildUser.Nickname != null)
+                {
+                    redisChat.Nickname = guildUser.Nickname;
+                }
+                else
+                {
+                    redisChat.Nickname = guildUser.GlobalName;
+                }
+
+                var LuckUser = await GetDiscordUserLuckUser(guildUser);
+                if (LuckUser is not null)
+                {
+                    redisChat.Prefix = LuckUser.Metadata.Prefix;
+                    redisChat.Suffix = LuckUser.Metadata.Suffix;
+                    redisChat.PlayerUuid = LuckUser.UniqueId.ToString();
+                    redisChat.Primarygroup = LuckUser.Metadata.PrimaryGroup;
+                }
+                else
+                {
+                    redisChat.Prefix = "§6[Pleb] §f";
+                    redisChat.Suffix = "§f";
+                    redisChat.PlayerUuid = "00000000-0000-0000-0000-000000000000";
+                    redisChat.Primarygroup = "default";
+                }
+
+
+                redisChat.Uuid = "chat:" + redisChat.Channel + ":" + date.Replace(":", "-") + ":" + redisChat.Nickname;
 
                 await RedisService.SetInRedis(redisChat.Uuid, redisChat.ToJson());
 
@@ -265,6 +276,16 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 _logger.LogInformation($"DiscordSocketListener MessageReceived exception: \n" + ex.Message);
             }
 
+        }
+
+        private async Task<User> GetDiscordUserLuckUser(IUser guildUser)
+        {
+            DiscordAccount discordAccount = await _mcMainContext.DiscordAccounts.FirstOrDefaultAsync(x => x.Discord == guildUser.Id.ToString());
+            if (discordAccount is not null)
+            {
+                return await _luckPermsService.GetUserAsync(discordAccount.Uuid);
+            }
+            return null;
         }
 
 
