@@ -103,7 +103,7 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task SetPlayerSettings()
         {
             JoinedChannels.Clear();
-            PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:"+MinecraftUser.NickName));
+            PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:"+ApplicationUser.mcNickname));
 
             ChannelOut = AvaiableChannels.FirstOrDefault(x => x.Name == PlayerServerSettings.channelOut);
 
@@ -125,7 +125,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async Task UpdatePlayerSettings()
         {
-            await RedisService.SetInRedis("players:settings:" + MinecraftUser.NickName, JsonConvert.SerializeObject(PlayerServerSettings));
+            await RedisService.SetInRedis("players:settings:" + ApplicationUser.mcNickname, JsonConvert.SerializeObject(PlayerServerSettings));
         }
     }
 }
