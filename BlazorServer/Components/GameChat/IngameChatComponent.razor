@@ -8,13 +8,13 @@
 @implements IDisposable
 @if (loadingComplete)
 {
-    <MudPaper Class="" Style="max-width:50rem;position:fixed; margin-left:2rem;right:2rem; bottom:2rem; background-color:#212121; min-width:25rem">
+    <MudPaper Class="" Style="max-width:50rem;position:fixed; margin-left:2rem;right:2rem; bottom:2rem; background-color:#212121; min-width:20rem">
         <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
             <div class="row">
-                <div class="col-5">
-                    <MudText Style="padding:0.5rem;" Typo="Typo.h5">Game chat</MudText>
+                <div class="col-6">
+                    <MudText Style="padding-left:0.5rem;padding-bottom:0.5rem;padding-top:0.5rem;" Typo="Typo.h5">Game chat</MudText>
                 </div>
-                <div class="col-6" >
+                <div class="col-5" >
                     <MudSelect T="ChannelSettingsAdapter" MultiSelection="true" SelectAll="true" @ref="channelSelector" SelectedValues="_userService.JoinedChannels" SelectedValuesChanged="JoinedChannelsChanged" ToStringFunc="converter" Style="margin-top:-0.5rem; margin-right:1rem; margin-left:-1.5rem">
                         @foreach(var channel in _userService.AvaiableChannels)
                         {
