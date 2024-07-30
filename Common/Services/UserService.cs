@@ -94,7 +94,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async void FetchPlayerSettingsFromRedis(object sender, string uuid)
         {
-            if (uuid.Contains(this.MinecraftUser.NickName))
+            if (uuid.Contains(ApplicationUser.mcNickname))
             {
                 await SetPlayerSettings();
             }
