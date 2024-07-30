@@ -14,7 +14,7 @@ namespace Highgeek.McWebApp.Common.Helpers
             CompoundTag compoundTag = SharpNBT.SNBT.StringNbt.Parse(jsonString);
             gameItem.CompoundTag = compoundTag;
 
-            gameItem.name = ((StringTag) compoundTag["id"]).Value;
+            string id = ((StringTag) compoundTag["id"]).Value;
             gameItem.Json = jsonString;
 
 
@@ -29,7 +29,19 @@ namespace Highgeek.McWebApp.Common.Helpers
                 //Logger.LogError(ex.Message);
             }
             gameItem.Amount = amount;
+            if (id != "minecraft:air")
+            {
+                gameItem.Identifier = originUuid;
+            }
 
+            //todo: check for enchants to add _enchanted.gif
+            string texture = id.ToLower().Substring(id.IndexOf(":", id.Length));
+            gameItem.Texture = texture;
+            if (compoundTag.ContainsKey("minecraft:enchantments")){
+                gameItem.TextureName = "https://api.highgeek.eu/api/images/items/name/" + texture + "_enchanted";
+            }else{
+                gameItem.TextureName = "https://api.highgeek.eu/api/images/items/name/" + texture;
+            }
 
 
             /*
