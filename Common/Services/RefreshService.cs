@@ -16,8 +16,14 @@ namespace Highgeek.McWebApp.Common.Services
         event Action ApplicationUserRefreshRequested;
         void CallApplicationUserRefresh();
 
-        event Action ChatWindowClosehRequested;
+        event Action ChatWindowCloseRequested;
         void CallChatWindowClose();
+
+        event Action ChatRefreshRequested;
+        void CallChatRefresh();
+
+        event Action ChatServiceRefreshRequested;
+        void CallChatServiceRefresh();
 
         event Action MainNavMenuClosehRequested;
         void CallMainNavMenuClose();
@@ -39,16 +45,30 @@ namespace Highgeek.McWebApp.Common.Services
         }
 
 
+        public event Action ChatRefreshRequested;
+        public void CallChatRefresh()
+        {
+            ChatRefreshRequested?.Invoke();
+        }
+
+
+        public event Action ChatServiceRefreshRequested;
+        public void CallChatServiceRefresh()
+        {
+            ChatServiceRefreshRequested?.Invoke();
+        }
+
+
         public event Action ApplicationUserRefreshRequested;
         public void CallApplicationUserRefresh()
         {
             ApplicationUserRefreshRequested?.Invoke();
         }
 
-        public event Action ChatWindowClosehRequested;
+        public event Action ChatWindowCloseRequested;
         public void CallChatWindowClose()
         {
-            ChatWindowClosehRequested?.Invoke();
+            ChatWindowCloseRequested?.Invoke();
         }
 
         public event Action MainNavMenuClosehRequested;

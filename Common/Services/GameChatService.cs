@@ -2,6 +2,11 @@
 using Highgeek.McWebApp.Common.Models;
 using LuckPermsApi.Model;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Highgeek.McWebApp.Common.Helpers.Channels;
+using Highgeek.McWebApp.Common.Models.mcserver_maindb;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Components.Web;
+using Org.BouncyCastle.Asn1.BC;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -9,20 +14,77 @@ namespace Highgeek.McWebApp.Common.Services
     {
         private readonly LuckPermsService _luckPermsService;
         private readonly UserService _userService;
+        private readonly IRefreshService _refreshService;
+        private readonly IRedisUpdateService _redisUpdateService;
 
-        public GameChatService(LuckPermsService luckPermsService, UserService userService) 
+        public List<RedisChatEntryAdapter> chat = new List<RedisChatEntryAdapter>();
+
+        public GameChatService(LuckPermsService luckPermsService, UserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
             _luckPermsService = luckPermsService;
             _userService = userService;
-            
+            _redisUpdateService = redisUpdateService;
+            _refreshService = refreshService;
+
+
+            LoadChatFromRedis();
+            _redisUpdateService.ChatChanged += c_RenderNewChatEntry;
+            _refreshService.ChatServiceRefreshRequested += RefreshChatService;
         }
 
-        //public MinecraftUser User { get; set; }
+        public async void RefreshChatService()
+        {
+            await LoadChatFromRedis();
+        }
+
+        private async Task LoadChatFromRedis()
+        {
+            chat.Clear();
+            foreach (var channel in _userService.PlayerServerSettings.joinedChannels)
+            {
+                var keys = await RedisService.GetKeysList("*chat:" + channel + "*");
+                keys = keys.OrderByDescending(i => i).ToList();
+                if (keys.Count > 0)
+                {
+                    int max;
+                    if (keys.Count < 50)
+                    {
+                        max = keys.Count;
+                    }
+                    else
+                    {
+                        max = 50;
+                    }
+                    for (int i = 0; i < max; i++)
+                    {
+                        chat.Add(RedisChatEntryAdapter.FromJson(await RedisService.GetFromRedis(keys[i])));
+                    }
+                }
+            }
+            chat = chat.OrderBy(i => i.Datetime).ToList();
+            _refreshService.CallChatRefresh();
+        }
+
+        private async void c_RenderNewChatEntry(object sender, RedisChatEntryAdapter entry)
+        {
+            if (_userService.PlayerServerSettings.joinedChannels.Contains(entry.Channel))
+            {
+                chat.Add(entry);
+                chat = chat.OrderBy(i => i.Datetime).ToList();
+                _refreshService.CallChatRefresh();
+            }
+        }
 
         public async Task<RedisChatEntryAdapter> CreateMessage(string message)
         {
+            ChannelSettingsAdapter channelOut = new ChannelSettingsAdapter();
+
             RedisChatEntryAdapter json = new RedisChatEntryAdapter();
 
+            //ChannelSettingsAdapter channelSetting = ChannelSettingsAdapter.FromJson(await RedisService.GetFromRedis("settings:server:chat:channels:"+channel));
+            json.Channelprefix = _userService.ChannelOut.Prefix;
+            json.Channel = _userService.ChannelOut.Name;
+            json.PrettyServerName = "&2Web";
 
             json.Message = message;
 
@@ -31,18 +93,23 @@ namespace Highgeek.McWebApp.Common.Services
             json.Suffix = _userService.LpUser.Metadata.Suffix;
             json.Primarygroup = _userService.LpUser.Metadata.PrimaryGroup;
 
-            json.Source = "web";
-            json.Channelprefix = "&8[&2Global&8@&2Web&8]";
-            json.Channel = "global";
-            json.Servername = "web";
 
-
-            json.Datetime = DateTime.Now.AddHours(2);
             json.Username = _userService.MinecraftUser.NickName;
             json.Nickname = _userService.MinecraftUser.NickName;
             json.PlayerUuid = _userService.MinecraftUser.Uuid;
 
-            json.Uuid = "chat:"+ json.Channel + ":" + json.Datetime + ":" + _userService.MinecraftUser.NickName;
+
+            DateTime dateTime = DateTime.UtcNow;
+
+            string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF");
+
+            json.Source = "web";
+            json.Servername = "web";
+            json.Datetime = dateTime;
+
+
+            json.Uuid = "chat:" + json.Channel + ":" + date.Replace(":", "-") + ":" + json.Username;
+
             return json;
         }
 

@@ -6,7 +6,7 @@
 //
 //    var welcome = Welcome.FromJson(jsonString);
 
-namespace Highgeek.McWebApp.Common.Helpers
+namespace Highgeek.McWebApp.Common.Helpers.Channels
 {
     using System.Globalization;
     using Newtonsoft.Json;
@@ -32,12 +32,12 @@ namespace Highgeek.McWebApp.Common.Helpers
 
     public partial class ChannelSettingsAdapter
     {
-        public static ChannelSettingsAdapter FromJson(string json) => JsonConvert.DeserializeObject<ChannelSettingsAdapter>(json, Highgeek.McWebApp.Common.Helpers.Converter.Settings);
+        public static ChannelSettingsAdapter FromJson(string json) => JsonConvert.DeserializeObject<ChannelSettingsAdapter>(json, Highgeek.McWebApp.Common.Helpers.Channels.Converter.Settings);
     }
 
     public static class Serialize
     {
-        public static string ToJson(this ChannelSettingsAdapter self) => JsonConvert.SerializeObject(self, Highgeek.McWebApp.Common.Helpers.Converter.Settings);
+        public static string ToJson(this ChannelSettingsAdapter self) => JsonConvert.SerializeObject(self, Highgeek.McWebApp.Common.Helpers.Channels.Converter.Settings);
     }
 
     internal static class Converter

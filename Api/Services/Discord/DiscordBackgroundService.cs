@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Helpers.Channels;
 using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Models.Adapters;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;

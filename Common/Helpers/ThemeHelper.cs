@@ -16,6 +16,8 @@ namespace Highgeek.McWebApp.Common.Helpers
 
                 Primary = "1B5E20",
 
+                Surface = Colors.Grey.Darken4,
+
                 Secondary = Colors.Green.Accent4,
 
 

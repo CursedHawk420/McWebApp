@@ -22,7 +22,7 @@
     protected override async void OnInitialized()
     {
         _refreshService.PageRefreshRequested += Refresh;
-        _refreshService.ChatWindowClosehRequested += CloseChatWindow;
+        _refreshService.ChatWindowCloseRequested += CloseChatWindow;
     }
 
     private async void Refresh(){

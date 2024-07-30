@@ -3,6 +3,7 @@ using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Highgeek.McWebApp.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Highgeek.McWebApp.Common.Services.Redis
 {
@@ -20,6 +21,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<string> SettingsChanged;
 
+        public event EventHandler<string> PlayersSettingsChanged;
+
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
     }
 
@@ -33,6 +36,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<RedisChatEntryAdapter> PreChatChanged;
         public event EventHandler<string> OtherRedisSetChange;
         public event EventHandler<string> SettingsChanged;
+        public event EventHandler<string> PlayersSettingsChanged;
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
@@ -79,11 +83,29 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 case "luckperms":
                     await LuckpermsEvent(Uuid);
                     return;
+                case "players":
+                    await PlayersEvent(Uuid);
+                    return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
                     return;
             }
 
+        }
+
+        public async Task PlayersEvent(string uuid)
+        {
+            if (uuid.Contains("settings"))
+            {
+                try
+                {
+                    PlayersSettingsChanged?.Invoke(this, uuid);
+                }
+                catch
+                {
+                    return;
+                }
+            }
         }
 
         public async Task LuckpermsEvent(string uuid)
