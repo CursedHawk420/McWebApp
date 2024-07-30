@@ -86,10 +86,10 @@
         <ItemRenderer>
             <MudDynamicDropItem T="GameItem">
                 <div class="d-flex justify-center align-center flex-grow-1">
-                    <MudTooltip @ref="tooltip">
-                        <ChildContent>
+                    <MudTooltip @ref="tooltip" ShowOnClick="true" ShowOnHover="true">
+                        <ChildContent >
                             <div class="container">
-                                <MudImage Src="@context.TextureName" Style="height:36px;width:36px;" />
+                                <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
                                 @if (context.Amount > 1)
                                 {
                                     <MudText Class="bottom-right-text" Typo="Typo.caption">@context.Amount</MudText>
@@ -97,12 +97,12 @@
                             </div>
                         </ChildContent>
                         <TooltipContent>
-                            <MudText Typo="Typo.body2">@context.name</MudText>
+                            <MudText Typo="Typo.body2">@((MarkupString)context.DisplayName.HtmlText)</MudText>
                             @if (context.Enchantments != null)
                             {
-                                foreach (var enchant in context.Enchantments)
+                                foreach (IntTag enchant in context.Enchantments.Values)
                                 {
-                                    <MudText Typo="Typo.caption">@enchant.Key @((MarkupString)": ") @enchant.Value <br /></MudText>
+                                    <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1)) @((MarkupString)": ") @enchant.Value <br /></MudText>
                                 }
                             }
                         </TooltipContent>
@@ -122,6 +122,7 @@
     public VirtualInventory winvsyncredisdatum { get; set; }
 
     private InventoryData invData = new InventoryData();
+
 
     //todo: load winv data
     private InventoryData webinvData = new InventoryData();
@@ -168,8 +169,8 @@
         await InvokeAsync(async () =>
         {
             invData.Items = new List<GameItem?>();
-            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum.InventoryUuid, "vinv");
-            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum.InventoryUuid, "winv");
+            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum, "vinv");
+            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum, "winv");
             vinvslots = vinvData.Items.Count;
             winvslots = webinvData.Items.Count;
             await DetermineInventorySize();
@@ -179,7 +180,6 @@
             StateHasChanged();
         });
     }
-
 
     //TODO adaptér pro velikosti invů
 
@@ -197,7 +197,7 @@
         //dropItem.Item.Identifier = dropItem.DropzoneIdentifier;
 
         string item = await RedisService.GetFromRedis(olduuid);
-        await RedisService.SetInRedis(olduuid, ItemParser.AIRITEM);
+        await RedisService.SetInRedis(olduuid, GameItem.AIRITEM);
         await RedisService.SetInRedis(dropItem.DropzoneIdentifier, item);
     }
 
@@ -243,8 +243,8 @@
 
             invData.Items = new List<GameItem?>();
 
-            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum.InventoryUuid, "vinv");
-            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum.InventoryUuid, "winv");
+            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum, "vinv");
+            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum, "winv");
 
 
             invData.Items.AddRange(vinvData.Items);
@@ -279,12 +279,12 @@
         if (info.rawuuid.Contains("winv:"))
         {
             invData.Items[int.Parse(info.position) + vinvslots].Json = info.Item;
-            invData.Items[int.Parse(info.position) + vinvslots] = await ItemParser.CreateItem(info.Item, int.Parse(info.position), info.rawuuid);
+            invData.Items[int.Parse(info.position) + vinvslots] = new GameItem(info.Item, info.rawuuid);
         }
         else
         {
             invData.Items[int.Parse(info.position)].Json = info.Item;
-            invData.Items[int.Parse(info.position)] = await ItemParser.CreateItem(info.Item, int.Parse(info.position), info.rawuuid);
+            invData.Items[int.Parse(info.position)] = new GameItem(info.Item, info.rawuuid);
         }
 
 

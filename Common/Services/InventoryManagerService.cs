@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Highgeek.McWebApp.Common.Services.Redis;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
+using Highgeek.McWebApp.Common.Data.Plan;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -56,26 +57,19 @@ namespace Highgeek.McWebApp.Common.Services
 
         //todo: load webinv data from somewhere - new table in db or just use redis keys?
 
-        public async Task<List<GameItem?>> LoadItemsFromRedis(string id, string prefix)
+        public async Task<List<GameItem?>> LoadItemsFromRedis(VirtualInventory inventory, string prefix)
         {
 
-            _logger.LogInformation("Starting loading data from redis for uuid: " + id);
+            _logger.LogInformation("Starting loading data from redis for uuid: " + inventory.InventoryUuid);
             List<GameItem> items = new List<GameItem>();
-            try
+            for (int i = 0; i < inventory.Size; i++)
             {
-                for (int i = 0; i < 54; i++)
-                {
-                    string uuid = prefix + ":" + mcusername + ":" + id + ":" + i;
-                    string json = await RedisService.GetFromRedis(uuid);
-                    _logger.LogInformation("Loaded item from redis: " + json);
-                    GameItem item = await ItemParser.CreateItem(json, i, uuid);
-                    _logger.LogInformation("ItemParser parsed item: " + item.name);
-                    items.Add(item);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("tryed to load bigger chest.: "+e.Message);
+                string uuid = prefix + ":" + mcusername + ":" + inventory.InventoryUuid + ":" + i;
+                string json = await RedisService.GetFromRedis(uuid);
+                _logger.LogInformation("Loaded item from redis: " + json);
+                GameItem item = new GameItem(json, uuid);
+                _logger.LogInformation("ItemParser parsed item: " + item.Name);
+                items.Add(item);
             }
 
             return items;
