@@ -60,8 +60,8 @@ namespace Highgeek.McWebApp.Common.Services
                 }
             }
 
-            AllItems.AddRange(wInvData.Items);
             AllItems.AddRange(vInvData.Items);
+            AllItems.AddRange(wInvData.Items);
 
             WinvIdentifier = "winv:" + _userService.MinecraftUser.NickName + ":" + wInvData.VirtualInventory.InventoryUuid + ":";
             VinvIdentifier = "vinv:" + _userService.MinecraftUser.NickName + ":" + vInvData.VirtualInventory.InventoryUuid + ":";
