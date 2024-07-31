@@ -17,7 +17,7 @@
                     <MudText Style="padding-left:0.5rem;padding-bottom:0.5rem;padding-top:0.5rem;" Typo="Typo.h5">Game chat</MudText>
                 </div>
                 <div class="col-5" >
-                    <MudSelect T="ChannelSettingsAdapter" MultiSelection="true" SelectAll="true" @ref="channelSelector" SelectedValues="_userService.JoinedChannels" SelectedValuesChanged="JoinedChannelsChanged" ToStringFunc="converter" Style="margin-top:-0.5rem; margin-right:1rem; margin-left:-1.5rem">
+                    <MudSelect T="ChannelSettingsAdapter" MultiSelection="true" SelectAll="true" @ref="channelSelector" SelectedValues="_userService.JoinedChannels" SelectedValuesChanged="JoinedChannelsChanged" ToStringFunc="converter" Style=" margin-right:1rem; margin-left:-1.5rem">
                         @foreach(var channel in _userService.AvaiableChannels)
                         {
                             <MudSelectItem T="ChannelSettingsAdapter" Value="channel" >@channel.FancyName</MudSelectItem>
@@ -31,12 +31,12 @@
             </div>
         </MudPaper>
         <MudPaper @ref="_chatField" Style="height:30rem;  background-color:#212121; overflow-y:scroll;" class="scrollchatarea">
-            <MudList Clickable="false" Dense="true" DisableGutters="false">
-                @foreach (var entry in _gameChatService.chat)
+            <MudList T="string" Gutters="false" Dense="true">
+                @foreach (var entry in _gameChatService.chat.ToList())
                 {
                     <MudTooltip Inline="false">
                         <ChildContent>
-                            <MudListItem style=" padding-top: 0px; padding-bottom: 0px; margin-bottom:-0.5rem">@((MarkupString)DeserializeMessage(entry))</MudListItem>
+                            <MudListItem OnClickPreventDefault="false"  style=" padding-top: 0px; padding-bottom: 0px; margin-bottom:-0.5rem">@((MarkupString)DeserializeMessage(entry))</MudListItem>
                         </ChildContent>
                         <TooltipContent>
                             <MudText Typo="Typo.body2">@_timeZoneService.GetLocalDateTime(entry.Datetime).Result.ToString("g")</MudText>
@@ -49,10 +49,10 @@
         <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
             <div class="row">
                 <div class="col-9" >
-                    <MudTextField @ref="RefEntryField" @bind-Value="@textInput" Variant="Variant.Text" OnKeyDown="TextFieldOnKeyDown" Disabled="disableChatInput" Immediate="true" Style="margin-left:1rem; margin-top:0.1rem" />
+                    <MudTextField @ref="RefEntryField" @bind-Value="@textInput" Variant="Variant.Text" OnKeyDown="TextFieldOnKeyDown" Disabled="disableChatInput" Immediate="true" Style="margin-left:1rem; " />
                 </div>
                 <div class="col-3">
-            <MudSelect T="ChannelSettingsAdapter" @ref="channelSelector" @bind-Value="_userService.ChannelOut" SelectedValuesChanged="OutChannelChanged" ToStringFunc="converter" Style="margin-top:-0.5rem; margin-right:1rem; margin-left:-1.5rem">
+            <MudSelect T="ChannelSettingsAdapter" @ref="channelSelector" @bind-Value="_userService.ChannelOut" SelectedValuesChanged="OutChannelChanged" ToStringFunc="converter" Style=" margin-right:1rem; margin-left:-1.5rem">
                 @foreach (var channel in _userService.AvaiableChannels)
                 {
                     <MudSelectItem T="ChannelSettingsAdapter" Value="channel">@channel.FancyName</MudSelectItem>

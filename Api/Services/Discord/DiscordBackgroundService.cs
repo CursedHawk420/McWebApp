@@ -11,7 +11,6 @@ using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
-using Humanizer;
 using LuckPermsApi.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

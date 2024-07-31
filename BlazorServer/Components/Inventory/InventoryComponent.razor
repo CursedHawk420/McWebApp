@@ -47,7 +47,7 @@
                                     <div class="d-flex dropinv ">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                            <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default " Style="height:41px;width:41.4px;" />
+                                            <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             i++;
                                         }
                                     </div>
@@ -71,7 +71,7 @@
                                     <div class="d-flex dropinv">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                            <MudDropZone T="GameItem" Identifier="@($"{winvrawuuid}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default " Style="height:41px;width:41.4px;" />
+                                            <MudDropZone T="GameItem" Identifier="@($"{winvrawuuid}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             ii++;
                                         }
                                     </div>
@@ -87,14 +87,24 @@
             <MudDynamicDropItem T="GameItem">
                 <div class="d-flex justify-center align-center flex-grow-1">
                     <MudTooltip @ref="tooltip" ShowOnClick="true" ShowOnHover="true">
-                        <ChildContent >
-                            <div class="container">
-                                <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
-                                @if (context.Amount > 1)
-                                {
-                                    <MudText Class="bottom-right-text" Typo="Typo.caption">@context.Amount</MudText>
-                                }
-                            </div>
+                        <ChildContent>
+                            <MudMenu ActivationEvent="@MouseEvent.RightClick" >
+                                <ActivatorContent>
+                                    <div class="container">
+                                        <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
+                                        @if (context.Amount > 1)
+                                        {
+                                            <MudText Class="bottom-right-text" Typo="Typo.caption">@context.Amount</MudText>
+                                        }
+                                    </div>
+                                </ActivatorContent>
+                                <ChildContent>
+                                    <MudMenuItem>Profile</MudMenuItem>
+                                    <MudMenuItem>Theme</MudMenuItem>
+                                    <MudMenuItem>Usage</MudMenuItem>
+                                    <MudMenuItem>Sign Out</MudMenuItem>
+                                </ChildContent>
+                            </MudMenu>
                         </ChildContent>
                         <TooltipContent>
                             <MudText Typo="Typo.body1">@((MarkupString)context.DisplayName.HtmlText)</MudText>
@@ -122,6 +132,8 @@
     public VirtualInventory winvsyncredisdatum { get; set; }
 
     private InventoryData invData = new InventoryData();
+
+    private MudMenu mudMenu;
 
 
     //todo: load winv data
@@ -181,11 +193,12 @@
         });
     }
 
+
     //TODO adaptér pro velikosti invů
 
     public async Task ItemPicked(MudDragAndDropItemTransaction<GameItem> pickItem)
     {
-        tooltip.IsVisible = false;
+        tooltip.Visible = false;
         //_logger.LogInformation("ItemParser.GetItemPositionInt(pickItem.SourceZoneIdentifier) = " + await ItemParser.GetItemPositionInt(pickItem.SourceZoneIdentifier));
 
     }

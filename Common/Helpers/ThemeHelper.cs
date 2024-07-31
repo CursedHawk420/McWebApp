@@ -5,36 +5,56 @@ namespace Highgeek.McWebApp.Common.Helpers
     public class ThemeHelper
     {
 
-        public static string MainAppBackgroud = Colors.Grey.Darken4;
+        public static string MainAppBackgroud = Colors.Gray.Darken4;
 
         public static MudTheme CustomTheme = new MudTheme()
         {
-            Palette = new Palette()
+            
+            PaletteDark = new PaletteDark()
             {
                 Dark = "111111",
-                AppbarBackground = Colors.Grey.Darken4,
+                AppbarBackground = Colors.Gray.Darken4,
 
                 Primary = "1B5E20",
 
-                Surface = Colors.Grey.Darken4,
+                Surface = Colors.Gray.Darken4,
 
                 Secondary = Colors.Green.Accent4,
 
 
                 Black = Colors.Cyan.Default,
 
-                TextPrimary = Colors.Grey.Lighten4,
+                TextPrimary = Colors.Gray.Lighten4,
 
-                TextSecondary = Colors.Grey.Lighten1,
+                TextSecondary = Colors.Gray.Lighten1,
+            },
+
+            PaletteLight = new PaletteLight()
+            {
+                Dark = "111111",
+                AppbarBackground = Colors.Gray.Darken4,
+
+                Primary = "1B5E20",
+
+                Surface = Colors.Gray.Darken4,
+
+                Secondary = Colors.Green.Accent4,
+
+
+                Black = Colors.Cyan.Default,
+
+                TextPrimary = Colors.Gray.Lighten4,
+
+                TextSecondary = Colors.Gray.Lighten1,
             }
         };
 
-        public static Palette CustomPalette = new Palette()
+        /*public static Palette CustomPalette = new Palette()
         {
             Primary = Colors.Blue.Default,
             Secondary = Colors.Green.Accent4,
             AppbarBackground = Colors.Red.Default,
             Black = Colors.Cyan.Default,
-        };
+        };*/
     }
 }
