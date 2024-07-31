@@ -1,6 +1,7 @@
-﻿@inject InventoryManagerService _inventoryManager
+﻿@inject InventoryService _invService
 @inject ILogger<InventoryTabs> _logger
 @inject UserService _userService
+@inject IRefreshService _refreshService
 
 @implements IDisposable
 @if (loadingComplete)
@@ -36,11 +37,15 @@
 
         @if (selectedVinv != null)
         {
-            <InventoryComponent syncredisdatum="@selectedVinv" winvsyncredisdatum="@selectedWinv" @ref="inventoryComponent" />
+            <InventoryComponent selectedVinv="selectedVinv"  @ref="inventoryComponent" />
         }
 
     }
 
+}
+else
+{
+    <h1>Loading...</h1>
 }
 
 @code {
@@ -62,14 +67,19 @@
 
     protected override async void OnInitialized()
     {
-        
-        _inventoryManager.mcusername = _userService.ApplicationUser.mcNickname;
-        _inventoryManager.mcuuid = _userService.ApplicationUser.mcUUID;
+        _refreshService.InventoryRefreshRequested += Load;
+        if (_invService.InvData is not null)
+        {
+            Load();
+        }
+    }
 
+    public async void Load()
+    {
         await InvokeAsync(async () =>
         {
-            invData = await _inventoryManager.GetInventoriesData(_userService.ApplicationUser.mcUUID);
-            
+            invData = _invService.InvData.Inventories;
+
             foreach (var datum in invData)
             {
                 if (datum.Web == true)
@@ -98,8 +108,9 @@
 
     void IDisposable.Dispose()
     {
+        _refreshService.PageRefreshRequested -= Load;
         //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
         //_userManager.Dispose();
-        _inventoryManager.Dispose();
+        //_invService.Dispose();
     }
 }

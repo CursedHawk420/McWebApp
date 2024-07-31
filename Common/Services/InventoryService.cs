@@ -9,75 +9,63 @@ using MudBlazor;
 
 namespace Highgeek.McWebApp.Common.Services
 {
-    public class InventoryService
+    public class InventoryService : IDisposable
     {
-        private readonly McserverMaindbContext _mcMainDbContext;
         private readonly ILogger<InventoryService> _logger;
         private readonly IRedisUpdateService _redisUpdateService;
         private readonly UserService _userService;
+        private readonly IRefreshService _refreshService;
 
-        public InventoryService(McserverMaindbContext mcserverMaindb, ILogger<InventoryService> logger, UserService userService, IRedisUpdateService redisUpdateService)
+        public InventoriesList InvData;
+
+        public string WinvIdentifier;
+
+        public int winvslots;
+
+        public List<GameItem?> AllItems = new List<GameItem?>();
+
+        public InventoryService(ILogger<InventoryService> logger, UserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
-            _mcMainDbContext = mcserverMaindb;
             _logger = logger;
             _userService = userService;
             _redisUpdateService = redisUpdateService;
+            _refreshService = refreshService;
             //_iRedisUpdateService = _serviceProvider.GetService<IRedisUpdateService>();
             //_iRedisUpdateService.InventoryChanged += c_InventoryUpdated;
         }
 
-
-        public string WinvIdentifier;
-        public string VinvIdentifier;
-
-        public int winvslots;
-        public int vinvslots;
-
-        public InventoryData wInvData = new InventoryData();
-        public InventoryData vInvData = new InventoryData();
-
-        public List<GameItem?> AllItems = new List<GameItem?>();
-
-
-        public async Task<List<VirtualInventory>> GetInventoriesData()
+        public async Task Init()
         {
-            _logger.LogInformation("Loading player inventories...");
             var context = new McserverMaindbContext();
-            var toReturn = await context.VirtualInventories.Where(s => s.PlayerUuid == _userService.MinecraftUser.Uuid).ToListAsync();
+            _logger.LogInformation("Loading player inventories...");
+            InvData = new InventoriesList(context.VirtualInventories.Where(s => s.PlayerUuid == _userService.MinecraftUser.Uuid).ToList());
 
-
-            foreach ( var item in toReturn )
+            foreach (var inv in InvData.Inventories)
             {
-                if (item.Web.Value)
+                string prefix = "";
+                if (inv.Web)
                 {
-                    wInvData.VirtualInventory = item;
-                    wInvData.Items = await LoadItemsFromRedis(item, "winv");
+                    prefix = "winv";
+                    WinvIdentifier = "winv:" + _userService.MinecraftUser.NickName + ":" + inv.InventoryUuid + ":";
+                    winvslots = inv.Size;
                 }
                 else
                 {
-                    vInvData.VirtualInventory = item;
-                    vInvData.Items = await LoadItemsFromRedis(item, "vinv");
+                    prefix = "vinv";
                 }
+                inv.Items = await LoadItemsFromRedis(inv, prefix);
+                AllItems.AddRange(inv.Items);
             }
-
-            AllItems.AddRange(vInvData.Items);
-            AllItems.AddRange(wInvData.Items);
-
-            WinvIdentifier = "winv:" + _userService.MinecraftUser.NickName + ":" + wInvData.VirtualInventory.InventoryUuid + ":";
-            VinvIdentifier = "vinv:" + _userService.MinecraftUser.NickName + ":" + vInvData.VirtualInventory.InventoryUuid + ":";
-
-            winvslots = wInvData.VirtualInventory.Size.Value;
-            vinvslots = vInvData.VirtualInventory.Size.Value;
-
-            return toReturn;
+            _refreshService.CallInventoryRefresh();
         }
+
+
 
 
         public async Task<List<GameItem?>> LoadItemsFromRedis(VirtualInventory inventory, string prefix)
         {
-
-            _logger.LogInformation("Starting loading data from redis for uuid: " + inventory.InventoryUuid);
             List<GameItem> items = new List<GameItem>();
+            _logger.LogInformation("Starting loading data from redis for uuid: " + inventory.InventoryUuid);
             for (int i = 0; i < inventory.Size; i++)
             {
                 string uuid = prefix + ":" + _userService.MinecraftUser.NickName + ":" + inventory.InventoryUuid + ":" + i;
@@ -114,17 +102,14 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task listUpdater(InventoryPositionInfo info)
         {
             _logger.LogInformation("Updating item: " + info.uuid + ":" + info.position);
+            AllItems[int.Parse(info.position) + InvData.ListPosition[info.uuid]].Json = info.Item;
+            AllItems[int.Parse(info.position) + InvData.ListPosition[info.uuid]] = new GameItem(info.Item, info.rawuuid);
+        }
 
-            if (info.rawuuid.Contains("winv:"))
-            {
-                AllItems[int.Parse(info.position) + vInvData.VirtualInventory.Size.Value].Json = info.Item;
-                AllItems[int.Parse(info.position) + vInvData.VirtualInventory.Size.Value] = new GameItem(info.Item, info.rawuuid);
-            }
-            else
-            {
-                AllItems[int.Parse(info.position)].Json = info.Item;
-                AllItems[int.Parse(info.position)] = new GameItem(info.Item, info.rawuuid);
-            }
+        public void Dispose()
+        {
+            AllItems.Clear();
+            InvData.Inventories.Clear();
         }
     }
 }

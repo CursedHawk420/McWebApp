@@ -9,7 +9,7 @@ using Highgeek.McWebApp.Common.Helpers.Channels;
 
 namespace Highgeek.McWebApp.Common.Services
 {
-    public class UserService
+    public class UserService : IDisposable
     {
         private readonly MinecraftUserManager _mcUserManager;
 
@@ -126,6 +126,15 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task UpdatePlayerSettings()
         {
             await RedisService.SetInRedis("players:settings:" + ApplicationUser.mcNickname, JsonConvert.SerializeObject(PlayerServerSettings));
+        }
+
+        public void Dispose()
+        {
+            this.ApplicationUser = null;
+            this.MinecraftUser = null;
+            this.LpUser = null;
+            _refreshService.ServiceRefreshRequested -= RefreshServiceState;
+            _redisUpdateService.PlayersSettingsChanged -= FetchPlayerSettingsFromRedis;
         }
     }
 }

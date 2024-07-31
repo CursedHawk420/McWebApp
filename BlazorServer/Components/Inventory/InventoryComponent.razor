@@ -1,6 +1,6 @@
 ﻿@inject ILogger<InventoryComponent> _logger
 @inject IRedisUpdateService _redisUpdateService
-@inject InventoryManagerService _invManager
+@inject InventoryService _invService
 @inject IBrowserViewportService _browserViewportService
 @implements IDisposable
 
@@ -33,7 +33,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="@invclass">
-                        <MudText Style="margin-top:0.1%; margin-bottom:0.1%">@(syncredisdatum == null ? "Nothing selected." : $"Ingame Inventory: {syncredisdatum.InventoryName}")</MudText>
+                <MudText Style="margin-top:0.1%; margin-bottom:0.1%">@(selectedVinv == null ? "Nothing selected." : $"Ingame Inventory: {selectedVinv.InventoryName}")</MudText>
 
                         <div style="background-image:url('@vinvsize'); width: 410px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -39px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
                             @if (true)
@@ -56,7 +56,7 @@
 
                 <div class="col-md-6">
                     <div class="@invclass">
-                        <MudText Style="margin-top:0.1%;margin-bottom:0.1%;">@(winvsyncredisdatum == null ? "Nothing selected." : $"Web Inventory: {winvsyncredisdatum.InventoryName}")</MudText>
+                <MudText Style="margin-top:0.1%;margin-bottom:0.1%;">@(_invService.InvData.WInvData == null ? "Nothing selected." : $"Web Inventory: {_invService.InvData.WInvData.InventoryName}")</MudText>
 
                         <div style="background-image:url('@winvsize'); width: 410px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -39px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
                             @if (true)
@@ -67,7 +67,7 @@
                                     <div class="d-flex dropinv">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                            <MudDropZone T="GameItem" Identifier="@($"{winvrawuuid}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
+                                            <MudDropZone T="GameItem" Identifier="@($"{_invService.WinvIdentifier}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             ii++;
                                         }
                                     </div>
@@ -86,19 +86,11 @@
     public Highgeek.McWebApp.BlazorServer.Components.Layout.MainLayout MainLayout { get; set; }
 
     [Parameter]
-    public VirtualInventory syncredisdatum { get; set; }
-
-    [Parameter]
-    public VirtualInventory winvsyncredisdatum { get; set; }
-
-    private InventoryData invData = new InventoryData();
+    public VirtualInventory selectedVinv { get; set; }
 
     private MudMenu mudMenu;
 
 
-    //todo: load winv data
-    private InventoryData webinvData = new InventoryData();
-    private InventoryData vinvData = new InventoryData();
     //todo: velikost invů
     private int winvslots;
     private int vinvslots;
@@ -109,11 +101,10 @@
     private int i = 0;
     private int ii = 0;
 
-    private string winvrawuuid;
-    private string vinvrawuuid;
-
     private string winvsize;
     private string vinvsize;
+
+    private string vinvrawuuid;
 
     MudTooltip tooltip;
 
@@ -128,26 +119,14 @@
 
         //_redisUpdateService.InventoryChanged += c_InventoryUpdated;
 
-        _invManager.mcuuid = syncredisdatum.PlayerUuid;
-        _invManager.mcusername = syncredisdatum.PlayerName;
-
-        vinvData.VirtualInventory = syncredisdatum;
-        webinvData.VirtualInventory = winvsyncredisdatum;
-
-
-        winvrawuuid = "winv:" + winvsyncredisdatum.PlayerName + ":" + winvsyncredisdatum.InventoryUuid + ":";
-        vinvrawuuid = "vinv:" + syncredisdatum.PlayerName + ":" + syncredisdatum.InventoryUuid + ":";
+        vinvrawuuid = "vinv:" + selectedVinv.PlayerName + ":" + selectedVinv.InventoryUuid + ":";
 
         await InvokeAsync(async () =>
         {
-            invData.Items = new List<GameItem?>();
-            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum, "vinv");
-            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum, "winv");
-            vinvslots = vinvData.Items.Count;
-            winvslots = webinvData.Items.Count;
+            vinvslots = selectedVinv.Items.Count;
+            winvslots = _invService.InvData.WInvData.Items.Count;
             await DetermineInventorySize();
-            invData.Items.AddRange(vinvData.Items);
-            invData.Items.AddRange(webinvData.Items);
+
             loadingComplete = true;
             StateHasChanged();
         });

@@ -6,7 +6,6 @@
 @inject ILogger<MainLayout> _logger
 
 @inject IRedisUpdateService _redisUpdateService
-@inject InventoryManagerService _invManager
 @inject InventoryService _invService
 
 @implements IDisposable
@@ -144,7 +143,7 @@
         {
             _userService.ApplicationUser = user;
             await _userService.UserServiceInitAsync();
-            await _invService.GetInventoriesData();
+            await _invService.Init();
             Refresh();
         }
         else
@@ -204,18 +203,25 @@
 
     public async void c_InventoryUpdated(object sender, InventoryPositionInfo info)
     {
-        if (info.rawuuid.StartsWith(_invService.VinvIdentifier) || info.rawuuid.StartsWith(_invService.WinvIdentifier))
+        try
         {
-            _logger.LogInformation("Updated inventory: " + info.uuid);
-            await InvokeAsync(async () =>
+            if (_invService.InvData.ListPosition.ContainsKey(info.uuid))
             {
-                // Set the local variable
-                await _invService.listUpdater(info);
-                //_logger.LogInformation("Updated inventory: " + Uuid + " Type: " + Type);
-                // Tell Blazor to rewrite the DOM
-                StateHasChanged();
-                MainDropContainer.Refresh();
-            });
+                _logger.LogInformation("Updated inventory: " + info.uuid);
+                await InvokeAsync(async () =>
+                {
+                    // Set the local variable
+                    await _invService.listUpdater(info);
+                    //_logger.LogInformation("Updated inventory: " + Uuid + " Type: " + Type);
+                    // Tell Blazor to rewrite the DOM
+                    StateHasChanged();
+                    MainDropContainer.Refresh();
+                });
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n"+ ex.Message + "\nTrace: \n" + ex.StackTrace);
         }
     }
 }
