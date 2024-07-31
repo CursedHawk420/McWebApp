@@ -26,7 +26,7 @@
         public string Primarygroup { get; set; }
 
         [JsonProperty("datetime", NullValueHandling = NullValueHandling.Ignore)]
-        public DateTimeOffset? Datetime { get; set; }
+        public DateTimeOffset Datetime { get; set; }
 
         [JsonProperty("channel", NullValueHandling = NullValueHandling.Ignore)]
         public string Channel { get; set; }

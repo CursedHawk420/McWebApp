@@ -85,6 +85,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddScoped<TimeZoneService>();
 
 builder.Services.AddScoped<EcoParser>();
 builder.Services.AddScoped<MinecraftUserManager>();
@@ -155,6 +156,10 @@ builder.Services.AddMudServices(config =>
 var app = builder.Build();
 
 //app.MapDefaultEndpoints();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseResponseCompression();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

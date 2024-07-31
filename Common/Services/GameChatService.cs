@@ -27,20 +27,20 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService = refreshService;
 
 
-            LoadChatFromRedis();
+            LoadChatFromRedis(_userService.PlayerServerSettings.joinedChannels);
             _redisUpdateService.ChatChanged += c_RenderNewChatEntry;
             _refreshService.ChatServiceRefreshRequested += RefreshChatService;
         }
 
         public async void RefreshChatService()
         {
-            await LoadChatFromRedis();
+            Task.Run(()=> LoadChatFromRedis(_userService.PlayerServerSettings.joinedChannels));
         }
 
-        private async Task LoadChatFromRedis()
+        private async Task LoadChatFromRedis(List<string> channels)
         {
             chat.Clear();
-            foreach (var channel in _userService.PlayerServerSettings.joinedChannels)
+            foreach (var channel in channels)
             {
                 var keys = await RedisService.GetKeysList("*chat:" + channel + "*");
                 keys = keys.OrderByDescending(i => i).ToList();

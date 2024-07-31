@@ -5,7 +5,9 @@
 @inject IJSRuntime js
 @inject ILogger<IngameChatComponent> _logger
 @inject IRefreshService _refreshService
+@inject TimeZoneService _timeZoneService
 @implements IDisposable
+
 @if (loadingComplete)
 {
     <MudPaper Class="" Style="max-width:50rem;position:fixed; margin-left:2rem;right:2rem; bottom:2rem; background-color:#212121; min-width:20rem">
@@ -32,7 +34,14 @@
             <MudList Clickable="false" Dense="true" DisableGutters="false">
                 @foreach (var entry in _gameChatService.chat)
                 {
-                    <MudListItem Text="@DeserializeMessage(entry)" />
+                    <MudTooltip Inline="false">
+                        <ChildContent>
+                            <MudListItem style=" padding-top: 0px; padding-bottom: 0px; margin-bottom:-0.5rem">@((MarkupString)DeserializeMessage(entry))</MudListItem>
+                        </ChildContent>
+                        <TooltipContent>
+                            <MudText Typo="Typo.body2">@_timeZoneService.GetLocalDateTime(entry.Datetime).Result.ToString("g")</MudText>
+                        </TooltipContent>
+                    </MudTooltip>
 
                 }
             </MudList>
@@ -129,9 +138,20 @@
         await ScrollChatWindowToBottom();
     }
 
-    public static string DeserializeMessage(RedisChatEntryAdapter message)
+    public string DeserializeMessage(RedisChatEntryAdapter message)
     {
-        return message.Datetime.Value + " " + message.Nickname + ": " + message.Message;
+        string mess = "";
+        try
+        {
+            mess = "&8[" + message.Channelprefix + "&8@" + message.PrettyServerName + "&8] " + message.Prefix + message.Nickname + message.Suffix + ": " + message.Message;
+            mess = ColorAdapter.ToHtmlString(mess);
+            //mess = _timeZoneService.GetLocalDateTime(message.Datetime).Result.ToString("g") + ": <br>" + mess;
+            return mess;
+        }catch(NullReferenceException ex)
+        {
+            _logger.LogInformation("DeserializeMessage failed, null: " + ex.Message);
+        }
+        return mess;
     }
 
 
