@@ -91,7 +91,7 @@
 
     public async Task SelectedChanged(IEnumerable<VirtualInventory> newselection)
     {
-        await inventoryComponent.RefreshInventory();
+        //await inventoryComponent.RefreshInventory();
     }
 
     Func<VirtualInventory, string> converter = p => p?.InventoryName;

@@ -1,6 +1,6 @@
 ﻿@inject ILogger<InventoryComponent> _logger
 @inject IRedisUpdateService _redisUpdateService
-@inject InventoryService _invService
+@inject InventoryManagerService _invManager
 @inject IBrowserViewportService _browserViewportService
 @implements IDisposable
 
@@ -43,7 +43,7 @@
                                     <div class="d-flex dropinv ">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                            <MudDropZone  T="GameItem" Identifier="@($"{_invService.VinvIdentifier}{i.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
+                                            <MudDropZone  T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             i++;
                                         }
                                     </div>
@@ -67,7 +67,7 @@
                                     <div class="d-flex dropinv">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                    <MudDropZone T="GameItem" Identifier="@($"{_invService.WinvIdentifier}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
+                                            <MudDropZone T="GameItem" Identifier="@($"{winvrawuuid}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             ii++;
                                         }
                                     </div>
@@ -95,13 +95,22 @@
 
     private MudMenu mudMenu;
 
+
+    //todo: load winv data
+    private InventoryData webinvData = new InventoryData();
+    private InventoryData vinvData = new InventoryData();
     //todo: velikost invů
+    private int winvslots;
+    private int vinvslots;
 
     private int winvrows;
     private int vinvrows;
 
     private int i = 0;
     private int ii = 0;
+
+    private string winvrawuuid;
+    private string vinvrawuuid;
 
     private string winvsize;
     private string vinvsize;
@@ -119,9 +128,26 @@
 
         //_redisUpdateService.InventoryChanged += c_InventoryUpdated;
 
+        _invManager.mcuuid = syncredisdatum.PlayerUuid;
+        _invManager.mcusername = syncredisdatum.PlayerName;
+
+        vinvData.VirtualInventory = syncredisdatum;
+        webinvData.VirtualInventory = winvsyncredisdatum;
+
+
+        winvrawuuid = "winv:" + winvsyncredisdatum.PlayerName + ":" + winvsyncredisdatum.InventoryUuid + ":";
+        vinvrawuuid = "vinv:" + syncredisdatum.PlayerName + ":" + syncredisdatum.InventoryUuid + ":";
 
         await InvokeAsync(async () =>
         {
+            invData.Items = new List<GameItem?>();
+            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum, "vinv");
+            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum, "winv");
+            vinvslots = vinvData.Items.Count;
+            winvslots = webinvData.Items.Count;
+            await DetermineInventorySize();
+            invData.Items.AddRange(vinvData.Items);
+            invData.Items.AddRange(webinvData.Items);
             loadingComplete = true;
             StateHasChanged();
         });
@@ -129,7 +155,7 @@
 
     public async Task DetermineInventorySize()
     {
-        if (_invService.vinvslots > 27)
+        if (vinvslots > 27)
         {
             vinvsize = "https://images.highgeek.eu/doublechest.png";
             vinvrows = 6;
@@ -140,7 +166,7 @@
             vinvrows = 3;
         }
 
-        if (_invService.winvslots > 27)
+        if (winvslots > 27)
         {
             winvsize = "https://images.highgeek.eu/doublechest.png";
             winvrows = 6;
