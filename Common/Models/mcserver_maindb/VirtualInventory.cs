@@ -38,7 +38,7 @@ public partial class VirtualInventory
 
 public class InventoryData
 {
-    public VirtualInventory? Syncredisdatum { get; set; }
+    public VirtualInventory? VirtualInventory { get; set; }
     public List<GameItem?>? Items { get; set; }
 
 }

@@ -1,6 +1,6 @@
 ﻿@inject ILogger<InventoryComponent> _logger
 @inject IRedisUpdateService _redisUpdateService
-@inject InventoryManagerService _invManager
+@inject InventoryService _invService
 @inject IBrowserViewportService _browserViewportService
 @implements IDisposable
 
@@ -30,10 +30,6 @@
 </style>
 @if (loadingComplete)
 {
-    <MudDropContainer T="GameItem" Items="invData.Items" CanDropClass="mud-border-info" NoDropClass="mud-border-error" CanDrop="@( (item,identifier ) => invData.Items.Count(x => x.Identifier == identifier ) == 0)" ItemsSelector="@((item,dropzone) => item.Identifier == dropzone)" ItemPicked="ItemPicked" ItemDropped="ItemDroped"
-                      Class="" @ref="dropContainer">
-
-        <ChildContent>
             <div class="row">
                 <div class="col-md-6">
                     <div class="@invclass">
@@ -47,7 +43,7 @@
                                     <div class="d-flex dropinv ">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                            <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
+                                            <MudDropZone  T="GameItem" Identifier="@($"{_invService.VinvIdentifier}{i.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             i++;
                                         }
                                     </div>
@@ -71,7 +67,7 @@
                                     <div class="d-flex dropinv">
                                         @for (int c = 0; c < 9; c++)
                                         {
-                                            <MudDropZone T="GameItem" Identifier="@($"{winvrawuuid}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
+                                    <MudDropZone T="GameItem" Identifier="@($"{_invService.WinvIdentifier}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                                             ii++;
                                         }
                                     </div>
@@ -82,49 +78,13 @@
                     </div>
                 </div>
             </div>
-        </ChildContent>
-        <ItemRenderer>
-            <MudDynamicDropItem T="GameItem">
-                <div class="d-flex justify-center align-center flex-grow-1">
-                    <MudTooltip @ref="tooltip" ShowOnClick="true" ShowOnHover="true">
-                        <ChildContent>
-                            <MudMenu ActivationEvent="@MouseEvent.RightClick" >
-                                <ActivatorContent>
-                                    <div class="container">
-                                        <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
-                                        @if (context.Amount > 1)
-                                        {
-                                            <MudText Class="bottom-right-text" Typo="Typo.caption">@context.Amount</MudText>
-                                        }
-                                    </div>
-                                </ActivatorContent>
-                                <ChildContent>
-                                    <MudMenuItem>Profile</MudMenuItem>
-                                    <MudMenuItem>Theme</MudMenuItem>
-                                    <MudMenuItem>Usage</MudMenuItem>
-                                    <MudMenuItem>Sign Out</MudMenuItem>
-                                </ChildContent>
-                            </MudMenu>
-                        </ChildContent>
-                        <TooltipContent>
-                            <MudText Typo="Typo.body1">@((MarkupString)context.DisplayName.HtmlText)</MudText>
-                            @if (context.Enchantments != null)
-                            {
-                                foreach (IntTag enchant in context.Enchantments.Values)
-                                {
-                                    <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1)) @((MarkupString)": ") @enchant.Value <br /></MudText>
-                                }
-                            }
-                        </TooltipContent>
-                    </MudTooltip>
-                </div>
-            </MudDynamicDropItem>
-        </ItemRenderer>
-    </MudDropContainer>
 }
 
 @code {
     //zmena
+    [CascadingParameter]
+    public Highgeek.McWebApp.BlazorServer.Components.Layout.MainLayout MainLayout { get; set; }
+
     [Parameter]
     public VirtualInventory syncredisdatum { get; set; }
 
@@ -135,13 +95,7 @@
 
     private MudMenu mudMenu;
 
-
-    //todo: load winv data
-    private InventoryData webinvData = new InventoryData();
-    private InventoryData vinvData = new InventoryData();
     //todo: velikost invů
-    private int winvslots;
-    private int vinvslots;
 
     private int winvrows;
     private int vinvrows;
@@ -149,13 +103,8 @@
     private int i = 0;
     private int ii = 0;
 
-    private string winvrawuuid;
-    private string vinvrawuuid;
-
     private string winvsize;
     private string vinvsize;
-
-    MudDropContainer<GameItem> dropContainer;
 
     MudTooltip tooltip;
 
@@ -167,57 +116,20 @@
 
     protected override async void OnInitialized()
     {
-        _redisUpdateService.InventoryChanged += c_InventoryUpdated;
 
-        _invManager.mcuuid = syncredisdatum.PlayerUuid;
-        _invManager.mcusername = syncredisdatum.PlayerName;
+        //_redisUpdateService.InventoryChanged += c_InventoryUpdated;
 
-        vinvData.Syncredisdatum = syncredisdatum;
-        webinvData.Syncredisdatum = winvsyncredisdatum;
-
-
-        winvrawuuid = "winv:" + winvsyncredisdatum.PlayerName + ":" + winvsyncredisdatum.InventoryUuid + ":";
-        vinvrawuuid = "vinv:" + syncredisdatum.PlayerName + ":" + syncredisdatum.InventoryUuid + ":";
 
         await InvokeAsync(async () =>
         {
-            invData.Items = new List<GameItem?>();
-            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum, "vinv");
-            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum, "winv");
-            vinvslots = vinvData.Items.Count;
-            winvslots = webinvData.Items.Count;
-            await DetermineInventorySize();
-            invData.Items.AddRange(vinvData.Items);
-            invData.Items.AddRange(webinvData.Items);
             loadingComplete = true;
             StateHasChanged();
         });
     }
 
-
-    //TODO adaptér pro velikosti invů
-
-    public async Task ItemPicked(MudDragAndDropItemTransaction<GameItem> pickItem)
-    {
-        tooltip.Visible = false;
-        //_logger.LogInformation("ItemParser.GetItemPositionInt(pickItem.SourceZoneIdentifier) = " + await ItemParser.GetItemPositionInt(pickItem.SourceZoneIdentifier));
-
-    }
-    public async Task ItemDroped(MudItemDropInfo<GameItem> dropItem)
-    {
-        string olduuid = dropItem.Item.Identifier;
-
-
-        //dropItem.Item.Identifier = dropItem.DropzoneIdentifier;
-
-        string item = await RedisService.GetFromRedis(olduuid);
-        await RedisService.SetInRedis(olduuid, GameItem.AIRITEM);
-        await RedisService.SetInRedis(dropItem.DropzoneIdentifier, item);
-    }
-
     public async Task DetermineInventorySize()
     {
-        if (vinvslots > 27)
+        if (_invService.vinvslots > 27)
         {
             vinvsize = "https://images.highgeek.eu/doublechest.png";
             vinvrows = 6;
@@ -228,7 +140,7 @@
             vinvrows = 3;
         }
 
-        if (winvslots > 27)
+        if (_invService.winvslots > 27)
         {
             winvsize = "https://images.highgeek.eu/doublechest.png";
             winvrows = 6;
@@ -240,69 +152,6 @@
         }
     }
 
-    public async Task RefreshInventory()
-    {
-        await InvokeAsync(async () =>
-        {
-            vinvData.Syncredisdatum = syncredisdatum;
-            webinvData.Syncredisdatum = winvsyncredisdatum;
-
-            vinvslots = syncredisdatum.Size.Value;
-            winvslots = winvsyncredisdatum.Size.Value;
-
-            await DetermineInventorySize();
-
-            winvrawuuid = "winv:" + winvsyncredisdatum.PlayerName + ":" + winvsyncredisdatum.InventoryUuid + ":";
-            vinvrawuuid = "vinv:" + syncredisdatum.PlayerName + ":" + syncredisdatum.InventoryUuid + ":";
-
-            invData.Items = new List<GameItem?>();
-
-            vinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum, "vinv");
-            webinvData.Items = await _invManager.LoadItemsFromRedis(winvsyncredisdatum, "winv");
-
-
-            invData.Items.AddRange(vinvData.Items);
-            invData.Items.AddRange(webinvData.Items);
-
-            //webinvData.Items = await _invManager.LoadItemsFromRedis(syncredisdatum.InventoryUuid, "winv");
-            StateHasChanged();
-            dropContainer.Refresh();
-        });
-    }
-
-    public async void c_InventoryUpdated(object sender, InventoryPositionInfo info)
-    {
-        if (vinvData.Syncredisdatum.InventoryUuid == info.uuid || webinvData.Syncredisdatum.InventoryUuid == info.uuid)
-        {
-            _logger.LogInformation("Updated inventory: " + info.uuid);
-            await InvokeAsync(async () =>
-            {
-                // Set the local variable
-                await listUpdater(info);
-                //_logger.LogInformation("Updated inventory: " + Uuid + " Type: " + Type);
-                // Tell Blazor to rewrite the DOM
-                StateHasChanged();
-                dropContainer.Refresh();
-            });
-        }
-    }
-    public async Task listUpdater(InventoryPositionInfo info)
-    {
-        _logger.LogInformation("Updating item: " + info.uuid + ":" + info.position);
-
-        if (info.rawuuid.Contains("winv:"))
-        {
-            invData.Items[int.Parse(info.position) + vinvslots].Json = info.Item;
-            invData.Items[int.Parse(info.position) + vinvslots] = new GameItem(info.Item, info.rawuuid);
-        }
-        else
-        {
-            invData.Items[int.Parse(info.position)].Json = info.Item;
-            invData.Items[int.Parse(info.position)] = new GameItem(info.Item, info.rawuuid);
-        }
-
-
-    }
     private int _width = 0;
     private int _height = 0;
 
@@ -338,7 +187,7 @@
     {
         //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
         _browserViewportService.UnsubscribeAsync(_subscriptionId);
-        _redisUpdateService.InventoryChanged -= c_InventoryUpdated;
+        //_redisUpdateService.InventoryChanged -= c_InventoryUpdated;
         //_usermanager.Dispose();
     }
 }

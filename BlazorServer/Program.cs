@@ -100,6 +100,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GameChatService>();
 
 builder.Services.AddScoped<InventoryManagerService>();
+builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<ImageCacheService>();
 
 builder.Services.AddSingleton<LuckPermsService>();

@@ -7,6 +7,7 @@
 @inject IRefreshService _refreshService
 @inject TimeZoneService _timeZoneService
 @implements IDisposable
+@inject InventoryService _invService
 
 @if (loadingComplete)
 {
@@ -24,6 +25,7 @@
                         }
                     </MudSelect>
                 </div>
+                <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "0")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
 
                 <div class="col-1">
                     <MudIcon Style="position: absolute; right: 0.5rem; top:0.3rem" Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Large" @onclick="CloseChatWindow" />

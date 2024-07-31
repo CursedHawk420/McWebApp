@@ -13,13 +13,11 @@ namespace Highgeek.McWebApp.Common.Services
     {
         private readonly McserverMaindbContext _mcMainDbContext;
         private readonly ILogger<InventoryManagerService> _logger;
-        private readonly ImageCacheService _imageCacheService;
         private readonly IRedisUpdateService _iRedisUpdateService;
-        public InventoryManagerService(McserverMaindbContext mcserverMaindb, ILogger<InventoryManagerService> logger, ImageCacheService imageCacheService)
+        public InventoryManagerService(McserverMaindbContext mcserverMaindb, ILogger<InventoryManagerService> logger)
         {
             _mcMainDbContext = mcserverMaindb;
             _logger = logger;
-            _imageCacheService = imageCacheService;
             //_iRedisUpdateService = _serviceProvider.GetService<IRedisUpdateService>();
             //_iRedisUpdateService.InventoryChanged += c_InventoryUpdated;
         }
@@ -29,6 +27,8 @@ namespace Highgeek.McWebApp.Common.Services
         public string invuuid { get; set; }
 
         public InventoryData invData { get; set; } = new InventoryData();
+
+        public string Identifier;
 
 
         /*public async Task<List<InventoryData>> GetInventoryAsync(string playeruuid)

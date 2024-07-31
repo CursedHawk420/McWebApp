@@ -23,7 +23,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public ApplicationUser ApplicationUser;
 
-        public MinecraftUser MinecraftUser;
+        public MinecraftUser MinecraftUser { get; set; }
 
         public bool HasConnectedAccount = false;
 

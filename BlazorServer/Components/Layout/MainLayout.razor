@@ -7,6 +7,7 @@
 
 @inject IRedisUpdateService _redisUpdateService
 @inject InventoryManagerService _invManager
+@inject InventoryService _invService
 
 @implements IDisposable
 
@@ -18,7 +19,9 @@
 <!--<MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))"  />
 <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme"  />-->
 <CascadingValue Value="this">
-    <MudDropContainer T="GameItem" @ref="MainDropContainer">
+    <MudDropContainer T="GameItem" Items="_invService.AllItems" CanDropClass="mud-border-info" NoDropClass="mud-border-error" CanDrop="@( (item,identifier ) => _invService.AllItems.Count(x => x.Identifier == identifier ) == 0)" ItemsSelector="@((item,dropzone) => item.Identifier == dropzone)" ItemPicked="_invService.ItemPicked" ItemDropped="_invService.ItemDroped"
+                      Class="" @ref="MainDropContainer">
+        <ChildContent>
         <MudLayout>
             <MudAppBar>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
@@ -46,7 +49,8 @@
                     @if (_userService.Loaded)
                     {
                         @Body
-                        <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
+                            <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
+                            <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
                     }
                     else
                     {
@@ -56,6 +60,45 @@
                 </MudContainer>
             </MudMainContent>
         </MudLayout>
+        
+        </ChildContent>
+        <ItemRenderer>
+            <MudDynamicDropItem T="GameItem">
+                <div class="d-flex justify-center align-center flex-grow-1">
+                    <MudTooltip @ref="ItemToolTip" ShowOnClick="true" ShowOnHover="true">
+                        <ChildContent>
+                            <MudMenu ActivationEvent="@MouseEvent.RightClick">
+                                <ActivatorContent>
+                                    <div class="container">
+                                        <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
+                                        @if (context.Amount > 1)
+                                        {
+                                            <MudText Class="bottom-right-text" Typo="Typo.caption">@context.Amount</MudText>
+                                        }
+                                    </div>
+                                </ActivatorContent>
+                                <ChildContent>
+                                    <MudMenuItem>Profile</MudMenuItem>
+                                    <MudMenuItem>Theme</MudMenuItem>
+                                    <MudMenuItem>Usage</MudMenuItem>
+                                    <MudMenuItem>Sign Out</MudMenuItem>
+                                </ChildContent>
+                            </MudMenu>
+                        </ChildContent>
+                        <TooltipContent>
+                            <MudText Typo="Typo.body1">@((MarkupString)context.DisplayName.HtmlText)</MudText>
+                            @if (context.Enchantments != null)
+                            {
+                                foreach (IntTag enchant in context.Enchantments.Values)
+                                {
+                                    <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1)) @((MarkupString)": ") @enchant.Value <br /></MudText>
+                                }
+                            }
+                        </TooltipContent>
+                    </MudTooltip>
+                </div>
+            </MudDynamicDropItem>
+        </ItemRenderer>
     </MudDropContainer>
 </CascadingValue>
 <div id="blazor-error-ui">
@@ -66,6 +109,7 @@
 
 @code {
     public MudDropContainer<GameItem> MainDropContainer { get; set; }
+    public MudTooltip ItemToolTip { get; set; }
 
     bool _drawerOpen = false;
 
@@ -80,7 +124,9 @@
         _refreshService.PageRefreshRequested += Refresh;
         _refreshService.ApplicationUserRefreshRequested += UserInit;
         _refreshService.MainNavMenuClosehRequested += DrawerClose;
+        _redisUpdateService.InventoryChanged += c_InventoryUpdated;
         UserInit();
+
     }
 
     private async void UserInit()
@@ -98,6 +144,7 @@
         {
             _userService.ApplicationUser = user;
             await _userService.UserServiceInitAsync();
+            await _invService.GetInventoriesData();
             Refresh();
         }
         else
@@ -152,5 +199,23 @@
         _refreshService.PageRefreshRequested -= Refresh;
         _refreshService.ApplicationUserRefreshRequested -= UserInit;
         _refreshService.MainNavMenuClosehRequested -= DrawerClose;
+    }
+
+
+    public async void c_InventoryUpdated(object sender, InventoryPositionInfo info)
+    {
+        if (info.rawuuid.StartsWith(_invService.VinvIdentifier) || info.rawuuid.StartsWith(_invService.WinvIdentifier))
+        {
+            _logger.LogInformation("Updated inventory: " + info.uuid);
+            await InvokeAsync(async () =>
+            {
+                // Set the local variable
+                await _invService.listUpdater(info);
+                //_logger.LogInformation("Updated inventory: " + Uuid + " Type: " + Type);
+                // Tell Blazor to rewrite the DOM
+                StateHasChanged();
+                MainDropContainer.Refresh();
+            });
+        }
     }
 }
