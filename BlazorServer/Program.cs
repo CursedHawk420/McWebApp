@@ -18,6 +18,8 @@ using Highgeek.McWebApp.Common.Services.Redis;
 
 using MudBlazor.Services;
 using MudBlazor;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,6 +111,26 @@ builder.Services.AddHostedService(
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddSingleton<IdentityNoOpEmailSender>();
+
+if (builder.Environment.IsProduction())
+{
+
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<BrotliCompressionProvider>();
+        options.Providers.Add<GzipCompressionProvider>();
+    });
+    builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Optimal;
+    });
+
+    builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Optimal;
+    });
+}
 
 
 //MailKit options load
