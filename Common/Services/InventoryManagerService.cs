@@ -14,14 +14,12 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly McserverMaindbContext _mcMainDbContext;
         private readonly ILogger<InventoryManagerService> _logger;
         private readonly ImageCacheService _imageCacheService;
-        private readonly IServiceProvider _serviceProvider;
         private readonly IRedisUpdateService _iRedisUpdateService;
-        public InventoryManagerService(McserverMaindbContext mcserverMaindb, ILogger<InventoryManagerService> logger, ImageCacheService imageCacheService, IServiceProvider serviceProvider)
+        public InventoryManagerService(McserverMaindbContext mcserverMaindb, ILogger<InventoryManagerService> logger, ImageCacheService imageCacheService)
         {
             _mcMainDbContext = mcserverMaindb;
             _logger = logger;
             _imageCacheService = imageCacheService;
-            _serviceProvider = serviceProvider;
             //_iRedisUpdateService = _serviceProvider.GetService<IRedisUpdateService>();
             //_iRedisUpdateService.InventoryChanged += c_InventoryUpdated;
         }
@@ -29,7 +27,8 @@ namespace Highgeek.McWebApp.Common.Services
         public string mcusername { get; set; }
         public string mcuuid { get; set; }
         public string invuuid { get; set; }
-        public List<InventoryData> invData { get; set; } = new List<InventoryData>();
+
+        public InventoryData invData { get; set; } = new InventoryData();
 
 
         /*public async Task<List<InventoryData>> GetInventoryAsync(string playeruuid)
@@ -48,10 +47,17 @@ namespace Highgeek.McWebApp.Common.Services
             return invData;
         }*/
 
+        /*public async void Init(string playeruuid)
+        {
+            invData.Items = new List<GameItem?>();
+        }*/
+
         public async Task<List<VirtualInventory>> GetInventoriesData(string playeruuid)
         {
             _logger.LogInformation("Loading player inventories...");
-            return await _mcMainDbContext.VirtualInventories.Where(s => s.PlayerUuid == playeruuid).ToListAsync();
+            var toReturn = await _mcMainDbContext.VirtualInventories.Where(s => s.PlayerUuid == playeruuid).ToListAsync();
+
+            return toReturn;
 
         }
 

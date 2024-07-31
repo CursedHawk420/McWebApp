@@ -5,6 +5,9 @@
 @inject UserService _userService
 @inject ILogger<MainLayout> _logger
 
+@inject IRedisUpdateService _redisUpdateService
+@inject InventoryManagerService _invManager
+
 @implements IDisposable
 
 <MudThemeProvider Theme="_themeManager.Theme" />
@@ -14,45 +17,47 @@
 
 <!--<MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))"  />
 <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme"  />-->
+<CascadingValue Value="this">
+    <MudDropContainer T="GameItem" @ref="MainDropContainer">
+        <MudLayout>
+            <MudAppBar>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <a href="/" class="link-hover">
+                    <MudText>HighGeek</MudText>
+                </a>
 
-<MudLayout>
-    <MudAppBar >
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <a href="/" class="link-hover">
-            <MudText>HighGeek</MudText>
-        </a>
+                @if (_userService.HasConnectedAccount)
+                {
+                    <MudSpacer />
+                    <a href="/Minecraft/Account/Statistics">
+                        <MudAvatar>
+                            <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">
 
-        @if (_userService.HasConnectedAccount)
-        {
-            <MudSpacer />
-            <a href="/Minecraft/Account/Statistics">
-                <MudAvatar>
-                    <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">
-
-                    </MudImage>
-                </MudAvatar>
-            </a>
-        }
-    </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen" Color="Color.Dark">
-        <NavMenu/>
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-            @if (_userService.Loaded)
-            {
-                @Body
-                <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton/>
-            }
-            else
-            {
-                <PageTitle>HighGeek - Loading</PageTitle>
-                <h1>Loading...</h1>
-            }
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
-
+                            </MudImage>
+                        </MudAvatar>
+                    </a>
+                }
+            </MudAppBar>
+            <MudDrawer @bind-Open="@_drawerOpen" Color="Color.Dark">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+                    @if (_userService.Loaded)
+                    {
+                        @Body
+                        <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
+                    }
+                    else
+                    {
+                        <PageTitle>HighGeek - Loading</PageTitle>
+                        <h1>Loading...</h1>
+                    }
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </MudDropContainer>
+</CascadingValue>
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
@@ -60,6 +65,8 @@
 </div>
 
 @code {
+    public MudDropContainer<GameItem> MainDropContainer { get; set; }
+
     bool _drawerOpen = false;
 
     ApplicationUser user;
@@ -84,7 +91,7 @@
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("MainLayout UserInit() error: "+ex.Message);
+            _logger.LogWarning("MainLayout UserInit() error: " + ex.Message);
         }
 
         if (user is not null)
@@ -106,7 +113,7 @@
         {
             StateHasChanged();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogWarning("MainLayout Refresh() error: " + ex.Message);
         }
