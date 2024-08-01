@@ -177,9 +177,39 @@
         _refreshService.CallChatWindowClose();
     }
 
+
+
+    private bool _disposed = false;
+
     void IDisposable.Dispose()
     {
-        _refreshService.ChatRefreshRequested -= RefreshChat;
-        _gameChatService.DisposeAsync();
+        // Dispose of unmanaged resources.
+        Dispose(true);
+        // Suppress finalization.
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // Dispose managed resources
+                // For example: Close file handles, database connections, etc.
+
+                _refreshService.ChatRefreshRequested -= RefreshChat;
+                //_gameChatService.Dispose();
+            }
+
+            // Dispose unmanaged resources
+            // For example: Release memory allocated through unmanaged code
+            
+            _disposed = true;
+        }
+    }
+
+    ~IngameChatComponent()
+    {
+        Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
     }
 }

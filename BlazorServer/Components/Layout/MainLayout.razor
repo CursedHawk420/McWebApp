@@ -28,7 +28,7 @@
                     <MudText>HighGeek</MudText>
                 </a>
 
-                @if (_userService.HasConnectedAccount)
+                @if (_userService.HasConnectedAccount) 
                 {
                     <MudSpacer />
                     <a href="/Minecraft/Account/Statistics">
@@ -190,16 +190,6 @@
         StateHasChanged();
     }
 
-    void IDisposable.Dispose()
-    {
-        _themeManager = null;
-        authenticationState = null;
-        user = null;
-        _refreshService.PageRefreshRequested -= Refresh;
-        _refreshService.ApplicationUserRefreshRequested -= UserInit;
-        _refreshService.MainNavMenuClosehRequested -= DrawerClose;
-    }
-
 
     public async void c_InventoryUpdated(object sender, InventoryPositionInfo info)
     {
@@ -214,8 +204,15 @@
                     await _invService.listUpdater(info);
                     //_logger.LogInformation("Updated inventory: " + Uuid + " Type: " + Type);
                     // Tell Blazor to rewrite the DOM
-                    StateHasChanged();
-                    MainDropContainer.Refresh();
+                    try
+                    {
+                        StateHasChanged();
+                        MainDropContainer.Refresh();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n" + ex.Message + "\nTrace: \n" + ex.StackTrace);
+                    }
                 });
             }
         }
@@ -223,5 +220,43 @@
         {
             _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n"+ ex.Message + "\nTrace: \n" + ex.StackTrace);
         }
+    }
+
+    private bool _disposed = false;
+
+    void IDisposable.Dispose()
+    {
+        // Dispose of unmanaged resources.
+        Dispose(true);
+        // Suppress finalization.
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // Dispose managed resources
+                // For example: Close file handles, database connections, etc.
+
+                _refreshService.PageRefreshRequested -= Refresh;
+                _refreshService.ApplicationUserRefreshRequested -= UserInit;
+                _refreshService.MainNavMenuClosehRequested -= DrawerClose;
+            }
+
+            // Dispose unmanaged resources
+            // For example: Release memory allocated through unmanaged code
+
+            _themeManager = null;
+            authenticationState = null;
+            user = null;
+            _disposed = true;
+        }
+    }
+
+    ~MainLayout()
+    {
+        Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
     }
 }

@@ -188,11 +188,37 @@
     }
 
 
+    private bool _disposed = false;
+
     void IDisposable.Dispose()
     {
-        //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
-        _browserViewportService.UnsubscribeAsync(_subscriptionId);
-        //_redisUpdateService.InventoryChanged -= c_InventoryUpdated;
-        //_usermanager.Dispose();
+        // Dispose of unmanaged resources.
+        Dispose(true);
+        // Suppress finalization.
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // Dispose managed resources
+                // For example: Close file handles, database connections, etc.
+
+                _browserViewportService.UnsubscribeAsync(_subscriptionId);
+            }
+
+            // Dispose unmanaged resources
+            // For example: Release memory allocated through unmanaged code
+
+            selectedVinv = null;
+            _disposed = true;
+        }
+    }
+
+    ~InventoryComponent()
+    {
+        Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
     }
 }

@@ -3,6 +3,7 @@ using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Models.Minecraft;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
@@ -110,6 +111,42 @@ namespace Highgeek.McWebApp.Common.Services
         {
             AllItems.Clear();
             InvData.Inventories.Clear();
+        }
+
+
+        private bool _disposed = false;
+
+        void IDisposable.Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources
+                    // For example: Close file handles, database connections, etc.
+
+                }
+
+                // Dispose unmanaged resources
+                // For example: Release memory allocated through unmanaged code
+
+                InvData = null;
+                AllItems = null;
+
+                _disposed = true;
+            }
+        }
+
+        ~InventoryService()
+        {
+            Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
         }
     }
 }

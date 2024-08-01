@@ -7,10 +7,12 @@ using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Components.Web;
 using Org.BouncyCastle.Asn1.BC;
+using Microsoft.AspNetCore.Components.Authorization;
+using Sharpdactyl.Models.User;
 
 namespace Highgeek.McWebApp.Common.Services
 {
-    public class GameChatService : IAsyncDisposable
+    public class GameChatService : IDisposable
     {
         private readonly LuckPermsService _luckPermsService;
         private readonly UserService _userService;
@@ -34,7 +36,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async void RefreshChatService()
         {
-            Task.Run(()=> LoadChatFromRedis(_userService.PlayerServerSettings.joinedChannels));
+            await Task.Run(async ()=> await LoadChatFromRedis(_userService.PlayerServerSettings.joinedChannels));
         }
 
         private async Task LoadChatFromRedis(List<string> channels)
@@ -120,10 +122,40 @@ namespace Highgeek.McWebApp.Common.Services
             await RedisService.SetInRedis(message.Uuid, message.ToJson());
         }
 
-        public ValueTask DisposeAsync()
+
+        private bool _disposed = false;
+
+        void IDisposable.Dispose()
         {
-            //throw new NotImplementedException();
-            return ValueTask.CompletedTask;
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources
+                    // For example: Close file handles, database connections, etc.
+
+                    _redisUpdateService.ChatChanged -= c_RenderNewChatEntry;
+                    _refreshService.ChatServiceRefreshRequested -= RefreshChatService;
+                }
+
+                // Dispose unmanaged resources
+                // For example: Release memory allocated through unmanaged code
+
+                chat = null;
+                _disposed = true;
+            }
+        }
+
+        ~GameChatService()
+        {
+            Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
         }
 
     }

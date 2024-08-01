@@ -6,6 +6,8 @@ using LuckPermsApi.Model;
 using Highgeek.McWebApp.Common.Services.Redis;
 using Newtonsoft.Json;
 using Highgeek.McWebApp.Common.Helpers.Channels;
+using Microsoft.AspNetCore.Components.Authorization;
+using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -27,11 +29,11 @@ namespace Highgeek.McWebApp.Common.Services
 
         public bool HasConnectedAccount = false;
 
-        public User LpUser;
+        public User LpUser { get; set; }
 
         public bool Loaded = false;
 
-        public PlayerServerSettings PlayerServerSettings;
+        public PlayerServerSettings PlayerServerSettings { get; set; }
 
         public ChannelSettingsAdapter ChannelOut;
         public List<ChannelSettingsAdapter> JoinedChannels = new List<ChannelSettingsAdapter>();
@@ -49,17 +51,21 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService.ServiceRefreshRequested += RefreshServiceState;
 
             _redisUpdateService.PlayersSettingsChanged += FetchPlayerSettingsFromRedis;
+            _redisUpdateService.LuckpermsChanged += ListenForLuckUpdate;
         }
         
         public async Task UserServiceInitAsync()
         {
-            if (ApplicationUser.mcUUID != null)
+            if(ApplicationUser is not null)
             {
-                await SetMinecraftUserAsync(ApplicationUser.mcUUID);
-            }
-            else
-            {
-                HasConnectedAccount = false;
+                if (ApplicationUser.mcUUID != null)
+                {
+                    await SetMinecraftUserAsync(ApplicationUser.mcUUID);
+                }
+                else
+                {
+                    HasConnectedAccount = false;
+                }
             }
             Loaded = true;
             _refreshService.CallPageRefresh();
@@ -68,7 +74,7 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task SetMinecraftUserAsync(string uuid)
         {
             MinecraftUser = await _mcUserManager.GetUserAsync(uuid);
-            LpUser = await _luckPermsService.GetUserAsync(uuid);
+            await SetLuckpermsUser(uuid);
             HasConnectedAccount = true;
 
             await SetAvaiableChannels();
@@ -79,6 +85,16 @@ namespace Highgeek.McWebApp.Common.Services
             }*/
 
             await SetPlayerSettings();
+        }
+
+        public async void ListenForLuckUpdate(object sender, LuckpermsRedisLogAdapter redisLogAdapter)
+        {
+
+        }
+
+        public async Task SetLuckpermsUser(string uuid)
+        {
+            LpUser = await _luckPermsService.GetUserAsync(uuid);
         }
 
         public async void RefreshServiceState()
@@ -128,13 +144,43 @@ namespace Highgeek.McWebApp.Common.Services
             await RedisService.SetInRedis("players:settings:" + ApplicationUser.mcNickname, JsonConvert.SerializeObject(PlayerServerSettings));
         }
 
-        public void Dispose()
+
+        private bool _disposed = false;
+
+        void IDisposable.Dispose()
         {
-            this.ApplicationUser = null;
-            this.MinecraftUser = null;
-            this.LpUser = null;
-            _refreshService.ServiceRefreshRequested -= RefreshServiceState;
-            _redisUpdateService.PlayersSettingsChanged -= FetchPlayerSettingsFromRedis;
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources
+                    // For example: Close file handles, database connections, etc.
+
+                    _refreshService.ServiceRefreshRequested -= RefreshServiceState;
+                    _redisUpdateService.PlayersSettingsChanged -= FetchPlayerSettingsFromRedis;
+                    _redisUpdateService.LuckpermsChanged -= ListenForLuckUpdate;
+                }
+
+                // Dispose unmanaged resources
+                // For example: Release memory allocated through unmanaged code
+
+                this.ApplicationUser = null;
+                this.MinecraftUser = null;
+                this.LpUser = null;
+                _disposed = true;
+            }
+        }
+
+        ~UserService()
+        {
+            Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
         }
     }
 }
