@@ -92,16 +92,15 @@ builder.Services.AddScoped<TimeZoneService>();
 builder.Services.AddScoped<EcoParser>();
 builder.Services.AddScoped<MinecraftUserManager>();
 builder.Services.AddScoped<MineskinApiCommunication>();
-builder.Services.AddScoped<MineSkinApi.Client.Configuration>();
+builder.Services.AddSingleton<MineSkinApi.Client.Configuration>();
 builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 builder.Services.AddScoped<IRefreshService, RefreshService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GameChatService>();
 
-//builder.Services.AddScoped<InventoryManagerService>();
 builder.Services.AddScoped<InventoryService>();
-builder.Services.AddScoped<ImageCacheService>();
+//builder.Services.AddScoped<ImageCacheService>();
 
 builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddSingleton<IRedisUpdateService, RedisUpdateService>();

@@ -66,7 +66,7 @@
                 <div class="d-flex justify-center align-center flex-grow-1">
                     <MudTooltip @ref="ItemToolTip" ShowOnClick="true" ShowOnHover="true">
                         <ChildContent>
-                            <MudMenu ActivationEvent="@MouseEvent.RightClick">
+                            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick">
                                 <ActivatorContent>
                                     <div class="container">
                                         <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
@@ -77,10 +77,10 @@
                                     </div>
                                 </ActivatorContent>
                                 <ChildContent>
-                                    <MudMenuItem>Profile</MudMenuItem>
+                                    <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">Profile</MudMenuItem>
                                     <MudMenuItem>Theme</MudMenuItem>
                                     <MudMenuItem>Usage</MudMenuItem>
-                                    <MudMenuItem>Sign Out</MudMenuItem>
+                                    <MudMenuItem>Close</MudMenuItem>
                                 </ChildContent>
                             </MudMenu>
                         </ChildContent>
@@ -109,6 +109,10 @@
 @code {
     public MudDropContainer<GameItem> MainDropContainer { get; set; }
     public MudTooltip ItemToolTip { get; set; }
+
+    public MudMenu MudMenu { set => MudMenus.Add(value); }
+
+    public List<MudMenu> MudMenus { get; set; } = new List<MudMenu>();
 
     bool _drawerOpen = false;
 
@@ -190,6 +194,16 @@
         StateHasChanged();
     }
 
+    private async void DoubleClickOnMenuEvent(MouseEventArgs mouseEventArgs, GameItem item)
+    {
+        await MudMenus.FirstOrDefault(x => x.Tag == item).OpenMenuAsync(mouseEventArgs);
+    }
+
+    private async void DoSomethingWithItem(MouseEventArgs mouseEventArgs, GameItem gameItem)
+    {
+        _logger.LogWarning("Trying to do something with item: " +gameItem.Name );
+    }
+
 
     public async void c_InventoryUpdated(object sender, InventoryPositionInfo info)
     {
@@ -243,6 +257,7 @@
                 _refreshService.PageRefreshRequested -= Refresh;
                 _refreshService.ApplicationUserRefreshRequested -= UserInit;
                 _refreshService.MainNavMenuClosehRequested -= DrawerClose;
+                _redisUpdateService.InventoryChanged -= c_InventoryUpdated;
             }
 
             // Dispose unmanaged resources

@@ -6,7 +6,7 @@
 @implements IDisposable
 @if (loadingComplete)
 {
-    @if (invData != null)
+    @if (_invService.InvData != null)
     {
         <div class="row">
         <div class="col-md-6">
@@ -54,7 +54,6 @@ else
     //TODO kdyz je jen jeden tak nevytvaret select boxy vubec
     //TODO novej selectbox i pro winv
 
-    private List<VirtualInventory> invData = new List<VirtualInventory>();
     private bool loadingComplete = false;
     protected InventoryComponent inventoryComponent;
 
@@ -78,9 +77,8 @@ else
     {
         await InvokeAsync(async () =>
         {
-            invData = _invService.InvData.Inventories;
 
-            foreach (var datum in invData)
+            foreach (var datum in _invService.InvData.Inventories)
             {
                 if (datum.Web == true)
                 {
@@ -106,11 +104,42 @@ else
 
     Func<VirtualInventory, string> converter = p => p?.InventoryName;
 
+
+    private bool _disposed = false;
+
     void IDisposable.Dispose()
     {
-        _refreshService.PageRefreshRequested -= Load;
-        //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
-        //_userManager.Dispose();
-        //_invService.Dispose();
+        // Dispose of unmanaged resources.
+        Dispose(true);
+        // Suppress finalization.
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // Dispose managed resources
+                // For example: Close file handles, database connections, etc.
+
+                _refreshService.PageRefreshRequested -= Load;
+                //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
+                //_userManager.Dispose();
+                //_invService.Dispose();
+            }
+
+            // Dispose unmanaged resources
+            // For example: Release memory allocated through unmanaged code
+            
+            selectedVinv = null;
+            selectedWinv = null;
+            _disposed = true;
+        }
+    }
+
+    ~InventoryTabs()
+    {
+        Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
     }
 }

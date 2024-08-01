@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Highgeek.McWebApp.Common.Helpers.Channels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
+using Microsoft.Extensions.Logging;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -22,6 +23,8 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly IRedisUpdateService _redisUpdateService;
 
         private readonly LuckPermsService _luckPermsService;
+
+        private readonly ILogger<UserService> _logger;
 
         public ApplicationUser ApplicationUser;
 
@@ -39,13 +42,14 @@ namespace Highgeek.McWebApp.Common.Services
         public List<ChannelSettingsAdapter> JoinedChannels = new List<ChannelSettingsAdapter>();
         public List<ChannelSettingsAdapter> AvaiableChannels = new List<ChannelSettingsAdapter>();
 
-        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService)
+        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILogger<UserService> logger)
         {
             _mcUserManager = minecraftUserManager;
             _userManager = userManager;
             _refreshService = refreshService;
             _luckPermsService = luckPermsService;
             _redisUpdateService = redisUpdateService;
+            _logger = logger;
 
 
             _refreshService.ServiceRefreshRequested += RefreshServiceState;
@@ -119,7 +123,13 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task SetPlayerSettings()
         {
             JoinedChannels.Clear();
-            PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:"+ApplicationUser.mcNickname));
+            try
+            {
+                PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:" + ApplicationUser.mcNickname));
+            }catch (Exception e)
+            {
+                _logger.LogWarning("SetPlayerSettings() failed!: \nMessage: " + e.Message +"\nStacktrace: \n" +e.StackTrace);
+            }
 
             ChannelOut = AvaiableChannels.FirstOrDefault(x => x.Name == PlayerServerSettings.channelOut);
 
