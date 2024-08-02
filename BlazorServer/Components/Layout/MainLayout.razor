@@ -92,7 +92,7 @@
                         </div>
                     </ActivatorContent>
                     <ChildContent>
-                        <MudMenuItem OnClick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
+                        <MudMenuItem @ontouchend="@((e) => DoSomethingWithItem(e, context))" @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
                         <MudMenuItem>Theme</MudMenuItem>
                         <MudMenuItem>Usage</MudMenuItem>
                         <MudMenuItem>Close</MudMenuItem>
@@ -201,7 +201,7 @@
         await MudMenus.FirstOrDefault(x => x.Tag == item).OpenMenuAsync(mouseEventArgs);
     }
 
-    private async void DoSomethingWithItem(MouseEventArgs mouseEventArgs, GameItem gameItem)
+    private async void DoSomethingWithItem(EventArgs mouseEventArgs, GameItem gameItem)
     {
         _snack.Add(gameItem.DisplayName.HtmlText, Severity.Success);
         _logger.LogWarning("Trying to do something with item: " +gameItem.Name );
