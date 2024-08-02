@@ -203,7 +203,7 @@
 
     private async void DoSomethingWithItem(MouseEventArgs mouseEventArgs, GameItem gameItem)
     {
-        _snack.Add(gameItem.DisplayName, Severity.Success);
+        _snack.Add(gameItem.DisplayName.HtmlText, Severity.Success);
         _logger.LogWarning("Trying to do something with item: " +gameItem.Name );
     }
 
