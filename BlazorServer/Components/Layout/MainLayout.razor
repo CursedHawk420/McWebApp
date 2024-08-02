@@ -108,6 +108,7 @@
     <a class="dismiss">🗙</a>
 </div>
 
+
 @code {
     public MudDropContainer<GameItem> MainDropContainer { get; set; }
     public MudTooltip ItemToolTip { get; set; }
@@ -201,9 +202,9 @@
         await MudMenus.FirstOrDefault(x => x.Tag == item).OpenMenuAsync(mouseEventArgs);
     }
 
-    private async void DoSomethingWithItem(EventArgs mouseEventArgs, GameItem gameItem)
+    private async void DoSomethingWithItem(EventArgs eventArgs, GameItem gameItem)
     {
-        _snack.Add(gameItem.DisplayName.HtmlText, Severity.Success);
+        _snack.Add((MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
         _logger.LogWarning("Trying to do something with item: " +gameItem.Name );
     }
 
@@ -238,6 +239,10 @@
             _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n"+ ex.Message + "\nTrace: \n" + ex.StackTrace);
         }
     }
+
+
+
+
 
     private bool _disposed = false;
 
