@@ -26,13 +26,14 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly ILogger<UserService> _logger;
 
-        public ApplicationUser ApplicationUser;
+        public ApplicationUser ApplicationUser { get; set; }
+
+        public User LpUser { get; set; }
 
         public MinecraftUser MinecraftUser { get; set; }
 
         public bool HasConnectedAccount = false;
 
-        public User LpUser { get; set; }
 
         public bool Loaded = false;
 
@@ -56,6 +57,7 @@ namespace Highgeek.McWebApp.Common.Services
 
             _redisUpdateService.PlayersSettingsChanged += FetchPlayerSettingsFromRedis;
             _redisUpdateService.LuckpermsChanged += ListenForLuckUpdate;
+
         }
         
         public async Task UserServiceInitAsync()
@@ -93,7 +95,13 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async void ListenForLuckUpdate(object sender, LuckpermsRedisLogAdapter redisLogAdapter)
         {
-
+            if (ApplicationUser is not null && ApplicationUser.mcNickname is not null)
+            {
+                if (redisLogAdapter.TargetUuid.Equals(ApplicationUser.mcUUID))
+                {
+                    await SetLuckpermsUser(ApplicationUser.mcUUID);
+                }
+            }
         }
 
         public async Task SetLuckpermsUser(string uuid)
@@ -114,9 +122,12 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async void FetchPlayerSettingsFromRedis(object sender, string uuid)
         {
-            if (uuid.Contains(ApplicationUser.mcNickname))
+            if(ApplicationUser is not null && ApplicationUser.mcNickname is not null)
             {
-                await SetPlayerSettings();
+                if (uuid.Contains(ApplicationUser.mcNickname))
+                {
+                    await SetPlayerSettings();
+                }
             }
         }
 
@@ -125,20 +136,24 @@ namespace Highgeek.McWebApp.Common.Services
             JoinedChannels.Clear();
             try
             {
-                PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:" + ApplicationUser.mcNickname));
-            }catch (Exception e)
-            {
-                _logger.LogWarning("SetPlayerSettings() failed!: \nMessage: " + e.Message +"\nStacktrace: \n" +e.StackTrace);
+                if (ApplicationUser is not null)
+                {
+                    PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:" + ApplicationUser.mcNickname));
+
+                    ChannelOut = AvaiableChannels.FirstOrDefault(x => x.Name == PlayerServerSettings.channelOut);
+
+                    foreach (var channel in PlayerServerSettings.joinedChannels)
+                    {
+                        JoinedChannels.Add(AvaiableChannels.FirstOrDefault(x => x.Name == channel));
+                    }
+
+                    _refreshService.CallChatServiceRefresh();
+                }
             }
-
-            ChannelOut = AvaiableChannels.FirstOrDefault(x => x.Name == PlayerServerSettings.channelOut);
-
-            foreach (var channel in PlayerServerSettings.joinedChannels)
+            catch (Exception e)
             {
-                JoinedChannels.Add(AvaiableChannels.FirstOrDefault(x => x.Name == channel));
+                _logger.LogWarning("SetPlayerSettings() failed!: \nMessage: " + e.Message + "\nStacktrace: \n" + e.StackTrace);
             }
-
-            _refreshService.CallChatServiceRefresh();
         }
 
         public async Task SetAvaiableChannels()

@@ -7,6 +7,7 @@
 
 @inject IRedisUpdateService _redisUpdateService
 @inject InventoryService _invService
+@inject ISnackbar _snack
 
 @implements IDisposable
 
@@ -63,11 +64,12 @@
         </ChildContent>
         <ItemRenderer>
             <MudDynamicDropItem T="GameItem">
-                <div class="d-flex justify-center align-center flex-grow-1">
-                    <MudTooltip @ref="ItemToolTip" ShowOnClick="true" ShowOnHover="true">
-                        <ChildContent>
-                            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick">
-                                <ActivatorContent>
+
+                <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick">
+                    <ActivatorContent>
+                        <div class="d-flex justify-center align-center flex-grow-1">
+                            <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
+                                <ChildContent>
                                     <div class="container">
                                         <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
                                         @if (context.Amount > 1)
@@ -75,27 +77,27 @@
                                             <MudText Class="bottom-right-text" Typo="Typo.caption">@context.Amount</MudText>
                                         }
                                     </div>
-                                </ActivatorContent>
-                                <ChildContent>
-                                    <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">Profile</MudMenuItem>
-                                    <MudMenuItem>Theme</MudMenuItem>
-                                    <MudMenuItem>Usage</MudMenuItem>
-                                    <MudMenuItem>Close</MudMenuItem>
                                 </ChildContent>
-                            </MudMenu>
-                        </ChildContent>
-                        <TooltipContent>
-                            <MudText Typo="Typo.body1">@((MarkupString)context.DisplayName.HtmlText)</MudText>
-                            @if (context.Enchantments != null)
-                            {
-                                foreach (IntTag enchant in context.Enchantments.Values)
-                                {
-                                    <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1)) @((MarkupString)": ") @enchant.Value <br /></MudText>
-                                }
-                            }
-                        </TooltipContent>
-                    </MudTooltip>
-                </div>
+                                <TooltipContent>
+                                    <MudText Typo="Typo.body1">@((MarkupString)context.DisplayName.HtmlText)</MudText>
+                                    @if (context.Enchantments != null)
+                                    {
+                                        foreach (IntTag enchant in context.Enchantments.Values)
+                                        {
+                                            <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1)) @((MarkupString)": ") @enchant.Value <br /></MudText>
+                                        }
+                                    }
+                                </TooltipContent>
+                            </MudTooltip>
+                        </div>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
+                        <MudMenuItem>Theme</MudMenuItem>
+                        <MudMenuItem>Usage</MudMenuItem>
+                        <MudMenuItem>Close</MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
             </MudDynamicDropItem>
         </ItemRenderer>
     </MudDropContainer>
@@ -201,6 +203,7 @@
 
     private async void DoSomethingWithItem(MouseEventArgs mouseEventArgs, GameItem gameItem)
     {
+        _snack.Add(gameItem.DisplayName, Severity.Success);
         _logger.LogWarning("Trying to do something with item: " +gameItem.Name );
     }
 
