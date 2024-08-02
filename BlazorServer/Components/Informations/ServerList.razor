@@ -1,0 +1,26 @@
+﻿@inject IServerListService _serverList
+
+<h1>ServerList</h1>
+
+@foreach (var server in ServerListModels)
+{
+    <h3>@server.ServerName</h3>
+}
+
+@code {
+    private List<ServerListModel> ServerListModels = new List<ServerListModel>();
+
+    protected override void OnInitialized()
+    {
+        _serverList.ServerListRefreshRequested += RefreshList;
+    }
+
+    private async void RefreshList()
+    {
+        await InvokeAsync(async () =>
+        {
+            ServerListModels = _serverList.GetServerList();
+            StateHasChanged();
+        });
+    }
+}

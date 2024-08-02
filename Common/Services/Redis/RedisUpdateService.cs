@@ -23,7 +23,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<string> PlayersSettingsChanged;
 
+        public event EventHandler<string> PlayersListChanged;
+
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
+
+
+        event Action ServerListRefreshRequested;
+        void CallServerListRefresh();
     }
 
     public class RedisUpdateService : IRedisUpdateService
@@ -38,6 +44,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> SettingsChanged;
         public event EventHandler<string> PlayersSettingsChanged;
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
+        public event EventHandler<string> PlayersListChanged;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -86,11 +93,29 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 case "players":
                     await PlayersEvent(Uuid);
                     return;
+                case "server":
+                    await ServerListEvent(Uuid);
+                    return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
                     return;
             }
 
+        }
+
+        public async Task ServerListEvent(string uuid)
+        {
+            if (uuid.Contains("playerlist"))
+            {
+                try
+                {
+                    PlayersListChanged?.Invoke(this, uuid);
+                }
+                catch
+                {
+                    return;
+                }
+            }
         }
 
         public async Task PlayersEvent(string uuid)
@@ -153,6 +178,12 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         {
             _logger.LogWarning("Invokig SettingsChanged: " + Uuid);
             SettingsChanged?.Invoke(this, uuid);
+        }
+
+        public event Action ServerListRefreshRequested;
+        public void CallServerListRefresh()
+        {
+            ServerListRefreshRequested?.Invoke();
         }
 
     }
