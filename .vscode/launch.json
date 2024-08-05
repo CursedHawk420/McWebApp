@@ -12,7 +12,7 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/BlazorServer/bin/Debug/net8.0/BlazorServer.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/BlazorServer",
+            //"cwd": "${workspaceFolder}/BlazorServer",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {
@@ -23,9 +23,6 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS" : "http://10.220.11.1:5000"
 
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
             }
         },
         {

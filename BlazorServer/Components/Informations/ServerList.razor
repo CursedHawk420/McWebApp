@@ -1,17 +1,25 @@
 ﻿@inject IServerListService _serverList
 
-<h1>ServerList</h1>
+<h3>ServerList</h3>
 
+<MudExpansionPanels MultiExpansion="true">
 @foreach (var server in ServerListModels)
 {
-    <h3>@server.ServerName</h3>
+    <MudExpansionPanel Text="@(server.ServerName + " " + server.Status)">
+        @foreach (var item in server.PlayerList)
+        {
+            <h6> item </h6>
+        } 
+    </MudExpansionPanel>
 }
+</MudExpansionPanels>
 
 @code {
     private List<ServerListModel> ServerListModels = new List<ServerListModel>();
 
     protected override void OnInitialized()
     {
+        ServerListModels = _serverList.GetServerList();
         _serverList.ServerListRefreshRequested += RefreshList;
     }
 
