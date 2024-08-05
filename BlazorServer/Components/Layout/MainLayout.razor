@@ -148,8 +148,8 @@
 
         if (user is not null)
         {
-            _userService.ApplicationUser = user;
-            await _userService.UserServiceInitAsync();
+            //_userService.ApplicationUser = user;
+            await _userService.UserServiceInitAsync(user);
             await _invService.Init();
             Refresh();
         }

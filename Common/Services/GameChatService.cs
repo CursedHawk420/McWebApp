@@ -41,30 +41,36 @@ namespace Highgeek.McWebApp.Common.Services
 
         private async Task LoadChatFromRedis(List<string> channels)
         {
-            chat.Clear();
-            foreach (var channel in channels)
+            try
             {
-                var keys = await RedisService.GetKeysList("*chat:" + channel + "*");
-                keys = keys.OrderByDescending(i => i).ToList();
-                if (keys.Count > 0)
+                chat.Clear();
+                foreach (var channel in channels)
                 {
-                    int max;
-                    if (keys.Count < 50)
+                    var keys = await RedisService.GetKeysList("*chat:" + channel + "*");
+                    keys = keys.OrderByDescending(i => i).ToList();
+                    if (keys.Count > 0)
                     {
-                        max = keys.Count;
-                    }
-                    else
-                    {
-                        max = 50;
-                    }
-                    for (int i = 0; i < max; i++)
-                    {
-                        chat.Add(RedisChatEntryAdapter.FromJson(await RedisService.GetFromRedis(keys[i])));
+                        int max;
+                        if (keys.Count < 50)
+                        {
+                            max = keys.Count;
+                        }
+                        else
+                        {
+                            max = 50;
+                        }
+                        for (int i = 0; i < max; i++)
+                        {
+                            chat.Add(RedisChatEntryAdapter.FromJson(await RedisService.GetFromRedis(keys[i])));
+                        }
                     }
                 }
+                chat = chat.OrderBy(i => i.Datetime).ToList();
+                _refreshService.CallChatRefresh();
+            }catch(Exception ex)
+            {
+
             }
-            chat = chat.OrderBy(i => i.Datetime).ToList();
-            _refreshService.CallChatRefresh();
         }
 
         private async void c_RenderNewChatEntry(object sender, RedisChatEntryAdapter entry)

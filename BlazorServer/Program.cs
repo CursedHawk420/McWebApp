@@ -121,6 +121,7 @@ if (builder.Environment.IsProduction())
         options.EnableForHttps = true;
         options.Providers.Add<BrotliCompressionProvider>();
         options.Providers.Add<GzipCompressionProvider>();
+        options.ExcludedMimeTypes = ["text/html"];
     });
     builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
     {
@@ -179,7 +180,7 @@ builder.Services.AddMudServices(config =>
 var app = builder.Build();
 
 //app.MapDefaultEndpoints();
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
     app.UseResponseCompression();
 }

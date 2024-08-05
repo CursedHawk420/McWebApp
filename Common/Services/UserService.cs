@@ -60,17 +60,21 @@ namespace Highgeek.McWebApp.Common.Services
 
         }
         
-        public async Task UserServiceInitAsync()
+        public async Task UserServiceInitAsync(ApplicationUser applicationUser)
         {
-            if(ApplicationUser is not null)
+            if(applicationUser is not null)
             {
-                if (ApplicationUser.mcUUID != null)
+                ApplicationUser = applicationUser;
+                if (ApplicationUser is not null)
                 {
-                    await SetMinecraftUserAsync(ApplicationUser.mcUUID);
-                }
-                else
-                {
-                    HasConnectedAccount = false;
+                    if (ApplicationUser.mcUUID != null)
+                    {
+                        await SetMinecraftUserAsync(ApplicationUser.mcUUID);
+                    }
+                    else
+                    {
+                        HasConnectedAccount = false;
+                    }
                 }
             }
             Loaded = true;
@@ -111,7 +115,10 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async void RefreshServiceState()
         {
-            await UserServiceInitAsync();
+            if(ApplicationUser is not null)
+            {
+                await UserServiceInitAsync(ApplicationUser);
+            }
         }
 
         public async Task DisconnectGameAccount(){
