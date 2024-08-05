@@ -50,7 +50,7 @@
                     {
                         @Body
                             <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
-                            <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
+                            <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu  d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
                     }
                     else
                     {
@@ -63,10 +63,10 @@
         
         </ChildContent>
         <ItemRenderer>
-            <MudDynamicDropItem T="object" >
+            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" PopoverClass="whereareyou">
+                <ActivatorContent>
+            <MudDynamicDropItem T="object">
 
-                <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick">
-                    <ActivatorContent>
                         <div class="d-flex justify-center align-center flex-grow-1">
                             <MudTooltip @ref="ItemToolTip" ShowOnHover="true" >
                                 <ChildContent>
@@ -84,21 +84,21 @@
                                     {
                                         foreach (IntTag enchant in context.Enchantments.Values)
                                         {
-                                            <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1)) @((MarkupString)": ") @enchant.Value <br /></MudText>
+                                            <MudText Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1))@((MarkupString)" : ") @enchant.Value <br /></MudText>
                                         }
                                     }
                                 </TooltipContent>
                             </MudTooltip>
                         </div>
-                    </ActivatorContent>
-                    <ChildContent>
-                        <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
-                        <MudMenuItem>Theme</MudMenuItem>
-                        <MudMenuItem>Usage</MudMenuItem>
-                        <MudMenuItem>Close</MudMenuItem>
-                    </ChildContent>
-                </MudMenu>
-            </MudDynamicDropItem>
+                    </MudDynamicDropItem>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
+                    <MudMenuItem>Theme</MudMenuItem>
+                    <MudMenuItem>Usage</MudMenuItem>
+                    <MudMenuItem>Close</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
         </ItemRenderer>
     </MudDropContainer>
 </CascadingValue>

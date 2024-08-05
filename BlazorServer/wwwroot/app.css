@@ -71,3 +71,9 @@ body {
 .link-hover {
     color: #F5F5F5;
 }
+
+.mud-drop-zone-with-menu > .mud-drop-item {
+    transform: unset !important;
+    -webkit-transform: translate3d(0,0,0);
+    -moz-transform: translate3d(0,0,0);
+}

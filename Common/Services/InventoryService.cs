@@ -42,29 +42,30 @@ namespace Highgeek.McWebApp.Common.Services
             try
             {
                 InvData = new InventoriesList(context.VirtualInventories.Where(s => s.PlayerUuid == _userService.MinecraftUser.Uuid).ToList());
+
+                foreach (var inv in InvData.Inventories)
+                {
+                    string prefix = "";
+                    if (inv.Web)
+                    {
+                        prefix = "winv";
+                        WinvIdentifier = "winv:" + _userService.MinecraftUser.NickName + ":" + inv.InventoryUuid + ":";
+                        winvslots = inv.Size;
+                    }
+                    else
+                    {
+                        prefix = "vinv";
+                    }
+                    inv.Items = await LoadItemsFromRedis(inv, prefix);
+                    AllItems.AddRange(inv.Items);
+                }
+                _refreshService.CallInventoryRefresh();
+
             }
             catch (Exception ex)
             {
                 _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
             }
-
-            foreach (var inv in InvData.Inventories)
-            {
-                string prefix = "";
-                if (inv.Web)
-                {
-                    prefix = "winv";
-                    WinvIdentifier = "winv:" + _userService.MinecraftUser.NickName + ":" + inv.InventoryUuid + ":";
-                    winvslots = inv.Size;
-                }
-                else
-                {
-                    prefix = "vinv";
-                }
-                inv.Items = await LoadItemsFromRedis(inv, prefix);
-                AllItems.AddRange(inv.Items);
-            }
-            _refreshService.CallInventoryRefresh();
         }
 
 
