@@ -50,7 +50,7 @@
                     {
                         @Body
                             <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
-                            <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default mud-drop-zone-with-menu" Style="height:41px;width:41.4px;" />
+                            <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
                     }
                     else
                     {
@@ -63,12 +63,12 @@
         
         </ChildContent>
         <ItemRenderer>
-            <MudDynamicDropItem T="GameItem">
+            <MudDynamicDropItem T="object" >
 
                 <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick">
                     <ActivatorContent>
                         <div class="d-flex justify-center align-center flex-grow-1">
-                            <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
+                            <MudTooltip @ref="ItemToolTip" ShowOnHover="true" >
                                 <ChildContent>
                                     <div class="container">
                                         <MudImage Src="@context.TextureUrl" Style="height:36px;width:36px;" />
@@ -92,7 +92,7 @@
                         </div>
                     </ActivatorContent>
                     <ChildContent>
-                        <MudMenuItem @ontouchend="@((e) => DoSomethingWithItem(e, context))" @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
+                        <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
                         <MudMenuItem>Theme</MudMenuItem>
                         <MudMenuItem>Usage</MudMenuItem>
                         <MudMenuItem>Close</MudMenuItem>

@@ -39,7 +39,14 @@ namespace Highgeek.McWebApp.Common.Services
         {
             var context = new McserverMaindbContext();
             _logger.LogInformation("Loading player inventories...");
-            InvData = new InventoriesList(context.VirtualInventories.Where(s => s.PlayerUuid == _userService.MinecraftUser.Uuid).ToList());
+            try
+            {
+                InvData = new InventoriesList(context.VirtualInventories.Where(s => s.PlayerUuid == _userService.MinecraftUser.Uuid).ToList());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
+            }
 
             foreach (var inv in InvData.Inventories)
             {
