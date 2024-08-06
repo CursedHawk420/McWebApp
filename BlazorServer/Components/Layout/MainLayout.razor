@@ -63,7 +63,7 @@
         
         </ChildContent>
         <ItemRenderer>
-            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" PopoverClass="whereareyou">
+            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick">
                 <ActivatorContent>
             <MudDynamicDropItem T="object">
 
@@ -205,7 +205,7 @@
     private async void DoSomethingWithItem(EventArgs eventArgs, GameItem gameItem)
     {
         _snack.Add((MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
-        _logger.LogWarning("Trying to do something with item: " +gameItem.Name );
+        _logger.LogWarning("Trying to do something with item: " + gameItem.Name);
     }
 
 
