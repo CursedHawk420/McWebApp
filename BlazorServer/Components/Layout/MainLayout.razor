@@ -2,7 +2,7 @@
 @inherits LayoutComponentBase
 @inject UserManager<ApplicationUser> _userManager
 @inject IRefreshService _refreshService
-@inject IUserService _userService
+@inject UserService _userService
 @inject ILogger<MainLayout> _logger
 
 @inject IRedisUpdateService _redisUpdateService
@@ -149,8 +149,8 @@
         if (user is not null)
         {
             //_userService.ApplicationUser = user;
-            //await _userService.UserServiceInitAsync(user);
-            //await _invService.Init();
+            await _userService.UserServiceInitAsync(user);
+            await _invService.Init();
             Refresh();
         }
         else

@@ -96,7 +96,7 @@ builder.Services.AddSingleton<MineSkinApi.Client.Configuration>();
 builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 builder.Services.AddScoped<IRefreshService, RefreshService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GameChatService>();
 
 builder.Services.AddScoped<InventoryService>();

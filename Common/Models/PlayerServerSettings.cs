@@ -25,7 +25,5 @@ namespace Highgeek.McWebApp.Common.Models
             this.hasConnectedDiscord = hasConnectedDiscord;
             this.mutedPlayers = mutedPlayers;
         }
-
-        public PlayerServerSettings() { }
     }
 }

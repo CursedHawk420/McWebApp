@@ -17,11 +17,11 @@ namespace Highgeek.McWebApp.Common.Permissions
 
         private readonly LuckPermsService _luckPermsService;
 
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
 
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public PermissionsAuthorizationHandler(ILogger<PermissionsAuthorizationHandler> logger, LuckPermsService luckPermsService, IUserService userService, UserManager<ApplicationUser> userManager)
+        public PermissionsAuthorizationHandler(ILogger<PermissionsAuthorizationHandler> logger, LuckPermsService luckPermsService, UserService userService, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _luckPermsService = luckPermsService;
