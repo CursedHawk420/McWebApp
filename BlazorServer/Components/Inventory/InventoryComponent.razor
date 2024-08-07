@@ -36,7 +36,7 @@
             <div class="@invclass">
                 <MudText Style="margin-top:0.1%; margin-bottom:0.1%">@(selectedVinv == null ? "Nothing selected." : $"Ingame Inventory: {selectedVinv.InventoryName}")</MudText>
 
-                <div style="background-image:url('@vinvsize'); width: 390px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -37px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
+                <div style="background-image:url('@vinvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
                     @if (true)
                     {
                         @for (int r = 0; r < vinvrows; r++)
@@ -44,7 +44,7 @@
                             <div class="d-flex dropinv ">
                                 @for (int c = 0; c < 9; c++)
                                 {
-                                    <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:38.6px;width:39.2px;" />
+                                    <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
                                     i++;
                                 }
                             </div>
