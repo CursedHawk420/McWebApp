@@ -9,10 +9,33 @@ using Highgeek.McWebApp.Common.Helpers.Channels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Components;
 
 namespace Highgeek.McWebApp.Common.Services
 {
-    public class UserService : IDisposable
+    public interface IUserService
+    {
+        public ApplicationUser ApplicationUser { get; set; }
+
+        public User LpUser { get; set; }
+
+        public MinecraftUser MinecraftUser { get; set; }
+
+        public bool HasConnectedAccount { get; set; }
+
+
+        public bool Loaded { get; set; }
+
+        public PlayerServerSettings PlayerServerSettings { get; set; }
+
+        public ChannelSettingsAdapter ChannelOut { get; set; }
+        public List<ChannelSettingsAdapter> JoinedChannels { get; set; }
+        public List<ChannelSettingsAdapter> AvaiableChannels { get; set; }
+
+        public Task UpdatePlayerSettings();
+        public Task DisconnectGameAccount();
+    }
+    public class UserService : IDisposable, IUserService
     {
         private readonly MinecraftUserManager _mcUserManager;
 
@@ -26,38 +49,72 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly ILogger<UserService> _logger;
 
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
-        public User LpUser { get; set; }
+        public User? LpUser { get; set; }
 
-        public MinecraftUser MinecraftUser { get; set; }
+        public MinecraftUser? MinecraftUser { get; set; }
 
-        public bool HasConnectedAccount = false;
+        public bool HasConnectedAccount { get; set; }
 
+        private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-        public bool Loaded = false;
+        public bool Loaded { get; set; }
 
         public PlayerServerSettings PlayerServerSettings { get; set; }
 
-        public ChannelSettingsAdapter ChannelOut;
-        public List<ChannelSettingsAdapter> JoinedChannels = new List<ChannelSettingsAdapter>();
-        public List<ChannelSettingsAdapter> AvaiableChannels = new List<ChannelSettingsAdapter>();
+        public ChannelSettingsAdapter ChannelOut { get; set; }
+        public List<ChannelSettingsAdapter> JoinedChannels { get; set; }
+        public List<ChannelSettingsAdapter> AvaiableChannels { get; set; }
 
-        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILogger<UserService> logger)
+        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILogger<UserService> logger, AuthenticationStateProvider authenticationStateProvider)
         {
+            Loaded = false;
             _mcUserManager = minecraftUserManager;
             _userManager = userManager;
             _refreshService = refreshService;
             _luckPermsService = luckPermsService;
             _redisUpdateService = redisUpdateService;
             _logger = logger;
+            _authenticationStateProvider = authenticationStateProvider;
+
+            ApplicationUser = _userManager.GetUserAsync(_authenticationStateProvider.GetAuthenticationStateAsync().Result.User).Result;
+
+            PlayerServerSettings = new PlayerServerSettings();
+            ChannelOut = new ChannelSettingsAdapter();
+            JoinedChannels = new List<ChannelSettingsAdapter>();
+            AvaiableChannels = new List<ChannelSettingsAdapter>();
 
 
             _refreshService.ServiceRefreshRequested += RefreshServiceState;
-
             _redisUpdateService.PlayersSettingsChanged += FetchPlayerSettingsFromRedis;
             _redisUpdateService.LuckpermsChanged += ListenForLuckUpdate;
 
+            if (ApplicationUser is not null)
+            {
+                if(ApplicationUser.mcUUID is not null)
+                {
+                    SetMcUser(ApplicationUser.mcUUID);
+                }
+            }
+            else
+            {
+                Loaded = true;
+                _refreshService.CallPageRefresh();
+            }
+        }
+
+        public async void SetMcUser(string uuid)
+        {
+            MinecraftUser = await _mcUserManager.GetUserAsync(uuid);
+            LpUser = await _luckPermsService.GetUserAsync(uuid);
+            HasConnectedAccount = true;
+            await SetAvaiableChannels();
+
+            await SetPlayerSettings();
+            Loaded = true;
+            _refreshService.CallInventoryServiceRefresh();
+            _refreshService.CallPageRefresh();
         }
         
         public async Task UserServiceInitAsync(ApplicationUser applicationUser)
@@ -97,7 +154,7 @@ namespace Highgeek.McWebApp.Common.Services
             await SetPlayerSettings();
         }
 
-        public async void ListenForLuckUpdate(object sender, LuckpermsRedisLogAdapter redisLogAdapter)
+        public async void ListenForLuckUpdate(object? sender, LuckpermsRedisLogAdapter redisLogAdapter)
         {
             if (ApplicationUser is not null && ApplicationUser.mcNickname is not null)
             {
@@ -127,7 +184,7 @@ namespace Highgeek.McWebApp.Common.Services
             HasConnectedAccount = false;
         }
 
-        public async void FetchPlayerSettingsFromRedis(object sender, string uuid)
+        public async void FetchPlayerSettingsFromRedis(object? sender, string uuid)
         {
             if(ApplicationUser is not null && ApplicationUser.mcNickname is not null)
             {
