@@ -14,7 +14,7 @@ namespace Highgeek.McWebApp.Common.Services
     {
         private readonly ILogger<InventoryService> _logger;
         private readonly IRedisUpdateService _redisUpdateService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly IRefreshService _refreshService;
 
         public InventoriesList InvData;
@@ -25,7 +25,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public List<GameItem?> AllItems = new List<GameItem?>();
 
-        public InventoryService(ILogger<InventoryService> logger, UserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
+        public InventoryService(ILogger<InventoryService> logger, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
             _logger = logger;
             _userService = userService;
@@ -33,9 +33,10 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService = refreshService;
             //_iRedisUpdateService = _serviceProvider.GetService<IRedisUpdateService>();
             //_iRedisUpdateService.InventoryChanged += c_InventoryUpdated;
+            _refreshService.InventoryServiceRefreshRequested += Init;
         }
 
-        public async Task Init()
+        public async void Init()
         {
             var context = new McserverMaindbContext();
             _logger.LogInformation("Loading player inventories...");
@@ -60,6 +61,7 @@ namespace Highgeek.McWebApp.Common.Services
                     AllItems.AddRange(inv.Items);
                 }
                 _refreshService.CallInventoryRefresh();
+                _refreshService.CallPageRefresh();
 
             }
             catch (Exception ex)
