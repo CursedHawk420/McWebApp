@@ -66,8 +66,8 @@ else
 
     protected override async void OnInitialized()
     {
-        _refreshService.InventoryViewRefreshRequested += Load;
-        if (_invService.InvData is not null)
+        //_refreshService.InventoryViewRefreshRequested += Load;
+        if (vinvData.Count == 0)
         {
             Load();
         }

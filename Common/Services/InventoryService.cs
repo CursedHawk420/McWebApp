@@ -177,7 +177,7 @@ namespace Highgeek.McWebApp.Common.Services
 
                 // Dispose unmanaged resources
                 // For example: Release memory allocated through unmanaged code
-                InvData.Inventories.Clear();
+                //InvData.Inventories.Clear();
                 InvData = null;
                 AllItems.Clear();
 

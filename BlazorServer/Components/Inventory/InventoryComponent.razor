@@ -2,6 +2,7 @@
 @inject IRedisUpdateService _redisUpdateService
 @inject IInventoryService _invService
 @inject IBrowserViewportService _browserViewportService
+@inject IRefreshService _refreshService
 @implements IDisposable
 <!--
 <style>
@@ -119,13 +120,21 @@
     {
 
         //_redisUpdateService.InventoryChanged += c_InventoryUpdated;
+        _refreshService.InventoryViewRefreshRequested += Load;
+        if(_invService.InvData.WInvData is not null)
+        {
+            Load();
+        }
+    }
 
+    public async void Load()
+    {
         vinvrawuuid = "vinv:" + selectedVinv.PlayerName + ":" + selectedVinv.InventoryUuid + ":";
 
         await InvokeAsync(async () =>
         {
-            vinvslots = selectedVinv.Items.Count;
-            winvslots = _invService.InvData.WInvData.Items.Count;
+            vinvslots = selectedVinv.Size;
+            winvslots = _invService.InvData.WInvData.Size;
             await DetermineInventorySize();
 
             loadingComplete = true;
@@ -207,6 +216,7 @@
                 // Dispose managed resources
                 // For example: Close file handles, database connections, etc.
 
+                _refreshService.InventoryViewRefreshRequested -= Load;
                 _browserViewportService.UnsubscribeAsync(_subscriptionId);
             }
 
