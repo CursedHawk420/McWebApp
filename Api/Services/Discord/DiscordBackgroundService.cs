@@ -11,7 +11,7 @@ using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
-using LuckPermsApi.Model;
+using OpenApi.Highgeek.LuckPermsApi.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;

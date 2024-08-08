@@ -1,10 +1,9 @@
 ﻿using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Models;
 using Microsoft.AspNetCore.Identity;
-using MineSkinApi.Model;
+using OpenApi.Highgeek.MineSkinApi.Model;
 using Highgeek.McWebApp.Common.Data;
 using Microsoft.EntityFrameworkCore;
-using ServerTapApi.Model;
 using System.Numerics;
 using System.Net;
 using Highgeek.McWebApp.Common.Models.Contexts;

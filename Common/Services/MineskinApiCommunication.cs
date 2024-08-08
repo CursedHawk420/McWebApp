@@ -2,25 +2,30 @@
 using Highgeek.McWebApp.Common.Models.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MineSkinApi;
-using MineSkinApi.Api;
-using MineSkinApi.Client;
-using MineSkinApi.Model;
+using OpenApi.Highgeek.MineSkinApi;
+using OpenApi.Highgeek.MineSkinApi.Api;
+using OpenApi.Highgeek.MineSkinApi.Client;
+using OpenApi.Highgeek.MineSkinApi.Model;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Highgeek.McWebApp.Common.Helpers;
 
 namespace Highgeek.McWebApp.Common.Services
 {
     public class MineskinApiCommunication
     {
-        private readonly Configuration _configuration;
+        private readonly Configuration _configuration = new Configuration();
+        private readonly ILogger<MineskinApiCommunication> _logger;
         private string userAgent;  // string | Custom User-Agent for your application, see [user-agent.dev](https://user-agent.dev/) for implementation examples
 
-        public MineskinApiCommunication(UserManager<ApplicationUser> userManager, McserverMaindbContext mainDbContext, Configuration config)
+        public MineskinApiCommunication(ILogger<MineskinApiCommunication> logger)
         {
-            config.BasePath = "https://api.mineskin.org";
-            _configuration = config;
-            userAgent = "";
+            _logger = logger;
+            _configuration.BasePath = "https://api.mineskin.org";
+            userAgent = "McWebApp/1.0";
+            _configuration.UserAgent = userAgent;
+            _configuration.AddApiKey(ConfigProvider.Instance.GetConfigString("MineSkinApi:ApiKey"), ConfigProvider.Instance.GetConfigString("MineSkinApi:ApiSecret"));
         }
 
         public SkinInfo GetTextureId(int mineskinid)
@@ -56,7 +61,7 @@ namespace Highgeek.McWebApp.Common.Services
             {
                 MemoryStream memStream = new MemoryStream();
                 file.CopyTo(memStream);
-                GenerateUrlPost200Response result = apiInstance.GenerateUploadPost(userAgent, model, variant, name, visibility, memStream);
+                GenerateUrlPost200Response result = apiInstance.GenerateUploadPost(userAgent, null, model, variant, name, visibility, memStream);
                 Debug.WriteLine(result);
                 return result;
                 //GenerateUrlPost200Response result = apiInstance.GenerateUploadPost(userAgent, model, variant, name, visibility, file);
@@ -81,14 +86,12 @@ namespace Highgeek.McWebApp.Common.Services
             try
             {
                 GenerateUrlPost200Response result = apiInstance.GenerateUrlPost(userAgent, generateUrlPostRequest);
-                Debug.WriteLine(result);
+                _logger.LogWarning("Succes");
                 return result;
             }
             catch (ApiException e)
             {
-                Debug.Print("Exception when calling GenerateApi.GenerateUrlPost: " + e.Message);
-                Debug.Print("Status Code: " + e.ErrorCode);
-                Debug.Print(e.StackTrace);
+                _logger.LogWarning("Mineskin error \nMessage: " + e.Message + "\nStacktrace: \n" + e.StackTrace);
                 return null;
             }
         }

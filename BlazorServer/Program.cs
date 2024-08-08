@@ -91,12 +91,11 @@ builder.Services.AddScoped<TimeZoneService>();
 
 builder.Services.AddScoped<EcoParser>();
 builder.Services.AddScoped<MinecraftUserManager>();
-builder.Services.AddScoped<MineskinApiCommunication>();
-builder.Services.AddSingleton<MineSkinApi.Client.Configuration>();
+builder.Services.AddSingleton<MineskinApiCommunication>();
 builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 builder.Services.AddScoped<IRefreshService, RefreshService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<GameChatService>();
 
 builder.Services.AddScoped<InventoryService>();

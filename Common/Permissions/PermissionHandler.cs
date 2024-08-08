@@ -17,11 +17,11 @@ namespace Highgeek.McWebApp.Common.Permissions
 
         private readonly LuckPermsService _luckPermsService;
 
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public PermissionsAuthorizationHandler(ILogger<PermissionsAuthorizationHandler> logger, LuckPermsService luckPermsService, UserService userService, UserManager<ApplicationUser> userManager)
+        public PermissionsAuthorizationHandler(ILogger<PermissionsAuthorizationHandler> logger, LuckPermsService luckPermsService, IUserService userService, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _luckPermsService = luckPermsService;
@@ -36,6 +36,7 @@ namespace Highgeek.McWebApp.Common.Permissions
             // Log as a warning so that it's very clear in sample output which authorization
             // policies(and requirements/handlers) are in use.
             _logger.LogWarning("Evaluating authorization requirement for permission \"" + requirement.Permission + "\"");
+
 
             _userService.ApplicationUser = await _userManager.GetUserAsync(context.User);
 

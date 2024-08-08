@@ -1,6 +1,6 @@
 ﻿using Highgeek.McWebApp.Common.Models.Adapters;
 using Highgeek.McWebApp.Common.Models;
-using LuckPermsApi.Model;
+using OpenApi.Highgeek.LuckPermsApi.Model;
 using Highgeek.McWebApp.Common.Services.Redis;
 using Highgeek.McWebApp.Common.Helpers.Channels;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
@@ -15,13 +15,13 @@ namespace Highgeek.McWebApp.Common.Services
     public class GameChatService : IDisposable
     {
         private readonly LuckPermsService _luckPermsService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly IRefreshService _refreshService;
         private readonly IRedisUpdateService _redisUpdateService;
 
         public List<RedisChatEntryAdapter> chat = new List<RedisChatEntryAdapter>();
 
-        public GameChatService(LuckPermsService luckPermsService, UserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
+        public GameChatService(LuckPermsService luckPermsService, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
             _luckPermsService = luckPermsService;
             _userService = userService;

@@ -9,6 +9,7 @@ using System.Reflection;
 using Discord.Commands;
 using Highgeek.McWebApp.Api.Services.Discord;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Highgeek.McWebApp.Common.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,8 +49,7 @@ builder.Services.AddScoped<MinecraftUserManager>();
 
 builder.Services.AddScoped<EcoParser>();
 builder.Services.AddScoped<MinecraftUserManager>();
-builder.Services.AddScoped<MineskinApiCommunication>();
-builder.Services.AddScoped<MineSkinApi.Client.Configuration>();
+builder.Services.AddSingleton<MineskinApiCommunication>();
 builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 
@@ -63,6 +63,19 @@ builder.Services.AddSingleton<CommandService>();
 builder.Services.AddSingleton<DiscordBackgroundService>();
 builder.Services.AddHostedService(
     provider => provider.GetRequiredService<DiscordBackgroundService>());
+
+builder.Services.AddSingleton<IEmailSender, EmailSender>();
+
+//MailKit options load
+builder.Services.Configure<MailKitEmailSenderOptions>(options =>
+{
+    options.Host_Address = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Address");
+    options.Host_Port = Convert.ToInt32(configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Port"));
+    options.Host_Username = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Account");
+    options.Host_Password = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Password");
+    options.Sender_EMail = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:SenderEmail");
+    options.Sender_Name = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:SenderName");
+});
 
 builder.Services.AddControllersWithViews();
 

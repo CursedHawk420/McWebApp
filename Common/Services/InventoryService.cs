@@ -14,7 +14,7 @@ namespace Highgeek.McWebApp.Common.Services
     {
         private readonly ILogger<InventoryService> _logger;
         private readonly IRedisUpdateService _redisUpdateService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly IRefreshService _refreshService;
 
         public InventoriesList InvData;
@@ -25,7 +25,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public List<GameItem?> AllItems = new List<GameItem?>();
 
-        public InventoryService(ILogger<InventoryService> logger, UserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
+        public InventoryService(ILogger<InventoryService> logger, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
             _logger = logger;
             _userService = userService;
@@ -57,7 +57,13 @@ namespace Highgeek.McWebApp.Common.Services
                         prefix = "vinv";
                     }
                     inv.Items = await LoadItemsFromRedis(inv, prefix);
-                    AllItems.AddRange(inv.Items);
+                    try
+                    {
+                        AllItems.AddRange(inv.Items);
+                    }catch (NullReferenceException ex)
+                    {
+                        _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
+                    }
                 }
                 _refreshService.CallInventoryRefresh();
 

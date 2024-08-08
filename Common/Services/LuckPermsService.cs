@@ -3,9 +3,9 @@ using System.Diagnostics;
 using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
-using LuckPermsApi.Api;
-using LuckPermsApi.Client;
-using LuckPermsApi.Model;
+using OpenApi.Highgeek.LuckPermsApi.Api;
+using OpenApi.Highgeek.LuckPermsApi.Client;
+using OpenApi.Highgeek.LuckPermsApi.Model;
 
 namespace Highgeek.McWebApp.Common.Services
 {
