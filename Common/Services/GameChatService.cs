@@ -12,14 +12,22 @@ using Sharpdactyl.Models.User;
 
 namespace Highgeek.McWebApp.Common.Services
 {
-    public class GameChatService : IDisposable
+    public interface IGameChatService
+    {
+        public List<RedisChatEntryAdapter> chat { get; set; }
+
+        public Task<RedisChatEntryAdapter> CreateMessage(string message);
+
+        public Task SendMessage(RedisChatEntryAdapter message);
+    }
+    public class GameChatService : IDisposable, IGameChatService
     {
         private readonly LuckPermsService _luckPermsService;
         private readonly IUserService _userService;
         private readonly IRefreshService _refreshService;
         private readonly IRedisUpdateService _redisUpdateService;
 
-        public List<RedisChatEntryAdapter> chat = new List<RedisChatEntryAdapter>();
+        public List<RedisChatEntryAdapter> chat { get; set; }
 
         public GameChatService(LuckPermsService luckPermsService, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
@@ -28,8 +36,11 @@ namespace Highgeek.McWebApp.Common.Services
             _redisUpdateService = redisUpdateService;
             _refreshService = refreshService;
 
+            chat = new List<RedisChatEntryAdapter>();
+
 
             LoadChatFromRedis(_userService.PlayerServerSettings.joinedChannels);
+
             _redisUpdateService.ChatChanged += c_RenderNewChatEntry;
             _refreshService.ChatServiceRefreshRequested += RefreshChatService;
         }
@@ -73,7 +84,7 @@ namespace Highgeek.McWebApp.Common.Services
             }
         }
 
-        private async void c_RenderNewChatEntry(object sender, RedisChatEntryAdapter entry)
+        private async void c_RenderNewChatEntry(object? sender, RedisChatEntryAdapter entry)
         {
             if (_userService.PlayerServerSettings.joinedChannels.Contains(entry.Channel))
             {

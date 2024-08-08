@@ -10,20 +10,34 @@ using MudBlazor;
 
 namespace Highgeek.McWebApp.Common.Services
 {
-    public class InventoryService : IDisposable
+    public interface IInventoryService
+    {
+        public InventoriesList InvData { get; set; }
+
+        public string WinvIdentifier { get; set; }
+
+        public int winvslots { get; set; }
+
+        public List<GameItem?> AllItems { get; set; }
+
+        public Task ItemPicked(MudDragAndDropItemTransaction<GameItem> pickItem);
+        public Task ItemDroped(MudItemDropInfo<GameItem> dropItem);
+        public Task listUpdater(InventoryPositionInfo info);
+    }
+    public class InventoryService : IAsyncDisposable, IInventoryService
     {
         private readonly ILogger<InventoryService> _logger;
         private readonly IRedisUpdateService _redisUpdateService;
         private readonly IUserService _userService;
         private readonly IRefreshService _refreshService;
 
-        public InventoriesList InvData;
+        public InventoriesList InvData { get; set; }
 
-        public string WinvIdentifier;
+        public string WinvIdentifier { get; set; }
 
-        public int winvslots;
+        public int winvslots { get; set; }
 
-        public List<GameItem?> AllItems = new List<GameItem?>();
+        public List<GameItem?> AllItems { get; set; }
 
         public InventoryService(ILogger<InventoryService> logger, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
@@ -31,8 +45,26 @@ namespace Highgeek.McWebApp.Common.Services
             _userService = userService;
             _redisUpdateService = redisUpdateService;
             _refreshService = refreshService;
+
+            AllItems = new List<GameItem?>();
+
             //_iRedisUpdateService = _serviceProvider.GetService<IRedisUpdateService>();
             //_iRedisUpdateService.InventoryChanged += c_InventoryUpdated;
+            _refreshService.InventoryServiceRefreshRequested += RefreshInventoryService;
+        }
+
+        public async void RefreshInventoryService()
+        {
+            if(_userService.MinecraftUser is not null)
+            {
+                await Init();
+                _refreshService.CallInventoryViewRefresh();
+            }
+            else
+            {
+                Dispose(true);
+                _refreshService.CallInventoryViewRefresh();
+            }
         }
 
         public async Task Init()
@@ -65,7 +97,7 @@ namespace Highgeek.McWebApp.Common.Services
                         _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
                     }
                 }
-                _refreshService.CallInventoryRefresh();
+                //_refreshService.CallInventoryViewRefresh();
 
             }
             catch (Exception ex)
@@ -121,21 +153,15 @@ namespace Highgeek.McWebApp.Common.Services
             AllItems[int.Parse(info.position) + InvData.ListPosition[info.uuid]] = new GameItem(info.Item, info.rawuuid);
         }
 
-        public void Dispose()
-        {
-            AllItems.Clear();
-            InvData.Inventories.Clear();
-        }
-
-
         private bool _disposed = false;
 
-        void IDisposable.Dispose()
+        ValueTask IAsyncDisposable.DisposeAsync()
         {
             // Dispose of unmanaged resources.
             Dispose(true);
             // Suppress finalization.
             GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
         }
         protected virtual void Dispose(bool disposing)
         {
@@ -146,13 +172,14 @@ namespace Highgeek.McWebApp.Common.Services
                     // Dispose managed resources
                     // For example: Close file handles, database connections, etc.
 
+                    _refreshService.InventoryServiceRefreshRequested -= RefreshInventoryService;
                 }
 
                 // Dispose unmanaged resources
                 // For example: Release memory allocated through unmanaged code
-
+                InvData.Inventories.Clear();
                 InvData = null;
-                AllItems = null;
+                AllItems.Clear();
 
                 _disposed = true;
             }

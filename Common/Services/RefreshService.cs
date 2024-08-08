@@ -28,8 +28,11 @@ namespace Highgeek.McWebApp.Common.Services
         event Action MainNavMenuClosehRequested;
         void CallMainNavMenuClose();
 
-        event Action InventoryRefreshRequested;
-        void CallInventoryRefresh();
+        event Action InventoryServiceRefreshRequested;
+        void CallInventoryServiceRefresh();
+
+        event Action InventoryViewRefreshRequested;
+        void CallInventoryViewRefresh();
     }
     public class RefreshService : IRefreshService
     {
@@ -40,10 +43,16 @@ namespace Highgeek.McWebApp.Common.Services
             PageRefreshRequested?.Invoke();
         }
 
-        public event Action InventoryRefreshRequested;
-        public void CallInventoryRefresh()
+        public event Action InventoryServiceRefreshRequested;
+        public void CallInventoryServiceRefresh()
         {
-            InventoryRefreshRequested?.Invoke();
+            InventoryServiceRefreshRequested?.Invoke();
+        }
+
+        public event Action InventoryViewRefreshRequested;
+        public void CallInventoryViewRefresh()
+        {
+            InventoryViewRefreshRequested?.Invoke();
         }
 
 

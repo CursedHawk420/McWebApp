@@ -1,5 +1,5 @@
 ﻿@inject IRedisUpdateService _iRedisUpdateService
-@inject GameChatService _gameChatService
+@inject IGameChatService _gameChatService
 @inject IUserService _userService
 @inject ISnackbar _snack
 @inject IJSRuntime js
@@ -7,7 +7,7 @@
 @inject IRefreshService _refreshService
 @inject TimeZoneService _timeZoneService
 @implements IDisposable
-@inject InventoryService _invService
+@inject IInventoryService _invService
 
 @if (loadingComplete)
 {

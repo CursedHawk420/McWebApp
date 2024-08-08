@@ -6,7 +6,7 @@
 @inject ILogger<MainLayout> _logger
 
 @inject IRedisUpdateService _redisUpdateService
-@inject InventoryService _invService
+@inject IInventoryService _invService
 @inject ISnackbar _snack
 
 @implements IDisposable
@@ -128,7 +128,8 @@
     {
         _themeManager.Theme = Highgeek.McWebApp.Common.Helpers.ThemeHelper.CustomTheme;
         _refreshService.PageRefreshRequested += Refresh;
-        _refreshService.ApplicationUserRefreshRequested += UserInit;
+        _refreshService.InventoryViewRefreshRequested += RefreshInventory;
+        //_refreshService.ApplicationUserRefreshRequested += UserInit;
         _refreshService.MainNavMenuClosehRequested += DrawerClose;
         _redisUpdateService.InventoryChanged += c_InventoryUpdated;
         UserInit();
@@ -150,7 +151,7 @@
         {
             //_userService.ApplicationUser = user;
             await _userService.UserServiceInitAsync(user);
-            await _invService.Init();
+            //await _invService.Init();
             Refresh();
         }
         else
@@ -165,6 +166,19 @@
         try
         {
             StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("MainLayout Refresh() error: " + ex.Message);
+        }
+    }
+
+    private void RefreshInventory()
+    {
+        try
+        {
+            StateHasChanged();
+            MainDropContainer.Refresh();
         }
         catch (Exception ex)
         {
@@ -209,7 +223,7 @@
     }
 
 
-    public async void c_InventoryUpdated(object sender, InventoryPositionInfo info)
+    public async void c_InventoryUpdated(object? sender, InventoryPositionInfo info)
     {
         try
         {
@@ -262,8 +276,9 @@
                 // Dispose managed resources
                 // For example: Close file handles, database connections, etc.
 
+                _refreshService.InventoryViewRefreshRequested -= RefreshInventory;
                 _refreshService.PageRefreshRequested -= Refresh;
-                _refreshService.ApplicationUserRefreshRequested -= UserInit;
+                //_refreshService.ApplicationUserRefreshRequested -= UserInit;
                 _refreshService.MainNavMenuClosehRequested -= DrawerClose;
                 _redisUpdateService.InventoryChanged -= c_InventoryUpdated;
             }

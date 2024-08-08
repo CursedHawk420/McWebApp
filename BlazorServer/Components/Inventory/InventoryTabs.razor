@@ -1,4 +1,4 @@
-﻿@inject InventoryService _invService
+﻿@inject IInventoryService _invService
 @inject ILogger<InventoryTabs> _logger
 @inject IUserService _userService
 @inject IRefreshService _refreshService
@@ -66,7 +66,7 @@ else
 
     protected override async void OnInitialized()
     {
-        _refreshService.InventoryRefreshRequested += Load;
+        _refreshService.InventoryViewRefreshRequested += Load;
         if (_invService.InvData is not null)
         {
             Load();
@@ -123,7 +123,7 @@ else
                 // Dispose managed resources
                 // For example: Close file handles, database connections, etc.
 
-                _refreshService.PageRefreshRequested -= Load;
+                _refreshService.InventoryViewRefreshRequested -= Load;
                 //BrowserViewportService.UnsubscribeAsync(_subscriptionId);
                 //_userManager.Dispose();
                 //_invService.Dispose();

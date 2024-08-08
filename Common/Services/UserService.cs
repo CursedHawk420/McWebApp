@@ -81,7 +81,6 @@ namespace Highgeek.McWebApp.Common.Services
             AvaiableChannels = new List<ChannelSettingsAdapter>();
 
             _refreshService.ServiceRefreshRequested += RefreshServiceState;
-
             _redisUpdateService.PlayersSettingsChanged += FetchPlayerSettingsFromRedis;
             _redisUpdateService.LuckpermsChanged += ListenForLuckUpdate;
 
@@ -97,6 +96,7 @@ namespace Highgeek.McWebApp.Common.Services
                     if (ApplicationUser.mcUUID != null)
                     {
                         await SetMinecraftUserAsync(ApplicationUser.mcUUID);
+                        _refreshService.CallInventoryServiceRefresh();
                     }
                     else
                     {
@@ -144,6 +144,7 @@ namespace Highgeek.McWebApp.Common.Services
         {
             if(ApplicationUser is not null)
             {
+                ApplicationUser = await _userManager.FindByIdAsync(ApplicationUser.Id);
                 await UserServiceInitAsync(ApplicationUser);
             }
         }
@@ -152,6 +153,8 @@ namespace Highgeek.McWebApp.Common.Services
             MinecraftUser = null;
             LpUser = null;
             HasConnectedAccount = false;
+            ApplicationUser = await _userManager.FindByIdAsync(ApplicationUser.Id);
+            _refreshService.CallInventoryServiceRefresh();
         }
 
         public async void FetchPlayerSettingsFromRedis(object? sender, string uuid)

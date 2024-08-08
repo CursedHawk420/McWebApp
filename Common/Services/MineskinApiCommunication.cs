@@ -23,7 +23,7 @@ namespace Highgeek.McWebApp.Common.Services
         {
             _logger = logger;
             _configuration.BasePath = "https://api.mineskin.org";
-            userAgent = "McWebApp/1.0";
+            userAgent = "mcwebapp/1.0";
             _configuration.UserAgent = userAgent;
             _configuration.AddApiKey(ConfigProvider.Instance.GetConfigString("MineSkinApi:ApiKey"), ConfigProvider.Instance.GetConfigString("MineSkinApi:ApiSecret"));
         }
@@ -70,9 +70,6 @@ namespace Highgeek.McWebApp.Common.Services
             }
             catch (ApiException e)
             {
-                Debug.Print("Exception when calling GenerateApi.GenerateUploadPost: " + e.Message);
-                Debug.Print("Status Code: " + e.ErrorCode);
-                Debug.Print(e.StackTrace);
                 return null;
             }
         }

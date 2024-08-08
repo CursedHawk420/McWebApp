@@ -96,9 +96,9 @@ builder.Services.AddScoped<PteroManager>();
 builder.Services.AddScoped<SkinManager>();
 builder.Services.AddScoped<IRefreshService, RefreshService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<GameChatService>();
+builder.Services.AddScoped<IGameChatService, GameChatService>();
 
-builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 //builder.Services.AddScoped<ImageCacheService>();
 
 builder.Services.AddSingleton<LuckPermsService>();
