@@ -66,35 +66,35 @@ else
 
     protected override async void OnInitialized()
     {
-        //_refreshService.InventoryViewRefreshRequested += Load;
-        if (vinvData.Count == 0)
-        {
-            Load();
-        }
+        _refreshService.InventoryViewRefreshRequested += Load;
+        Load();
     }
 
     public async void Load()
     {
-        await InvokeAsync(async () =>
+        if (vinvData.Count == 0 && _invService.InvData.Inventories.Count > 0)
         {
-
-            foreach (var datum in _invService.InvData.Inventories)
+            await InvokeAsync(async () =>
             {
-                if (datum.Web == true)
-                {
-                    winvData.Add(datum);
-                }
-                else
-                {
-                    vinvData.Add(datum);
-                }
-            }
-            selectedVinv = vinvData[0];
-            selectedWinv = winvData[0];
 
-            loadingComplete = true;
-            StateHasChanged();
-        });
+                foreach (var datum in _invService.InvData.Inventories)
+                {
+                    if (datum.Web == true)
+                    {
+                        winvData.Add(datum);
+                    }
+                    else
+                    {
+                        vinvData.Add(datum);
+                    }
+                }
+                selectedVinv = vinvData[0];
+                selectedWinv = winvData[0];
+
+                loadingComplete = true;
+                StateHasChanged();
+            });
+        }
     }
 
     public async Task SelectedChanged(IEnumerable<VirtualInventory> newselection)
