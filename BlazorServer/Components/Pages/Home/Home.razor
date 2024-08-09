@@ -1,5 +1,6 @@
 ﻿@page "/"
 @implements IDisposable
+@inject ILocalizer _localizer
 <!--
 <MainCarouselComponent />
 -->
@@ -8,7 +9,7 @@
 
 <div class="container">
     <div class="row">
-    <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">Vítejte na HighGeeku!</MudText>
+        <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">@_localizer["WelcomeMessage"]</MudText>
     </div>
     
     <div class="row mx-auto" style="max-height:50em;height: calc(150vh - 44em); width:98%">

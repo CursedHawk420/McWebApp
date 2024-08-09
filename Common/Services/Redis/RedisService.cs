@@ -19,9 +19,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public static readonly IServer server = Redis.GetServers().Single();
 
-        public static async Task<string> GetFromRedis(string uuid)
+        public static async Task<string> GetFromRedisAsync(string uuid)
         {
             return await Database.StringGetAsync(uuid);
+        }
+        public static string GetFromRedis(string uuid)
+        {
+            return Database.StringGet(uuid);
         }
 
         public static async Task SetInRedis(string uuid, string value)

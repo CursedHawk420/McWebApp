@@ -28,6 +28,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
 
 
+        event Action LocaleChangeRequested;
+        void CallLocaleChange();
+
         event Action ServerListRefreshRequested;
         void CallServerListRefresh();
     }
@@ -138,7 +141,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             if (uuid.StartsWith("luckperms:log:toresolve:"))
             {
 
-                LuckpermsChanged?.Invoke(this, LuckpermsRedisLogAdapter.FromJson(await RedisService.GetFromRedis(uuid)));
+                LuckpermsChanged?.Invoke(this, LuckpermsRedisLogAdapter.FromJson(await RedisService.GetFromRedisAsync(uuid)));
             }
         }
 
@@ -150,7 +153,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 type = type,
                 position = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1),
                 uuid = uuid.Substring(uuid.LastIndexOf(":") - 36, 36),
-                Item = await RedisService.GetFromRedis(uuid)
+                Item = await RedisService.GetFromRedisAsync(uuid)
             };
 
             InventoryChanged?.Invoke(this, positionInfo);
@@ -158,7 +161,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public async Task ChatEvent(string uuid)
         {
-            string json = await RedisService.GetFromRedis(uuid);
+            string json = await RedisService.GetFromRedisAsync(uuid);
             if (json == null) return;
             RedisChatEntryAdapter chatEntry = RedisChatEntryAdapter.FromJson(json);
 
@@ -167,7 +170,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public async Task PrechatEvent(string uuid)
         {
-            string json = await RedisService.GetFromRedis(uuid);
+            string json = await RedisService.GetFromRedisAsync(uuid);
             if (json == null) return;
             RedisChatEntryAdapter chatEntry = RedisChatEntryAdapter.FromJson(json);
 
@@ -176,14 +179,27 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public async Task SettingsEvent(string uuid)
         {
-            _logger.LogWarning("Invokig SettingsChanged: " + Uuid);
-            SettingsChanged?.Invoke(this, uuid);
+            if (uuid.Contains("language"))
+            {
+                CallLocaleChange();
+            }
+            else
+            {
+                _logger.LogWarning("Invokig SettingsChanged: " + Uuid);
+                SettingsChanged?.Invoke(this, uuid);
+            }
         }
 
         public event Action ServerListRefreshRequested;
         public void CallServerListRefresh()
         {
             ServerListRefreshRequested?.Invoke();
+        }
+
+        public event Action LocaleChangeRequested;
+        public void CallLocaleChange()
+        {
+            LocaleChangeRequested?.Invoke();
         }
 
     }

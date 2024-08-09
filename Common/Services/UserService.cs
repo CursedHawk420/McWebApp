@@ -9,6 +9,7 @@ using Highgeek.McWebApp.Common.Helpers.Channels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Microsoft.Extensions.Logging;
+using Common.Services;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -45,6 +46,10 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly LuckPermsService _luckPermsService;
 
+        private readonly ILocalizer _localizer;
+
+        private readonly ICookieService _cookieService;
+
         private readonly ILogger<UserService> _logger;
 
         public ApplicationUser ApplicationUser { get; set; }
@@ -64,7 +69,7 @@ namespace Highgeek.McWebApp.Common.Services
         public List<ChannelSettingsAdapter> JoinedChannels { get; set; }
         public List<ChannelSettingsAdapter> AvaiableChannels { get; set; }
 
-        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILogger<UserService> logger)
+        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILocalizer localizer, ICookieService cookieService, ILogger<UserService> logger)
         {
             Loaded = false;
             HasConnectedAccount = false;
@@ -74,6 +79,8 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService = refreshService;
             _luckPermsService = luckPermsService;
             _redisUpdateService = redisUpdateService;
+            _localizer = localizer;
+            _cookieService = cookieService;
             _logger = logger;
 
             ChannelOut = new ChannelSettingsAdapter();
@@ -104,6 +111,7 @@ namespace Highgeek.McWebApp.Common.Services
                     }
                 }
             }
+            _localizer.Locale = await _cookieService.GetValue("appLocale");
             Loaded = true;
             _refreshService.CallPageRefresh();
         }
@@ -175,7 +183,7 @@ namespace Highgeek.McWebApp.Common.Services
             {
                 if (ApplicationUser is not null)
                 {
-                    PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:" + ApplicationUser.mcNickname));
+                    PlayerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedisAsync("players:settings:" + ApplicationUser.mcNickname));
 
                     ChannelOut = AvaiableChannels.FirstOrDefault(x => x.Name == PlayerServerSettings.channelOut);
 
@@ -197,7 +205,7 @@ namespace Highgeek.McWebApp.Common.Services
         {
             foreach (var key in await RedisService.GetKeysList("settings:server:chat:channels:*"))
             {
-                AvaiableChannels.Add(ChannelSettingsAdapter.FromJson(await RedisService.GetFromRedis(key)));
+                AvaiableChannels.Add(ChannelSettingsAdapter.FromJson(await RedisService.GetFromRedisAsync(key)));
             }
         }
 

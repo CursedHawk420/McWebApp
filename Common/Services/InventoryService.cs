@@ -116,7 +116,7 @@ namespace Highgeek.McWebApp.Common.Services
             for (int i = 0; i < inventory.Size; i++)
             {
                 string uuid = prefix + ":" + _userService.MinecraftUser.NickName + ":" + inventory.InventoryUuid + ":" + i;
-                string json = await RedisService.GetFromRedis(uuid);
+                string json = await RedisService.GetFromRedisAsync(uuid);
                 _logger.LogInformation("Loaded item from redis: " + json);
                 GameItem item = new GameItem(json, uuid);
                 _logger.LogInformation("ItemParser parsed item: " + item.Name);
@@ -141,7 +141,7 @@ namespace Highgeek.McWebApp.Common.Services
 
             //dropItem.Item.Identifier = dropItem.DropzoneIdentifier;
 
-            string item = await RedisService.GetFromRedis(olduuid);
+            string item = await RedisService.GetFromRedisAsync(olduuid);
             await RedisService.SetInRedis(olduuid, GameItem.AIRITEM);
             await RedisService.SetInRedis(dropItem.DropzoneIdentifier, item);
         }

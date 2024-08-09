@@ -1,4 +1,8 @@
-﻿@using System.Net.Http
+@using Highgeek.McWebApp.BlazorServer.Components.Pages.Info.Shared
+@using Highgeek.McWebApp.BlazorServer.Components.Pages.Info.Pages
+@using Highgeek.McWebApp.Common.Models
+@using Highgeek.McWebApp.Common.Services
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -9,22 +13,14 @@
 @using Microsoft.JSInterop
 @using Highgeek.McWebApp.BlazorServer
 @using Highgeek.McWebApp.BlazorServer.Components
-@using Highgeek.McWebApp.Common.Services
-@using Highgeek.McWebApp.Common.Models
 @using Highgeek.McWebApp.Common.Models.mcwebapp1_cms
 @using Highgeek.McWebApp.Common.Models.mcserver_maindb
 @using Highgeek.McWebApp.Common.Models.Contexts
 @using Highgeek.McWebApp.Common.Permissions
 @using Highgeek.McWebApp.Common.Helpers
-@using Highgeek.McWebApp.Common.Helpers.Channels
 @using MudBlazor
 @using MudBlazor.ThemeManager
-@using Highgeek.McWebApp.Common.Permissions.Requirements
-@using Highgeek.McWebApp.Common.Models.Adapters
-@using Highgeek.McWebApp.Common.Services.Redis
-@using Highgeek.McWebApp.Common.Models.Minecraft
-@using Highgeek.McWebApp.Common.Models.Minecraft.ServerListModel
-@using SharpNBT;
-@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Identity
+@using Highgeek.McWebApp.BlazorServer.Components.Account;
 
-@namespace Highgeek.McWebApp.BlazorServer.Components
+@namespace Highgeek.McWebApp.BlazorServer.Components.Pages.Info

@@ -1,0 +1,76 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject IUserService _userService
+@inject IRefreshService _refreshService
+
+@implements IAsyncDisposable
+
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Info/Servers">Servers</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Info/Tutorials/Inventory">Inventory</NavLink>
+    </li>
+    <!--<li class="nav-item">
+        <NavLink class="nav-link" href="Minecraft/Account/Skin">Skin</NavLink>
+    </li>-->
+    <li class="nav-item nav-pills flex-column">
+        <button class="btn-toggle d-inline-flex align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+            Tutorials
+        </button>
+        <div class="collapse" id="orders-collapse" style="">
+            <ul class="btn-toggle-nav">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="Info/Tutorials/Inventory">Inventory</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="Info/Tutorials/atm">All The Mods</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="Info/Tutorials/Inventory">Inventory</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="Info/Tutorials/Inventory">Inventory</NavLink>
+                </li>
+            </ul>
+        </div>
+    </li>
+    <!--
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Minecraft/Account/Pets">Pets</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Minecraft/Account/Talismans">Talismans</NavLink>
+    </li>-->
+</ul>
+
+<script>
+    (() => {
+        'use strict'
+        const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    })()
+</script>
+
+@code {
+    //TODO Dispose
+
+    protected override async Task OnInitializedAsync()
+    {
+        _refreshService.PageRefreshRequested += Refresh;
+
+        Refresh();
+    }
+
+    public async void Refresh()
+    {
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _refreshService.PageRefreshRequested -= Refresh;
+    }
+}

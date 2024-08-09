@@ -72,7 +72,7 @@ namespace Highgeek.McWebApp.Common.Services
                         }
                         for (int i = 0; i < max; i++)
                         {
-                            chat.Add(RedisChatEntryAdapter.FromJson(await RedisService.GetFromRedis(keys[i])));
+                            chat.Add(RedisChatEntryAdapter.FromJson(await RedisService.GetFromRedisAsync(keys[i])));
                         }
                     }
                 }

@@ -42,7 +42,7 @@ namespace Highgeek.McWebApp.Common.Services
 
             foreach (var key in await RedisService.GetKeysList("server:*"))
             {
-                ServerList.Add(ServerListModel.FromJson(await RedisService.GetFromRedis(key)));
+                ServerList.Add(ServerListModel.FromJson(await RedisService.GetFromRedisAsync(key)));
             }
 
             CallServerListRefresh();
@@ -50,7 +50,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async void RefreshServerList(object sender, string uuid)
         {
-            ServerListModel serverListModel = ServerListModel.FromJson(await RedisService.GetFromRedis(uuid));
+            ServerListModel serverListModel = ServerListModel.FromJson(await RedisService.GetFromRedisAsync(uuid));
             ServerList.Remove(ServerList.FirstOrDefault(x => x.ServerName == serverListModel.ServerName));
             ServerList.Add(serverListModel);
             CallServerListRefresh();

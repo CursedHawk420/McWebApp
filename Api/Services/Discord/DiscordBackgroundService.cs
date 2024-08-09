@@ -82,21 +82,21 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 _logger.LogInformation($"Loading channel settings from redis.");
                 foreach (var key in RedisService.GetKeysList("settings:server:chat:channels:*").Result)
                 {
-                    channelSettings.Add(ChannelSettingsAdapter.FromJson(RedisService.GetFromRedis(key).Result));
+                    channelSettings.Add(ChannelSettingsAdapter.FromJson(RedisService.GetFromRedisAsync(key).Result));
                 }
             }
 
             if (uuid.IsNullOrEmpty() || uuid.Equals("settings:mcwebapp:discord:channels"))
             {
                 _logger.LogInformation($"Loading discord channel settings pairs from redis.");
-                DiscordPairing discordPairsList = DiscordPairing.FromJson(await RedisService.GetFromRedis("settings:mcwebapp:discord:channels"));
+                DiscordPairing discordPairsList = DiscordPairing.FromJson(await RedisService.GetFromRedisAsync("settings:mcwebapp:discord:channels"));
                 channelPairs = discordPairsList.DiscordPairs.ToList();
             }
             if (uuid.IsNullOrEmpty() || uuid.Equals("settings:mcwebapp:discord:roles"))
             {
                 _logger.LogInformation($"Loading discord roles settings pairs from redis.");
 
-                DiscordPairing discordPairsList = DiscordPairing.FromJson(RedisService.GetFromRedis("settings:mcwebapp:discord:roles").Result);
+                DiscordPairing discordPairsList = DiscordPairing.FromJson(RedisService.GetFromRedisAsync("settings:mcwebapp:discord:roles").Result);
                 rolePairs = discordPairsList.DiscordPairs.ToList();
             }
         }
@@ -440,7 +440,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             await _mcMainContext.DiscordAccounts.AddAsync(discordAccount);
             await _mcMainContext.SaveChangesAsync();
 
-            PlayerServerSettings playerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedis("players:settings:" + xconomy.Player));
+            PlayerServerSettings playerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedisAsync("players:settings:" + xconomy.Player));
             playerServerSettings.hasConnectedDiscord = true;
             await RedisService.SetInRedis("players:settings:" + xconomy.Player, JsonConvert.SerializeObject(playerServerSettings));
             await UpdateDiscordRoles(discordAccount);
