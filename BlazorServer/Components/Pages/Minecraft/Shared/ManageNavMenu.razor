@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject IUserService _userService
 @inject IRefreshService _refreshService
+@inject ILocalizer _localizer
 
 @implements IAsyncDisposable
 
@@ -8,18 +9,18 @@
     <AuthorizeView Policy="connectedaccount">
         <NotAuthorized>
             <li class="nav-item">
-                <NavLink class="nav-link" href="/Minecraft/Account/Register" Match="NavLinkMatch.All">Connect Account</NavLink>
+                <NavLink class="nav-link" href="/Minecraft/Account/Register" Match="NavLinkMatch.All">@_localizer["McNavMenuConnectAccount"]</NavLink>
             </li>
         </NotAuthorized>
         <Authorized>
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Statistics">Statistics</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Statistics">@_localizer["McNavMenuStats"]</NavLink>
             </li>
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Inventory">Inventory</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Inventory">@_localizer["McNavMenuInventory"]</NavLink>
             </li>
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Skin">Skin</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Skin">@_localizer["McNavMenuSkin"]</NavLink>
             </li>
             <!--
             <li class="nav-item">
@@ -29,7 +30,7 @@
                 <NavLink class="nav-link" href="Minecraft/Account/Talismans">Talismans</NavLink>
             </li>-->
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Settings">Settings</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Settings">@_localizer["McNavMenuSettings"]</NavLink>
             </li>
         </Authorized>
     </AuthorizeView>

@@ -1,5 +1,4 @@
-﻿using Common.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +11,10 @@ namespace Highgeek.McWebApp.Common.Services
         string this[string name] { get; }
 
         public string Locale { get; set; }
+
+
+        event Action LocaleRefreshRequested;
+        void CallLocaleRefresh();
     }
 
     public class Localizer : ILocalizer
@@ -33,6 +36,12 @@ namespace Highgeek.McWebApp.Common.Services
             }
         }
 
+
+        public event Action LocaleRefreshRequested;
+        public void CallLocaleRefresh()
+        {
+            LocaleRefreshRequested?.Invoke();
+        }
 
     }
 }

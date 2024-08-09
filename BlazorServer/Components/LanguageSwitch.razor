@@ -1,0 +1,38 @@
+﻿@inject ILocalizer _localizer
+@inject IRefreshService _refreshService
+@inject ICookieService _cookieService
+
+<MudSwitch T="bool" ValueChanged="ValueChange" Value="_checked3" ThumbIcon="@Icons.Material.Filled.Language" ThumbIconColor="@(_checked3==false ? Color.Success : Color.Warning)"></MudSwitch>
+
+@code {
+    bool _checked3 = false;
+
+    protected override void OnInitialized()
+    {
+        if(_localizer.Locale == "cs")
+        {
+            _checked3 = false;
+        }
+        else
+        {
+            _checked3 = true;
+        }
+    }
+
+    private async void ValueChange(bool value)
+    {
+        _checked3 = value;
+
+        if (value == false)
+        {
+            _localizer.Locale = "cs";
+            await _cookieService.SetValue("appLocale", "cs");
+        }
+        else
+        {
+            _localizer.Locale = "en";
+            await _cookieService.SetValue("appLocale", "en");
+        }
+        _refreshService.CallPageRefresh();
+    }
+}

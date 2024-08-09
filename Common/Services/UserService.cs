@@ -9,7 +9,6 @@ using Highgeek.McWebApp.Common.Helpers.Channels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Microsoft.Extensions.Logging;
-using Common.Services;
 
 namespace Highgeek.McWebApp.Common.Services
 {

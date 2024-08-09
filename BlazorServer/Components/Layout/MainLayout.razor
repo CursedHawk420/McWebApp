@@ -27,11 +27,14 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
                 <a href="/" class="link-hover">
                     <MudText>HighGeek</MudText>
-                </a>
-
+                    </a>
+                    <MudSpacer />
+                    @if (_userService.Loaded)
+                    {
+                        <LanguageSwitch />
+                    }
                 @if (_userService.HasConnectedAccount) 
                 {
-                    <MudSpacer />
                     <a href="/Minecraft/Account/Statistics">
                         <MudAvatar>
                             <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">
@@ -128,6 +131,7 @@
     {
         _themeManager.Theme = Highgeek.McWebApp.Common.Helpers.ThemeHelper.CustomTheme;
         _refreshService.PageRefreshRequested += Refresh;
+        
         _refreshService.InventoryViewRefreshRequested += RefreshInventory;
         //_refreshService.ApplicationUserRefreshRequested += UserInit;
         _refreshService.MainNavMenuClosehRequested += DrawerClose;

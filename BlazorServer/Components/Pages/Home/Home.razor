@@ -9,7 +9,7 @@
 
 <div class="container">
     <div class="row">
-        <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">@_localizer["WelcomeMessage"]</MudText>
+        <MudText @ref="WelcomeMessage" Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">@_localizer["WelcomeMessage"]</MudText>
     </div>
     
     <div class="row mx-auto" style="max-height:50em;height: calc(150vh - 44em); width:98%">
@@ -36,10 +36,18 @@
 
     List<CarouselContent> carousel = new List<CarouselContent>();
 
-    protected override Task OnInitializedAsync()
+    MudText WelcomeMessage;
+    protected override void OnInitialized()
     {
+        _localizer.LocaleRefreshRequested += Refresh;
         GetCarouselContents();
-        return Task.CompletedTask;
+    }
+
+    //TODO Broken:
+    public async void Refresh()
+    {
+        await WelcomeMessage.SetParametersAsync(ParameterView.Empty);
+        StateHasChanged();
     }
 
     public void GetCarouselContents()
@@ -52,6 +60,7 @@
 
     public void Dispose()
     {
+        //_localizer.LocaleRefreshRequested -= StateHasChanged;
         carousel = null;
 
         _cmsContext.Dispose();
