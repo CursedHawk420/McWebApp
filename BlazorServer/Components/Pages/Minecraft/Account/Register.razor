@@ -10,12 +10,15 @@
 @inject ISnackbar _snack
 @inject NavigationManager _navManager
 @inject IRefreshService _refreshService
+@inject ILocalizer l
+
+@implements IDisposable
 
 @attribute [PermissionsAuthorize("disconnectedaccount")]
 
-<PageTitle>Connect Minecraft</PageTitle>
+<PageTitle>@l["ConnectMcAccount"]</PageTitle>
 
-<h3>Connect Minecraft</h3>
+<h3>@l["ConnectMcAccount"]</h3>
 
 <div class="row">
     <div class="col-md-6">
@@ -23,15 +26,15 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <InputText type="text" @bind-Value="Input.Nickname" class="form-control" placeholder="Ingame Nickname" />
-                <label for="username" class="form-label" >Nickname</label>
+                <InputText type="text" @bind-Value="Input.Nickname" class="form-control" placeholder="@l["IngameNickname"]" />
+                <label for="username" class="form-label">@l["IngameNickname"]</label>
             </div>
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="password" aria-required="true" placeholder="Enter your ingame password." />
-                <label for="password" class="form-label">Password</label>
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="password" aria-required="true" placeholder="@l["IngamePassword"]" />
+                <label for="password" class="form-label">@l["IngamePassword"]</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Connect Account</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">@l["ConnectAccount"]</button>
         </EditForm>
     </div>
 </div>
@@ -39,6 +42,10 @@
 
 @code {
     //TODO Dispose
+    protected override void OnInitialized()
+    {
+        l.LocaleRefreshRequested += RefreshAsync;
+    }
 
     private async Task OnValidSubmitAsync(){
         string result = await _mcUserManager.RegisterMcUser(Input.Nickname, Input.Password, _userService.ApplicationUser);
@@ -53,7 +60,7 @@
             _snack.Add(result, Severity.Error);
         }
     }
-    
+
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
@@ -63,9 +70,23 @@
         [Required]
         [Display(Name = "Nickname")]
         public string? Nickname { get; set; } = "";
-        
+
         [Required]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
+    }
+
+    private async void RefreshAsync()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        l.LocaleRefreshRequested -= RefreshAsync;
     }
 }

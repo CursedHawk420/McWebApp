@@ -5,18 +5,23 @@
 @inject ISnackbar _snack
 @inject IRefreshService _refreshService
 @inject NavigationManager _navManager
+@inject ILocalizer l
 
 @attribute [PermissionsAuthorize("connectedaccount")]
 
 @implements IDisposable
 
-<PageTitle>Game Account Settings</PageTitle>
+<PageTitle>@l["GameAccountSettings"]</PageTitle>
 
-<h1>Game Account Settings</h1>
+<h1>@l["GameAccountSettings"]</h1>
 
-<button @onclick="DisconnectAccount" class="w-100 btn btn-lg btn-danger">Disconnect Minecraft Account</button>
+<button @onclick="DisconnectAccount" class="w-100 btn btn-lg btn-danger">@l["DisconnectMcAccount"]</button>
 
 @code{
+    protected override void OnInitialized()
+    {
+        l.LocaleRefreshRequested += RefreshAsync;
+    }
     //TODO Dispose
 
     private async Task DisconnectAccount(){
@@ -31,8 +36,18 @@
         }
     }
 
+    private async void RefreshAsync()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
     void IDisposable.Dispose()
     {
+        l.LocaleRefreshRequested -= RefreshAsync;
     }
 
 }

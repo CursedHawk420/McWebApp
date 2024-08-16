@@ -33,15 +33,18 @@ namespace Highgeek.McWebApp.Common.Services
             LanguageCzech = new Dictionary<string, string>();
             LanguageEnglish = new Dictionary<string, string>();
             LanguageModel = LanguageModel.FromJson(RedisService.GetFromRedis("settings:mcwebapp:language"));
-            InitLocale();
-
-            _redisUpdateService.LocaleChangeRequested += InitLocale;
-        }
-
-        public void InitLocale()
-        {
             SetCzech();
             SetEnglish();
+
+            _redisUpdateService.LocaleChangeRequested += RefreshLocale;
+        }
+
+        public void RefreshLocale()
+        {
+            LanguageModel = LanguageModel.FromJson(RedisService.GetFromRedis("settings:mcwebapp:language"));
+            SetCzech();
+            SetEnglish();
+            _redisUpdateService.CallLanguageProviderRefresh();
         }
 
         public void SetEnglish()

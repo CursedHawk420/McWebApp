@@ -2,8 +2,34 @@
 
 @attribute [PermissionsAuthorize("connectedaccount")]
 
-<PageTitle>Web Inventory</PageTitle>
+@inject ILocalizer l
+@implements IDisposable
+
+<PageTitle>@l["WebInventory"]</PageTitle>
 
 <Highgeek.McWebApp.BlazorServer.Components.Inventory.InventoryTabs>
 
 </Highgeek.McWebApp.BlazorServer.Components.Inventory.InventoryTabs>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        l.LocaleRefreshRequested += RefreshAsync;
+    }
+
+    private async void RefreshAsync()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+
+    public void Dispose()
+    {
+        l.LocaleRefreshRequested -= RefreshAsync;
+    }
+}

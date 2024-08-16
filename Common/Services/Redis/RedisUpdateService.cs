@@ -31,6 +31,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         event Action LocaleChangeRequested;
         void CallLocaleChange();
 
+        event Action LanguageProviderRefreshRequested;
+        void CallLanguageProviderRefresh();
+
         event Action ServerListRefreshRequested;
         void CallServerListRefresh();
     }
@@ -202,5 +205,11 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             LocaleChangeRequested?.Invoke();
         }
 
+
+        public event Action LanguageProviderRefreshRequested;
+        public void CallLanguageProviderRefresh()
+        {
+            LanguageProviderRefreshRequested?.Invoke();
+        }
     }
 }

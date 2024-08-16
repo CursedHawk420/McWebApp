@@ -33,6 +33,7 @@
             _localizer.Locale = "en";
             await _cookieService.SetValue("appLocale", "en");
         }
-        _refreshService.CallPageRefresh();
+        //_refreshService.CallPageRefresh();
+        _localizer.CallLocaleRefresh();
     }
 }

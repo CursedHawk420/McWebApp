@@ -33,9 +33,18 @@ namespace Highgeek.McWebApp.Common.Services
 
         event Action InventoryViewRefreshRequested;
         void CallInventoryViewRefresh();
+
+        event Action LanguageProviderRefreshRequested;
+        void CallLanguageProviderRefresh();
     }
     public class RefreshService : IRefreshService
     {
+
+        public event Action LanguageProviderRefreshRequested;
+        public void CallLanguageProviderRefresh()
+        {
+            LanguageProviderRefreshRequested?.Invoke();
+        }
 
         public event Action PageRefreshRequested;
         public void CallPageRefresh()
