@@ -16,6 +16,12 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft.ServerListModel
         [JsonProperty("status")]
         public string Status { get; set; }
 
+        [JsonProperty("visible")]
+        public bool Visible { get; set; }
+
+        [JsonProperty("position")]
+        public int Position { get; set; }
+
         [JsonProperty("playerList")]
         public List<string> PlayerList { get; set; }
     }

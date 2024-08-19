@@ -1,18 +1,22 @@
 ﻿@inject IServerListService _serverList
 @inject ILocalizer l
 
-<h3>@l["ServerList"]</h3>
-
 <MudExpansionPanels MultiExpansion="true">
-@foreach (var server in ServerListModels)
-{
-    <MudExpansionPanel Text="@(server.ServerName + " " + server.Status)">
-        @foreach (var item in server.PlayerList)
+    @foreach (var server in ServerListModels)
+    {
+        @if (server.Visible)
         {
-            <h6> item </h6>
-        } 
-    </MudExpansionPanel>
-}
+            <MudExpansionPanel Text="@(l[server.ServerName] + " " + l[server.Status] + " " + server.PlayerList.Count)">
+                @foreach (var item in server.PlayerList)
+                {
+                    <MudText Typo="Typo.body2">
+                        <MudImage Height="32" Src="@("https://api.highgeek.eu/api/skins/playerhead/"+item)"></MudImage>
+                        @item
+                    </MudText>
+                }
+            </MudExpansionPanel>
+        }
+    }
 </MudExpansionPanels>
 
 @code {

@@ -2,7 +2,11 @@
 @inject ILocalizer l
 @implements IDisposable
 
+<PageTitle>@l["ServerStatus"]</PageTitle>
+
 <h3>@l["ServerStatus"]</h3>
+
+<ServerList/>
 
 @code {
     protected override void OnInitialized()

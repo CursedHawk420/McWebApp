@@ -1,11 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Models.Minecraft.ServerListModel;
 using Highgeek.McWebApp.Common.Services.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MudBlazor.FilterOperator;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -34,7 +28,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public List<ServerListModel> GetServerList()
         {
-            return this.ServerList;
+            return this.ServerList.OrderBy(o => o.Position).ToList();
         }
 
         public async void Init()
