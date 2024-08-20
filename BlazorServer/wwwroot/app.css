@@ -50,6 +50,30 @@ h1:focus {
     border-color: #929292;
 }
 
+@font-face {
+    font-family: "Minecraft";
+    src: url("/fonts/minecraft/minecraft.eot") format("eot"), 
+        url("/fonts/minecraft/minecraft.woff") format("woff"), 
+        url("/fonts/minecraft/minecraft.ttf") format("truetype"), 
+        url("/fonts/minecraft/minecraft.svg#Minecraft") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+.inv-top-left {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+}
+.inv-container {
+    position: relative;
+    text-align: center;
+    color: white;
+}
+
+.mud-select-input-mcfont .mud-select-input {
+    font-family: 'Minecraft';
+}
+
 
 body {
     background-image: url('https://images.highgeek.eu/mcatm9image2.png');
@@ -88,7 +112,7 @@ body {
 
 .btn-toggle {
     padding: .25rem .5rem;
-    padding-left:1em;
+    padding-left: 1em;
     font-weight: 400;
     color: #1BAE20;
     background-color: transparent;

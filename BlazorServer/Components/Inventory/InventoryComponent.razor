@@ -35,47 +35,51 @@
     <div class="row">
         <div class="col-md-6">
             <div class="@invclass">
-                <MudText Style="margin-top:0.1%; margin-bottom:0.1%">@(selectedVinv == null ? "Nothing selected." : $"Ingame Inventory: {selectedVinv.InventoryName}")</MudText>
-
-                <div style="background-image:url('@vinvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
-                    @if (true)
-                    {
-                        @for (int r = 0; r < vinvrows; r++)
+                <MudText Style="font-family:'Minecraft'; margin-top:0.1%; margin-bottom:0.1%">@(selectedVinv == null ? "Nothing selected." : $"Ingame Inventory: {selectedVinv.InventoryName}")</MudText>
+                <div class="inv-container">
+                    <div style="background-image:url('@vinvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
+                        @if (true)
                         {
-                            <div class="d-flex dropinv ">
-                                @for (int c = 0; c < 9; c++)
-                                {
-                                    <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
-                                    i++;
-                                }
-                            </div>
+                            @for (int r = 0; r < vinvrows; r++)
+                            {
+                                <div class="d-flex dropinv ">
+                                    @for (int c = 0; c < 9; c++)
+                                    {
+                                        <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                        i++;
+                                    }
+                                </div>
+                            }
+                            this.i = 0;
                         }
-                        this.i = 0;
-                    }
+                    </div>
+                    <MudText class="inv-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="@invclass">
-                <MudText Style="margin-top:0.1%;margin-bottom:0.1%;">@(_invService.InvData.WInvData == null ? "Nothing selected." : $"Web Inventory: {_invService.InvData.WInvData.InventoryName}")</MudText>
-
-                <div style="background-image:url('@winvsize'); width: 410px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -39px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
-                    @if (true)
-                    {
-
-                        @for (int r = 0; r < winvrows; r++)
+                <MudText Style="font-family:'Minecraft'; margin-top:0.1%;margin-bottom:0.1%;">@(_invService.InvData.WInvData == null ? "Nothing selected." : $"Web Inventory: {_invService.InvData.WInvData.InventoryName}")</MudText>
+                <div class="inv-container">
+                    <div style="background-image:url('@winvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
+                        @if (true)
                         {
-                            <div class="d-flex dropinv">
-                                @for (int c = 0; c < 9; c++)
-                                {
-                                    <MudDropZone T="GameItem" Identifier="@($"{_invService.WinvIdentifier}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
-                                    ii++;
-                                }
-                            </div>
+
+                            @for (int r = 0; r < winvrows; r++)
+                            {
+                                <div class="d-flex dropinv">
+                                    @for (int c = 0; c < 9; c++)
+                                    {
+                                        <MudDropZone T="GameItem" Identifier="@($"{_invService.WinvIdentifier}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                        ii++;
+                                    }
+                                </div>
+                            }
+                            this.ii = 0;
                         }
-                        this.ii = 0;
-                    }
+                    </div>
+                    <MudText class="inv-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
                 </div>
             </div>
         </div>
@@ -121,7 +125,7 @@
 
         //_redisUpdateService.InventoryChanged += c_InventoryUpdated;
         _refreshService.InventoryViewRefreshRequested += Load;
-        if(_invService.InvData.WInvData is not null)
+        if (_invService.InvData.WInvData is not null)
         {
             Load();
         }

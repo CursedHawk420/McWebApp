@@ -11,21 +11,22 @@
 
 @if (loadingComplete)
 {
-    <MudPaper Class="" Style="max-width:50rem;position:fixed; margin-left:2rem;right:2rem; bottom:2rem; background-color:#212121; min-width:20rem">
-        <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
+    <MudPaper Class="mcfontwrapper" Style="font-family:'Minecraft';max-width:50rem;position:fixed; margin-left:2rem;right:2rem; bottom:2rem; background-color:#212121; min-width:20rem">
+        <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20;">
             <div class="row">
                 <div class="col-6">
-                    <MudText Style="padding-left:0.5rem;padding-bottom:0.5rem;padding-top:0.5rem;" Typo="Typo.h5">Game chat</MudText>
+                    <MudText Style="padding-left:0.5rem;padding-bottom:0.5rem;padding-top:0.5rem;font-family:'Minecraft';" Typo="Typo.h6">Game chat</MudText>
                 </div>
                 <div class="col-5" >
-                    <MudSelect T="ChannelSettingsAdapter" MultiSelection="true" SelectAll="true" @ref="channelSelector" SelectedValues="_userService.JoinedChannels" SelectedValuesChanged="JoinedChannelsChanged" ToStringFunc="converter" Style="margin-right:1rem; margin-left:-1.5rem; padding-top:0.5rem">
+                    <MudSelect T="ChannelSettingsAdapter" MultiSelection="true" SelectAll="true" @ref="channelSelector" SelectedValues="_userService.JoinedChannels" SelectedValuesChanged="JoinedChannelsChanged" ToStringFunc="converter" Style="margin-right:1rem; margin-left:-1.5rem; padding-top:0.5rem; font-family:'Minecraft';" Class="mud-select-input-mcfont">
                         @foreach(var channel in _userService.AvaiableChannels)
                         {
-                            <MudSelectItem T="ChannelSettingsAdapter" Value="channel" >@channel.FancyName</MudSelectItem>
+                            <MudSelectItem Class="mud-list-item-text-mcfont" T="ChannelSettingsAdapter" Value="channel">
+                                <MudText Style="font-family: 'Minecraft';">@channel.FancyName</MudText>
+                            </MudSelectItem>
                         }
                     </MudSelect>
                 </div>
-                <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "0")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu  d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
 
                 <div class="col-1">
                     <MudIcon Style="position: absolute; right: 0.5rem; top:0.3rem" Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Large" @onclick="CloseChatWindow" />
@@ -41,7 +42,7 @@
                             <MudListItem OnClickPreventDefault="false"  style=" padding-top: 0px; padding-bottom: 0px; margin-bottom:-0.5rem">@((MarkupString)DeserializeMessage(entry))</MudListItem>
                         </ChildContent>
                         <TooltipContent>
-                            <MudText Typo="Typo.body2">@_timeZoneService.GetLocalDateTime(entry.Datetime).Result.ToString("g")</MudText>
+                            <MudText Style="font-family: 'Minecraft'; font-size:x-small;" Typo="Typo.body2">@_timeZoneService.GetLocalDateTime(entry.Datetime).Result.ToString("g")</MudText>
                         </TooltipContent>
                     </MudTooltip>
 
@@ -54,10 +55,12 @@
                     <MudTextField @ref="RefEntryField" @bind-Value="@textInput" Variant="Variant.Text" OnKeyDown="TextFieldOnKeyDown" Disabled="disableChatInput" Immediate="true" Style="margin-left:1rem; " />
                 </div>
                 <div class="col-3">
-            <MudSelect T="ChannelSettingsAdapter" @ref="channelSelector" @bind-Value="_userService.ChannelOut" SelectedValuesChanged="OutChannelChanged" ToStringFunc="converter" Style=" margin-left:-1.5rem">
+                    <MudSelect T="ChannelSettingsAdapter" @ref="channelSelector" @bind-Value="_userService.ChannelOut" SelectedValuesChanged="OutChannelChanged" ToStringFunc="converter" Style=" margin-left:-1.5rem; " Class="mud-select-input-mcfont ">
                 @foreach (var channel in _userService.AvaiableChannels)
                 {
-                    <MudSelectItem T="ChannelSettingsAdapter" Value="channel">@channel.FancyName</MudSelectItem>
+                            <MudSelectItem Style="font-family:'Minecraft';" T="ChannelSettingsAdapter" Value="channel">
+                                <MudText Style="font-family: 'Minecraft';">@channel.FancyName</MudText>
+                            </MudSelectItem>
                 }
                     </MudSelect>
                 </div>

@@ -9,7 +9,15 @@ namespace Highgeek.McWebApp.Common.Helpers
 
         public static MudTheme CustomTheme = new MudTheme()
         {
-            
+            Typography = new Typography()
+            {
+                Default = new Default()
+                {
+                    FontFamily = new[] { "Roboto", "Helvetica", "Arial", "sans-serif", "Minecraft" },
+
+                }
+            },
+
             PaletteDark = new PaletteDark()
             {
                 Dark = "111111",

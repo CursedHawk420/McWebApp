@@ -21,7 +21,7 @@ namespace Highgeek.McWebApp.Common.Helpers
                 {
                     if (s.Length > 1)
                     {
-                        output += "<span style=\"color:" + GetColorFromMinecraftCode(s.Substring(0, 1)) + ";\">" + s.Substring(1, s.Length - 1) + "</span>";
+                        output += "<span style= \"font-family:'Minecraft';color:" + GetColorFromMinecraftCode(s.Substring(0, 1)) + ";\">" + s.Substring(1, s.Length - 1) + "</span>";
                     }
                 }
                 return output;
