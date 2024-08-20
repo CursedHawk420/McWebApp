@@ -22,62 +22,61 @@
     <MudDropContainer T="GameItem" Items="_invService.AllItems" CanDropClass="mud-border-info" NoDropClass="mud-border-error" CanDrop="@( (item,identifier ) => _invService.AllItems.Count(x => x.Identifier == identifier ) == 0)" ItemsSelector="@((item,dropzone) => item.Identifier == dropzone)" ItemPicked="_invService.ItemPicked" ItemDropped="_invService.ItemDroped"
                       Class="" @ref="MainDropContainer">
         <ChildContent>
-        <MudLayout>
-            <MudAppBar>
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                <a href="/" class="link-hover">
-                    <MudText>HighGeek</MudText>
+            <MudLayout>
+                <MudAppBar>
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                    <a href="/" class="link-hover">
+                        <MudText>HighGeek</MudText>
                     </a>
                     <MudSpacer />
                     @if (_userService.Loaded)
                     {
                         <LanguageSwitch />
                     }
-                @if (_userService.HasConnectedAccount) 
-                {
-                    <a href="/Minecraft/Account/Statistics">
-                        <MudAvatar>
-                            <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">
-
-                            </MudImage>
-                        </MudAvatar>
-                    </a>
-                }
-            </MudAppBar>
-            <MudDrawer @bind-Open="@_drawerOpen" Color="Color.Dark">
-                <NavMenu />
-            </MudDrawer>
-            <MudMainContent>
-                <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-                    @if (_userService.Loaded)
+                    @if (_userService.HasConnectedAccount)
                     {
-                        @Body
+                        <a href="/Minecraft/Account/Statistics">
+                            <MudAvatar>
+                                <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">
+
+                                </MudImage>
+                            </MudAvatar>
+                        </a>
+                    }
+                </MudAppBar>
+                <MudDrawer @bind-Open="@_drawerOpen" Color="Color.Dark">
+                    <NavMenu />
+                </MudDrawer>
+                <MudMainContent>
+                    <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+                        @if (_userService.Loaded)
+                        {
+                            @Body
                             <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
                             <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu  d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
-                    }
-                    else
-                    {
-                        <PageTitle>HighGeek - Loading</PageTitle>
-                        <h1>Loading...</h1>
-                    }
-                </MudContainer>
-            </MudMainContent>
-        </MudLayout>
-        
+                        }
+                        else
+                        {
+                            <PageTitle>HighGeek - Loading</PageTitle>
+                            <h1>Loading...</h1>
+                        }
+                    </MudContainer>
+                </MudMainContent>
+            </MudLayout>
+
         </ChildContent>
         <ItemRenderer>
-            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="font-family:'Minecraft'">
+            <MudMenu Tag="context" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, context))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="height:33px;width:33px;">
                 <ActivatorContent>
-            <MudDynamicDropItem T="object">
+                    <MudDynamicDropItem T="object" Class=" justify-center align-center flex-grow-1" Style="height:33px;width:33px;">
 
-                        <div class="d-flex justify-center align-center flex-grow-1">
-                            <MudTooltip @ref="ItemToolTip" ShowOnHover="true" >
+                            <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
                                 <ChildContent>
-                                    <div class="container">
+                                <div class="item-container">
                                         <MudImage Src="@context.TextureUrl" Style="height:33px;width:33px;" />
                                         @if (context.Amount > 1)
                                         {
-                                            <MudText Class="bottom-right-text"  Style="font-family:'Minecraft'" Typo="Typo.caption">@context.Amount</MudText>
+                                            <MudText Class="item-bottom-right-text" Style="font-family:'Minecraft'" Typo="Typo.caption">@context.Amount</MudText>
                                         }
                                     </div>
                                 </ChildContent>
@@ -92,11 +91,10 @@
                                     }
                                 </TooltipContent>
                             </MudTooltip>
-                        </div>
                     </MudDynamicDropItem>
                 </ActivatorContent>
                 <ChildContent>
-                    <MudMenuItem  @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
+                    <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, context))">DoSomethingWithItem</MudMenuItem>
                     <MudMenuItem>Theme</MudMenuItem>
                     <MudMenuItem>Usage</MudMenuItem>
                     <MudMenuItem>Close</MudMenuItem>
@@ -131,7 +129,7 @@
     {
         _themeManager.Theme = Highgeek.McWebApp.Common.Helpers.ThemeHelper.CustomTheme;
         _refreshService.PageRefreshRequested += Refresh;
-        
+
         _refreshService.InventoryViewRefreshRequested += RefreshInventory;
         //_refreshService.ApplicationUserRefreshRequested += UserInit;
         _refreshService.MainNavMenuClosehRequested += DrawerClose;
@@ -252,9 +250,9 @@
                 });
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n"+ ex.Message + "\nTrace: \n" + ex.StackTrace);
+            _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n" + ex.Message + "\nTrace: \n" + ex.StackTrace);
         }
     }
 
