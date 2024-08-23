@@ -20,7 +20,7 @@ using MudBlazor.Services;
 using MudBlazor;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
-
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -180,7 +180,12 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
+builder.Services.UseHttpClientMetrics();
+
 var app = builder.Build();
+
+app.UseMetricServer();
+app.UseHttpMetrics();
 
 //app.MapDefaultEndpoints();
 if (app.Environment.IsProduction())
@@ -199,6 +204,13 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.MapGet("/random-number", () =>
+{
+    var number = Random.Shared.Next(0, 10);
+    if (number >= 7)
+        return Results.Unauthorized();
+    return Results.Ok(number);
+});
 
 app.UseHttpsRedirection();
 

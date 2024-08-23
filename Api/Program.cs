@@ -11,6 +11,8 @@ using Highgeek.McWebApp.Api.Services.Discord;
 using Highgeek.McWebApp.Common.Services.Redis;
 using Highgeek.McWebApp.Common.Options;
 
+using Prometheus;
+
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.AddServiceDefaults();
@@ -87,15 +89,19 @@ builder.Services.AddSwaggerGen(options =>
     {
         Version = "v1",
         Title = "HighGeek API",
-        Description = "API For highgeek services."
+        Description = "API For HighGeek services."
     });
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+builder.Services.UseHttpClientMetrics();
 
 var app = builder.Build();
+
+app.UseMetricServer();
+app.UseHttpMetrics();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -119,6 +125,14 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+
+app.MapGet("/random-number", () =>
+{
+    var number = Random.Shared.Next(0, 10);
+    if (number >= 7)
+        return Results.Unauthorized();
+    return Results.Ok(number);
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
