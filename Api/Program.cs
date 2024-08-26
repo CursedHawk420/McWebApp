@@ -107,8 +107,7 @@ builder.Logging.AddOpenTelemetry(options =>
     options
         .SetResourceBuilder(
             ResourceBuilder.CreateDefault()
-                .AddService("api"))
-        .AddConsoleExporter();
+                .AddService("api"));
     options.IncludeFormattedMessage = true;
     options.IncludeScopes = true;
 
@@ -116,11 +115,9 @@ builder.Logging.AddOpenTelemetry(options =>
 builder.Services.AddOpenTelemetry()
       .ConfigureResource(resource => resource.AddService("api"))
       .WithTracing(tracing => tracing
-          .AddAspNetCoreInstrumentation()
-          .AddConsoleExporter())
+          .AddAspNetCoreInstrumentation())
       .WithMetrics(metrics => metrics
-          .AddAspNetCoreInstrumentation()
-          .AddConsoleExporter()).UseOtlpExporter();
+          .AddAspNetCoreInstrumentation()).UseOtlpExporter();
 
 var app = builder.Build();
 
