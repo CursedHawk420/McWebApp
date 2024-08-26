@@ -20,12 +20,42 @@ using MudBlazor.Services;
 using MudBlazor;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry;
 using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.AddServiceDefaults();
 var configuration = ConfigProvider.Instance;
+
+
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeFormattedMessage = true;
+    logging.IncludeScopes = true;
+});
+
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics.AddRuntimeInstrumentation()
+            .AddMeter("Microsoft.AspNetCore.Hosting", "Microsoft.AspNetCore.Server.Kestrel", "System.Net.Http");
+    })
+    .WithTracing(tracing =>
+    {
+        tracing.AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+    });
+
+var useOtlpExporter = !string.IsNullOrWhiteSpace(configuration.GetConfigString("OTEL_EXPORTER_OTLP_ENDPOINT"));
+if (useOtlpExporter)
+{
+    builder.Services.AddOpenTelemetry().UseOtlpExporter();
+}
 
 
 var connectionStringUsers = configuration.GetConnectionString("PostgresUsersConnection");
@@ -181,6 +211,8 @@ builder.Services.AddMudServices(config =>
 });
 
 builder.Services.UseHttpClientMetrics();
+
+
 
 var app = builder.Build();
 

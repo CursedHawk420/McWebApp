@@ -10,8 +10,13 @@ using Discord.Commands;
 using Highgeek.McWebApp.Api.Services.Discord;
 using Highgeek.McWebApp.Common.Services.Redis;
 using Highgeek.McWebApp.Common.Options;
-
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry;
 using Prometheus;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +102,25 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.UseHttpClientMetrics();
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options
+        .SetResourceBuilder(
+            ResourceBuilder.CreateDefault()
+                .AddService("api"))
+        .AddConsoleExporter();
+    options.IncludeFormattedMessage = true;
+    options.IncludeScopes = true;
+
+});
+builder.Services.AddOpenTelemetry()
+      .ConfigureResource(resource => resource.AddService("api"))
+      .WithTracing(tracing => tracing
+          .AddAspNetCoreInstrumentation()
+          .AddConsoleExporter())
+      .WithMetrics(metrics => metrics
+          .AddAspNetCoreInstrumentation()
+          .AddConsoleExporter()).UseOtlpExporter();
 
 var app = builder.Build();
 
