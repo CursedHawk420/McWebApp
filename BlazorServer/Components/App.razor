@@ -53,6 +53,6 @@
 
     private IComponentRenderMode? RenderModeForPage => (HttpContext.Request.Path.StartsWithSegments("/Account") && !HttpContext.Request.Path.StartsWithSegments("/Account/Manage"))
     ? null
-        : InteractiveServer;
+        : new InteractiveServerRenderMode(prerender: false);
 
 }
