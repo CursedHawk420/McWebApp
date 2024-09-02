@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Highgeek.McWebApp.Common
 {
@@ -68,6 +69,8 @@ namespace Highgeek.McWebApp.Common
         private static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
         {
             var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+
+            Log.Information("useOtlpExporter: " + useOtlpExporter);
 
             if (useOtlpExporter)
             {
