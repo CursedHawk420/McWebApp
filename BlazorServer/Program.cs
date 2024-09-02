@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Highgeek.McWebApp.BlazorServer.Components;
 using Highgeek.McWebApp.BlazorServer.Components.Account;
 
+using Highgeek.McWebApp.Common;
 using Highgeek.McWebApp.Common.Permissions;
 using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Models.Contexts;
@@ -32,7 +33,7 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.AddServiceDefaults();
 var configuration = ConfigProvider.Instance;
 
-
+/*
 builder.Logging.AddOpenTelemetry(logging =>
 {
     logging.IncludeFormattedMessage = true;
@@ -55,8 +56,9 @@ var useOtlpExporter = !string.IsNullOrWhiteSpace(configuration.GetConfigString("
 if (useOtlpExporter)
 {
     builder.Services.AddOpenTelemetry().UseOtlpExporter();
-}
+}*/
 
+builder.AddServiceDefaults();
 
 var connectionStringUsers = configuration.GetConnectionString("PostgresUsersConnection");
 var connectionStringKeys = configuration.GetConnectionString("PostgresKeysConnection");
@@ -215,6 +217,8 @@ builder.Services.UseHttpClientMetrics();
 
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.UseMetricServer();
 app.UseHttpMetrics();

@@ -16,6 +16,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry;
 using Prometheus;
+using Highgeek.McWebApp.Common;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.AddServiceDefaults();
 var configuration = ConfigProvider.Instance;
 
+builder.AddServiceDefaults();
 
 var connectionStringUsers = configuration.GetConnectionString("PostgresUsersConnection");
 var connectionStringKeys = configuration.GetConnectionString("PostgresKeysConnection");
@@ -120,6 +123,8 @@ builder.Services.AddOpenTelemetry()
           .AddAspNetCoreInstrumentation()).UseOtlpExporter();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.UseMetricServer();
 app.UseHttpMetrics();
