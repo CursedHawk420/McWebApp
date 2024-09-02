@@ -25,7 +25,14 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.AddServiceDefaults();
 var configuration = ConfigProvider.Instance;
 
-builder.Configuration.AddEnvironmentVariables();
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+{
+    builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+}
+else
+{
+    builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+}
 
 builder.AddServiceDefaults();
 
