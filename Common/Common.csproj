@@ -27,6 +27,10 @@
 		<PackageReference Include="MinecraftConnection" Version="2.1.0" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
 		<PackageReference Include="NRedisStack" Version="0.12.0" />
+		<PackageReference Include="OpenTelemetry.AutoInstrumentation.Runtime.Native" Version="1.7.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0-beta.1" />
+		<PackageReference Include="OpenTelemetry.Resources.Container" Version="1.0.0-beta.9" />
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.8" />
 		<PackageReference Include="MailKit" Version="4.7.1.1" />
