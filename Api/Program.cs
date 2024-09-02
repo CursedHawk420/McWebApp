@@ -113,6 +113,7 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+/*
 builder.Services.UseHttpClientMetrics();
 builder.Logging.AddOpenTelemetry(options =>
 {
@@ -129,7 +130,7 @@ builder.Services.AddOpenTelemetry()
       .WithTracing(tracing => tracing
           .AddAspNetCoreInstrumentation())
       .WithMetrics(metrics => metrics
-          .AddAspNetCoreInstrumentation()).UseOtlpExporter();
+          .AddAspNetCoreInstrumentation()).UseOtlpExporter();*/
 
 var app = builder.Build();
 
