@@ -18,8 +18,8 @@
             {
                 <MudCarouselItem Transition="transition" Color="@Color.Transparent" Style="">
                     <MudImage Src="@item.Imageurl" Alt="Swedish Farm House" Style="width:100%;" Class="" />
-                    <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)item.Header)</MudText>
-                    <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)item.Content)</MudText>
+                    <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)_localizer[item.Header])</MudText>
+                    <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)_localizer[item.Content])</MudText>
                 </MudCarouselItem>
             }
         </MudCarousel>
