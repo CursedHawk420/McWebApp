@@ -334,7 +334,10 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
                 for (int i = 1; i < split.Length; i++)
                 {
-                    message += split[i].Remove(0, 1);
+                    if(split[i].Length >= 1)
+                    {
+                        message += split[i].Remove(0, 1);
+                    }
                 }
                 chatEntryAdapter.Message = message;
             }
@@ -344,7 +347,10 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
                 for (int i = 1; i < split.Length; i++)
                 {
-                    message += split[i].Remove(0, 1);
+                    if (split[i].Length >= 1)
+                    {
+                        message += split[i].Remove(0, 1);
+                    }
                 }
                 chatEntryAdapter.Message = message;
             }
