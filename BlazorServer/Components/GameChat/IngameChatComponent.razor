@@ -120,7 +120,7 @@
     {
         if (args.Key is "Enter" or "NumppadEnter")
         {
-            if (textInput.IsNullOrEmpty()){
+            if (string.IsNullOrEmpty(textInput)){
                 return;
             }
             RefEntryField.TextUpdateSuppression = false;
