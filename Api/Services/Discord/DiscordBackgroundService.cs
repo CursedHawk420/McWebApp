@@ -320,8 +320,40 @@ namespace Highgeek.McWebApp.Api.Services.Discord
         {
             var channel = await _client.GetChannelAsync(GetMatchingDiscordId(channelPairs, chatEntry.Channel).DiscordId);
             var webhook = await GetWebhook(channel as IIntegrationChannel);
-            await ExecuteWebhook(chatEntry, webhook);
+            await ExecuteWebhook(RemoveColorCodes(chatEntry), webhook);
 
+        }
+
+
+        public static RedisChatEntryAdapter RemoveColorCodes(RedisChatEntryAdapter chatEntryAdapter)
+        {
+            string message = "";
+            if (chatEntryAdapter.Message.Contains("&"))
+            {
+                foreach (var mess in chatEntryAdapter.Message.Split("&"))
+                {
+                    if (mess.StartsWith("&"))
+                    {
+                        mess.Substring(0, 2);
+                    }
+                    message += mess;
+                }
+                chatEntryAdapter.Message = message;
+            }
+            if (chatEntryAdapter.Message.Contains("§"))
+            {
+                foreach (var mess in chatEntryAdapter.Message.Split("§"))
+                {
+                    if (mess.StartsWith("§"))
+                    {
+                        mess.Substring(0, 2);
+                    }
+                    message += mess;
+                }
+                chatEntryAdapter.Message = message;
+            }
+
+            return chatEntryAdapter;
         }
 
 
