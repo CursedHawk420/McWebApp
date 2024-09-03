@@ -120,8 +120,10 @@
     {
         if (args.Key is "Enter" or "NumppadEnter")
         {
+            if (textInput.IsNullOrEmpty()){
+                return;
+            }
             RefEntryField.TextUpdateSuppression = false;
-
             await _gameChatService.SendMessage(await _gameChatService.CreateMessage(textInput));
 
             textInput = string.Empty;
