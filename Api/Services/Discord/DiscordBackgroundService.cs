@@ -332,11 +332,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             {
                 foreach (var mess in chatEntryAdapter.Message.Split("&"))
                 {
-                    if (mess.StartsWith("&"))
-                    {
-                        mess.Substring(0, 2);
-                    }
-                    message += mess;
+                    message += mess.Substring(1, mess.Length - 1);
                 }
                 chatEntryAdapter.Message = message;
             }
@@ -344,11 +340,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             {
                 foreach (var mess in chatEntryAdapter.Message.Split("§"))
                 {
-                    if (mess.StartsWith("§"))
-                    {
-                        mess.Substring(0, 2);
-                    }
-                    message += mess;
+                    message += mess.Substring(1, mess.Length - 1);
                 }
                 chatEntryAdapter.Message = message;
             }
