@@ -330,17 +330,21 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             string message = "";
             if (chatEntryAdapter.Message.Contains("&"))
             {
-                foreach (var mess in chatEntryAdapter.Message.Split("&"))
+                string[] split = chatEntryAdapter.Message.Split("&");
+
+                for (int i = 1; i < split.Length; i++)
                 {
-                    message += mess.Remove(0, 1);
+                    message += split[i].Remove(0, 1);
                 }
                 chatEntryAdapter.Message = message;
             }
             if (chatEntryAdapter.Message.Contains("§"))
             {
-                foreach (var mess in chatEntryAdapter.Message.Split("§"))
+                string[] split = chatEntryAdapter.Message.Split("§");
+
+                for (int i = 1; i < split.Length; i++)
                 {
-                    message += mess.Remove(0, 1);
+                    message += split[i].Remove(0, 1);
                 }
                 chatEntryAdapter.Message = message;
             }
