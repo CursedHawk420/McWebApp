@@ -36,6 +36,9 @@ namespace Highgeek.McWebApp.Common.Services
 
         event Action LanguageProviderRefreshRequested;
         void CallLanguageProviderRefresh();
+
+        public event Action EcoRefreshRequested;
+        public void CallEcoRefresh();
     }
     public class RefreshService : IRefreshService
     {
@@ -102,6 +105,12 @@ namespace Highgeek.McWebApp.Common.Services
         public void CallMainNavMenuClose()
         {
             MainNavMenuClosehRequested?.Invoke();
+        }
+
+        public event Action EcoRefreshRequested;
+        public void CallEcoRefresh()
+        {
+            EcoRefreshRequested?.Invoke();
         }
     }
 }

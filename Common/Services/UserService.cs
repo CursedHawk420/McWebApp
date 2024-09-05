@@ -9,6 +9,7 @@ using Highgeek.McWebApp.Common.Helpers.Channels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Microsoft.Extensions.Logging;
+using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -32,6 +33,9 @@ namespace Highgeek.McWebApp.Common.Services
         public Task UserServiceInitAsync(ApplicationUser applicationUser);
         public Task DisconnectGameAccount();
         public Task UpdatePlayerSettings();
+
+        public Dictionary<string, float> GetEconomyModel();
+
     }
     public class UserService : IDisposable, IUserService
     {
@@ -68,6 +72,8 @@ namespace Highgeek.McWebApp.Common.Services
         public List<ChannelSettingsAdapter> JoinedChannels { get; set; }
         public List<ChannelSettingsAdapter> AvaiableChannels { get; set; }
 
+        private Dictionary<string, float> Economy = new Dictionary<string, float>();
+
         public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILocalizer localizer, ICookieService cookieService, ILogger<UserService> logger)
         {
             Loaded = false;
@@ -89,6 +95,7 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService.ServiceRefreshRequested += RefreshServiceState;
             _redisUpdateService.PlayersSettingsChanged += FetchPlayerSettingsFromRedis;
             _redisUpdateService.LuckpermsChanged += ListenForLuckUpdate;
+            _redisUpdateService.PlayersEconomyChanged += HandleEconomyChange;
 
         }
         
@@ -102,6 +109,7 @@ namespace Highgeek.McWebApp.Common.Services
                     if (ApplicationUser.mcUUID != null)
                     {
                         await SetMinecraftUserAsync(ApplicationUser.mcUUID);
+                        await EconomyLoad();
                         _refreshService.CallInventoryServiceRefresh();
                     }
                     else
@@ -214,6 +222,42 @@ namespace Highgeek.McWebApp.Common.Services
         }
 
 
+        public async Task EconomyLoad()
+        {
+            foreach (var uuid in await RedisService.GetKeysList("economy:players:" + ApplicationUser.mcNickname + ":*"))
+            {
+                float integer = float.Parse(RedisService.GetFromRedis(uuid));
+                string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+                Economy.Add(id, integer);
+            }
+            _refreshService.CallEcoRefresh();
+        }
+
+        public Dictionary<string, float> GetEconomyModel()
+        {
+            return Economy;
+        }
+        public async void HandleEconomyChange(object? sender, string uuid)
+        {
+            if (uuid.Contains(ApplicationUser.mcNickname))
+            {
+                string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+                if (Economy.ContainsKey(id))
+                {
+                    Economy.Remove(id);
+                }
+                try
+                {
+                    Economy.Add(id, float.Parse(await RedisService.GetFromRedisAsync(uuid)));
+                }
+                catch(Exception ex)
+                {
+
+                }
+                _refreshService.CallEcoRefresh();
+            }
+        }
+
         private bool _disposed = false;
 
         void IDisposable.Dispose()
@@ -235,6 +279,7 @@ namespace Highgeek.McWebApp.Common.Services
                     _refreshService.ServiceRefreshRequested -= RefreshServiceState;
                     _redisUpdateService.PlayersSettingsChanged -= FetchPlayerSettingsFromRedis;
                     _redisUpdateService.LuckpermsChanged -= ListenForLuckUpdate;
+                    _redisUpdateService.PlayersEconomyChanged -= HandleEconomyChange;
                 }
 
                 // Dispose unmanaged resources
@@ -243,6 +288,7 @@ namespace Highgeek.McWebApp.Common.Services
                 this.ApplicationUser = null;
                 this.MinecraftUser = null;
                 this.LpUser = null;
+                this.Economy = null;
                 _disposed = true;
             }
         }

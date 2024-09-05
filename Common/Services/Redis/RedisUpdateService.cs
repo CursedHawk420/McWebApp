@@ -25,6 +25,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<string> PlayersListChanged;
 
+        public event EventHandler<string> PlayersEconomyChanged;
+
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
 
 
@@ -51,6 +53,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> PlayersSettingsChanged;
         public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
         public event EventHandler<string> PlayersListChanged;
+        public event EventHandler<string> PlayersEconomyChanged;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -102,11 +105,22 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 case "server":
                     await ServerListEvent(Uuid);
                     return;
+                case "economy":
+                    await PlayerEconomyEvent(Uuid);
+                    return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
                     return;
             }
 
+        }
+
+        public async Task PlayerEconomyEvent(string uuid)
+        {
+            if (uuid.Contains("players"))
+            {
+                PlayersEconomyChanged?.Invoke(this, uuid);
+            }
         }
 
         public async Task ServerListEvent(string uuid)
