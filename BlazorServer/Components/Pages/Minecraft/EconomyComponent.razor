@@ -5,14 +5,17 @@
 
 @if (_userService.HasConnectedAccount)
 {
-    <MudPaper Style="margin-right:1rem; padding:0.4rem">
-    <span>
-    @foreach (var item in Economy)
+    @if(!Economy.IsNullOrEmpty())
     {
-        <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
+        <MudPaper Style="margin-right:1rem; padding:0.4rem">
+            <span>
+                @foreach (var item in Economy)
+                {
+                    <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
+                }
+            </span>
+        </MudPaper>
     }
-    </span>
-    </MudPaper>
 }
 
 @code {
