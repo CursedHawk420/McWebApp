@@ -5,7 +5,7 @@
 
 @if (_userService.HasConnectedAccount)
 {
-    @if(!Economy.IsNullOrEmpty())
+    @if(Economy is not null)
     {
         <MudPaper Style="margin-right:1rem; padding:0.4rem">
             <span>
