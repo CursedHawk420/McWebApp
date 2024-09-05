@@ -109,7 +109,6 @@ namespace Highgeek.McWebApp.Common.Services
                     if (ApplicationUser.mcUUID != null)
                     {
                         await SetMinecraftUserAsync(ApplicationUser.mcUUID);
-                        await EconomyLoad();
                         _refreshService.CallInventoryServiceRefresh();
                     }
                     else
@@ -128,6 +127,7 @@ namespace Highgeek.McWebApp.Common.Services
             MinecraftUser = await _mcUserManager.GetUserAsync(uuid);
             await SetLuckpermsUser(uuid);
             HasConnectedAccount = true;
+            await EconomyLoad();
 
             await SetAvaiableChannels();
 
