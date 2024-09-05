@@ -3,7 +3,7 @@
 @inject ILocalizer l
 @implements IDisposable
 
-@if (_userService.Loaded && _userService.HasConnectedAccount)
+@if (_userService.HasConnectedAccount)
 {
     <MudPaper Style="margin-right:1rem; padding:0.4rem">
     <span>
