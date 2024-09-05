@@ -24,6 +24,7 @@
         {
             Economy = _userService.GetEconomyModel();
             _refreshService.EcoRefreshRequested += RefreshAsync;
+            _refreshService.PageRefreshRequested += RefreshAsync;
             l.LocaleRefreshRequested += RefreshAsync;
         }
     }
@@ -45,6 +46,7 @@
     public void Dispose()
     {
         _refreshService.EcoRefreshRequested -= RefreshAsync;
+            _refreshService.PageRefreshRequested -= RefreshAsync;
         l.LocaleRefreshRequested -= RefreshAsync;
     }
 
