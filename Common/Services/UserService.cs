@@ -34,7 +34,7 @@ namespace Highgeek.McWebApp.Common.Services
         public Task DisconnectGameAccount();
         public Task UpdatePlayerSettings();
 
-        public Dictionary<string, float> GetEconomyModel();
+        public Task<Dictionary<string, float>> GetEconomyModel();
 
     }
     public class UserService : IDisposable, IUserService
@@ -233,9 +233,14 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService.CallEcoRefresh();
         }
 
-        public Dictionary<string, float> GetEconomyModel()
+        public async Task< Dictionary<string, float>> GetEconomyModel()
         {
+            if(Economy is not null){
             return Economy;
+            }else{
+                await EconomyLoad();
+                return await GetEconomyModel();
+            }
         }
         public async void HandleEconomyChange(object? sender, string uuid)
         {

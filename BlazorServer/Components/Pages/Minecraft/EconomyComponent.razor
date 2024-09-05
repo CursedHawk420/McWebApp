@@ -21,25 +21,27 @@
 @code {
     Dictionary<string, float> Economy { get; set; }
 
-    protected override void OnInitialized()
+
+
+    protected override async Task OnInitializedAsync()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
-            Economy = _userService.GetEconomyModel();
+            Economy = await _userService.GetEconomyModel();
             _refreshService.EcoRefreshRequested += RefreshAsync;
             _refreshService.PageRefreshRequested += RefreshAsync;
             l.LocaleRefreshRequested += RefreshAsync;
         }
     }
 
-    public async void RefreshAsync()
+        public async void RefreshAsync()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
             // InvokeAsync is inherited, it syncs the call back to the render thread
+            Economy = await _userService.GetEconomyModel();
             await InvokeAsync(() =>
             {
-                Economy = _userService.GetEconomyModel();
                 StateHasChanged();
             });
         }
