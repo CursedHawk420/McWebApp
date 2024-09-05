@@ -129,7 +129,7 @@
     protected override async void OnInitialized()
     {
         _themeManager.Theme = Highgeek.McWebApp.Common.Helpers.ThemeHelper.CustomTheme;
-        _refreshService.PageRefreshRequested += Refresh;
+        _refreshService.PageRefreshRequested += RefreshAsync;
 
         _refreshService.InventoryViewRefreshRequested += RefreshInventory;
         //_refreshService.ApplicationUserRefreshRequested += UserInit;
@@ -174,6 +174,15 @@
         {
             _logger.LogWarning("MainLayout Refresh() error: " + ex.Message);
         }
+    }
+    
+    private async void RefreshAsync()
+    {
+            // InvokeAsync is inherited, it syncs the call back to the render thread
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
     }
 
     private void RefreshInventory()
