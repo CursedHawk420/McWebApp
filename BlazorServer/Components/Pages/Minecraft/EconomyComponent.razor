@@ -29,7 +29,7 @@
         }
     }
 
-    private async void RefreshAsync()
+    public async void RefreshAsync()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
@@ -45,7 +45,7 @@
 
     public void Dispose()
     {
-        _refreshService.EcoRefreshRequested -= RefreshAsync;
+        _refreshService.EcoRefreshRequested -= StateHasChanged;
         _refreshService.PageRefreshRequested -= RefreshAsync;
         l.LocaleRefreshRequested -= RefreshAsync;
     }
