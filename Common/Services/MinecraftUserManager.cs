@@ -70,31 +70,31 @@ namespace Highgeek.McWebApp.Common.Services
         {
             return BCrypt.Net.BCrypt.Verify(mcpassword, authmeEntry.Password);
         }
-        public async Task<string> RegisterMcUser(string mcusername, string password, ApplicationUser applicationUser)
+        public async Task<StatusModel> RegisterMcUser(string mcusername, string password, ApplicationUser applicationUser)
         {
             var accountlinked = await _usersdb.Users.FirstOrDefaultAsync(s => s.mcNickname == mcusername);
             if (accountlinked != null)
             {
                 _logger.LogWarning("[MinecraftUserManager] (DB0001) Uživatel (" + applicationUser.Email+") se pokusil přidat již přiřazený herní účet ("+mcusername+")");
-                return "Herní účet je již přiřazen k jinému účtu! (DB0001)";
+                return new StatusModel("minecraftusermanager-register-error-05", "(DB0001)");
             }
             var authmeEntry = await _mcMainDbContext.Authmes.FirstOrDefaultAsync(s => s.Realname == mcusername);
             if (authmeEntry == null)
             {
                 _logger.LogWarning("[MinecraftUserManager] (DB0201) Uživatel (" + applicationUser.Email+") se pokusil přidat neexistující herní účet v Authme ("+mcusername+")");
-                return "Herní účet nenalezen! (DB0201)";
+                return new StatusModel("minecraftusermanager-register-error-04", "(DB0201)");
             }
             var luckpermsPlayerEntry = await _mcMainDbContext.LuckpermsPlayers.FirstOrDefaultAsync(s => s.Username == mcusername.ToLower());
             if (luckpermsPlayerEntry == null)
             {
                 _logger.LogWarning("[MinecraftUserManager] (DB0101) Uživatel (" + applicationUser.Email + ") se pokusil přidat neexistující herní účet v LuckPermsPlayers (" + mcusername + ")");
-                return "Chyba v databázi, kontaktuj administrátora. (DB0101)";
+                return new StatusModel("minecraftusermanager-register-error-03", "(DB0101)");
             }
             var premium = await _mcMainDbContext.Premia.FirstOrDefaultAsync(s => s.Name == mcusername);
             if (premium == null)
             {
                 _logger.LogWarning("[MinecraftUserManager] (DB0301) Uživatel (" + applicationUser.Email + ") se pokusil přidat neexistující herní účet v Premium (" + mcusername + ")");
-                return "Chyba v databázi, kontaktuj administrátora. (DB0301)";
+                return new StatusModel("minecraftusermanager-register-error-02", "(DB0301)");
             }
             var minecraftaccountlinked = await _mcMainDbContext.WebMinecraftusers.FirstOrDefaultAsync(s => s.NickName == mcusername);
             /*if (minecraftaccountlinked != null && minecraftaccountlinked.ApplicationUserId != null)
@@ -145,12 +145,12 @@ namespace Highgeek.McWebApp.Common.Services
                 }
                 await _mcMainDbContext.SaveChangesAsync();
                 _logger.LogInformation("[MinecraftUserManager] Uživatel (" + applicationUser.Email + ") si přopojil herní účet (" + mcusername + ")");
-                return "Účet připojen úspěšně!";
+                return new StatusModel("minecraftusermanager-register-succes-01");
             }
             else
             {
-                _logger.LogWarning("[MinecraftUserManager] (DB0301) Uživatel (" + applicationUser.Email + ") zadal špatné heslo k hernímu účtu (" + mcusername + ")");
-                return "Špatné jméno nebo heslo!";
+                _logger.LogWarning("[MinecraftUserManager] (DB0302) Uživatel (" + applicationUser.Email + ") zadal špatné heslo k hernímu účtu (" + mcusername + ")");
+                return new StatusModel("minecraftusermanager-register-error-01", "wrong password (DB0302)");
             }
         }
         public string ParseUUID(string uuid)
@@ -165,11 +165,11 @@ namespace Highgeek.McWebApp.Common.Services
         {
 
         }
-        public async Task<string> DisconnectMinecraftAccount(ApplicationUser applicationUser)
+        public async Task<StatusModel> DisconnectMinecraftAccount(ApplicationUser applicationUser)
         {
             if (applicationUser.mcNickname == null)
             {
-                return "Žádný účet není připojen!";
+                return new StatusModel("minecraftusermanager-unregister-error-01", "no account connected");
             }
             string mcusername = applicationUser.mcNickname;
             applicationUser.mcNickname = null;
@@ -178,7 +178,7 @@ namespace Highgeek.McWebApp.Common.Services
             await _userManager.UpdateAsync(applicationUser);
             //await _userManager.RemoveFromRoleAsync(applicationUser, "MC");
             _logger.LogInformation("[MinecraftUserManager] Uživatel (" + applicationUser.Email + ") si odpojil herní účet (" + mcusername + ")");
-            return "Účet "+mcusername+" odpojen úspěšně";
+            return new StatusModel("minecraftusermanager-unregister-succes-01");
         }
 
         public async Task GetIngameRoles()

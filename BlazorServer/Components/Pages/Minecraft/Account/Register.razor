@@ -48,16 +48,16 @@
     }
 
     private async Task OnValidSubmitAsync(){
-        string result = await _mcUserManager.RegisterMcUser(Input.Nickname, Input.Password, _userService.ApplicationUser);
-        if (result == "Účet připojen úspěšně!")
+        StatusModel result = await _mcUserManager.RegisterMcUser(Input.Nickname, Input.Password, _userService.ApplicationUser);
+        if (result.Success)
         {
-            _snack.Add(result, Severity.Success);
+            _snack.Add(l[result.UserMessage], Severity.Success);
             _navManager.NavigateTo("Minecraft/Account/Statistics");
             _refreshService.CallServiceRefresh();
         }
         else
         {
-            _snack.Add(result, Severity.Error);
+            _snack.Add(l[result.UserMessage], Severity.Error);
         }
     }
 

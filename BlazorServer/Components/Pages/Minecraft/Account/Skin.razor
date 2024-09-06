@@ -39,7 +39,7 @@
 
     public string Url;
 
-    private string Result;
+    private StatusModel Result;
 
     private bool ImageSet = false;
 
@@ -73,7 +73,7 @@
                 Result = await _skinManager.SetHeadPicture(mineskinResponse, _userService.ApplicationUser);
                 _userService.ApplicationUser.SkinHeadPicture = mineskinResponse.Data.Texture.Url.Remove(0, 38);
                 _refreshService.CallPageRefresh();
-                _snack.Add(Result, Severity.Success);
+                _snack.Add(l[Result.UserMessage], Severity.Success);
             }
         }
     }
@@ -97,19 +97,19 @@
             }
             else
             {
-                _snack.Add("Nepovedlo se naèíst skin z URL.", Severity.Error);
+                _snack.Add(l["skinchanger-error-01"], Severity.Error);
             }
         }
         else
         {
-            _snack.Add("Neplatná URL.", Severity.Error);
+            _snack.Add(l["skinchanger-error-02"], Severity.Error);
         }
     }
 
     private async Task ClearSkin()
     {
         await _skinManager.DefaultSkin(null, _userService.ApplicationUser, null);
-        _snack.Add("Skin byl odstranìn.", Severity.Success);
+        _snack.Add(l["skinchanger-clear"], Severity.Success);
     }
 
     private async Task TryUpdateSkinOnServer()

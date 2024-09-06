@@ -1,6 +1,7 @@
 ﻿@inject ISnackbar _snack
 @inject IUserService _userService
 @inject IRefreshService _refreshService
+@inject ILocalizer l
 
 @implements IAsyncDisposable
 
@@ -23,6 +24,16 @@
     {
         _refreshService.PageRefreshRequested += Refresh;
         _refreshService.ChatWindowCloseRequested += CloseChatWindow;
+        l.LocaleRefreshRequested += RefreshAsync;
+    }
+
+    private async void RefreshAsync()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
     }
 
     private async void Refresh(){
@@ -45,11 +56,11 @@
     public async void ChatButtonClicked()
     {
         if (_userService.ApplicationUser is null){
-            _snack.Add("Pro používání chatu musíte být přihlášeni a mít propojený herní účet.", Severity.Warning);
+            _snack.Add(l["chatbutton-warning-01"], Severity.Warning);
             return;
         }
         if (_userService.LpUser is null){
-            _snack.Add("Propojte si herní účet.", Severity.Warning);
+            _snack.Add(l["chatbutton-warning-02"], Severity.Warning);
             return;
         }
         if (IsChatOpen)
@@ -72,5 +83,6 @@
 
     async ValueTask IAsyncDisposable.DisposeAsync(){
         _refreshService.PageRefreshRequested -= Refresh;
+        l.LocaleRefreshRequested -= RefreshAsync;
     }
 }
