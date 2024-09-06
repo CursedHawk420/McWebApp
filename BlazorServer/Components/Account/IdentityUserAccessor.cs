@@ -1,27 +1,16 @@
-using Microsoft.AspNetCore.Identity;
-using Highgeek.McWebApp.Common.Models;
+﻿using Highgeek.McWebApp.Common.Models;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 
-namespace Highgeek.McWebApp.BlazorServer.Components.Account;
-
-internal sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
+namespace Highgeek.McWebApp.BlazorServer.Components.Account
 {
-    public async Task<ApplicationUser> GetRequiredUserAsync(HttpContext context)
+    internal sealed class IdentityUserAccessor (UserManager<ApplicationUser> userManager)
     {
-        var user = await userManager.GetUserAsync(context.User);
-
-        if (user is null)
+        public async Task<ApplicationUser> GetUserAsync(AuthenticationState state)
         {
-            redirectManager.RedirectToWithStatus("Account/InvalidUser", $"Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'.", context);
+            var user = await userManager.GetUserAsync(state.User);
+
+            return user ?? throw new ApplicationException("Account / InvalidUser");
         }
-
-        return user;
-    }
-
-    public async Task<ApplicationUser> GetUserAsync(AuthenticationState state)
-    {
-        var user = await userManager.GetUserAsync(state.User);
-
-        return user ?? throw new ApplicationException("Account / InvalidUser");
     }
 }
