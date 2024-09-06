@@ -6,7 +6,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
-@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 @inject ILogger<ResetAuthenticator> Logger
 @inject ISnackbar _snack
 
@@ -35,6 +35,9 @@
 
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; } = default!;
 
     private async Task OnSubmitAsync()
     {
