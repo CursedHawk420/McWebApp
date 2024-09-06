@@ -3,39 +3,45 @@
 @inject ILocalizer l
 @implements IDisposable
 
-@if (_userService.Loaded && _userService.HasConnectedAccount)
+@if (_userService.HasConnectedAccount)
 {
-    <MudPaper Style="margin-right:1rem; padding:0.4rem">
-    <span>
-    @foreach (var item in Economy)
+    @if(Economy is not null)
     {
-        <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
+        <MudPaper Style="margin-right:1rem; padding:0.4rem">
+            <span>
+                @foreach (var item in Economy)
+                {
+                    <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
+                }
+            </span>
+        </MudPaper>
     }
-    </span>
-    </MudPaper>
 }
 
 @code {
     Dictionary<string, float> Economy { get; set; }
 
-    protected override void OnInitialized()
+
+
+    protected override async Task OnInitializedAsync()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
-            Economy = _userService.GetEconomyModel();
+            Economy = await _userService.GetEconomyModel();
             _refreshService.EcoRefreshRequested += RefreshAsync;
+            _refreshService.PageRefreshRequested += RefreshAsync;
             l.LocaleRefreshRequested += RefreshAsync;
         }
     }
 
-    private async void RefreshAsync()
+        public async void RefreshAsync()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
             // InvokeAsync is inherited, it syncs the call back to the render thread
+            Economy = await _userService.GetEconomyModel();
             await InvokeAsync(() =>
             {
-                Economy = _userService.GetEconomyModel();
                 StateHasChanged();
             });
         }
@@ -44,7 +50,8 @@
 
     public void Dispose()
     {
-        _refreshService.EcoRefreshRequested -= RefreshAsync;
+        _refreshService.EcoRefreshRequested -= StateHasChanged;
+        _refreshService.PageRefreshRequested -= RefreshAsync;
         l.LocaleRefreshRequested -= RefreshAsync;
     }
 
