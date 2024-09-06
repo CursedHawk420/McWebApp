@@ -10,7 +10,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject UrlEncoder UrlEncoder
-@inject IdentityRedirectManager RedirectManager
+@inject NavigationManager NavigationManager
 @inject ILogger<EnableAuthenticator> Logger
 @inject ISnackbar _snack
 
@@ -118,7 +118,7 @@ else
         }
         else
         {
-            RedirectManager.RedirectTo("Account/Manage/TwoFactorAuthentication");
+            NavigationManager.NavigateTo("Account/Manage/TwoFactorAuthentication");
         }
     }
 
