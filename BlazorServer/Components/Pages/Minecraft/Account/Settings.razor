@@ -25,14 +25,17 @@
     //TODO Dispose
 
     private async Task DisconnectAccount(){
-        string result = await _mcUserManager.DisconnectMinecraftAccount(_userService.ApplicationUser);
+        StatusModel result = await _mcUserManager.DisconnectMinecraftAccount(_userService.ApplicationUser);
         await _userService.DisconnectGameAccount();
-        _snack.Add(result, Severity.Success);
+        _snack.Add(l[result.UserMessage], Severity.Success);
         _refreshService.CallServiceRefresh();
-        if(result == ""){
-
-        }else{
+        if (result.Success)
+        {
             _navManager.NavigateTo("/");
+        }
+        else
+        {
+            
         }
     }
 

@@ -99,13 +99,14 @@ namespace Highgeek.McWebApp.Common.Services
                 return "Chyba.";
             }
         }
-        public async Task<string> SetHeadPicture(GenerateUrlPost200Response response, ApplicationUser applicationUser)
+        public async Task<StatusModel> SetHeadPicture(GenerateUrlPost200Response response, ApplicationUser applicationUser)
         {
 
             //Smazat prvních 38 znaků z url
+            
             if (response == null)
             {
-                return "Chyba v odkazu. Doporučujeme použít odkaz na skin z https://minecraft.novaskin.me/";
+                return new StatusModel("skinmanager-error-01", "response is null");
             }
             string headid = response.Data.Texture.Url.Remove(0, 38);
             string skinurl = "https://mc-heads.net/skin/" + headid;
@@ -114,7 +115,7 @@ namespace Highgeek.McWebApp.Common.Services
             if (minecraftUser == null)
             {
                 _logger.LogWarning("[SkinManager] (DB0401) Nebyl nalezen MinecraftUser uživatele (" + applicationUser.Email + ")");
-                return "Uživatel nenalezen.";
+                return new StatusModel("skinmanager-error-02", "user not found");
             }
             await SaveSkinHeadImageToDatabase(minecraftUser, headurl);
             minecraftUser.SkinTexture = skinurl;
@@ -122,7 +123,7 @@ namespace Highgeek.McWebApp.Common.Services
             await _mcMainDbContext.SaveChangesAsync();
             applicationUser.SkinHeadPicture = headid;
             await _userManager.UpdateAsync(applicationUser);
-            return "Tvůj skin byl nastaven!";
+            return new StatusModel("skinmanager-succes-01");
         }
 
         public async Task DefaultSkin(MinecraftUser? minecraftUser, ApplicationUser applicationUser, string? uuid)
