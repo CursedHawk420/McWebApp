@@ -112,7 +112,6 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionsAuthorizationHandle
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionsPolicyProvider>();
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessorStaticRender>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();

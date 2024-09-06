@@ -7,7 +7,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
-@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
 @inject ISnackbar _snack
 
@@ -77,7 +77,7 @@
         Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
 
         _snack.Add("Account deleted succesfully.", Severity.Success);
-        NavigationManager.NavigateTo("/");
+        RedirectManager.RedirectToCurrentPage();
     }
 
     private sealed class InputModel

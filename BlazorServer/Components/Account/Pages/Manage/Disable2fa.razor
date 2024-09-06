@@ -5,7 +5,7 @@
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityUserAccessor UserAccessor
-@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
 @inject ISnackbar _snack
 
@@ -59,7 +59,7 @@
         var userId = await UserManager.GetUserIdAsync(user);
         Logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", userId);
 
-        NavigationManager.NavigateTo("Account/Manage/TwoFactorAuthentication");
+        RedirectManager.RedirectTo("Account/Manage/TwoFactorAuthentication");
 
         _snack.Add("2fa has been disabled. You can reenable 2fa when you setup an authenticator app", Severity.Success);
     }
