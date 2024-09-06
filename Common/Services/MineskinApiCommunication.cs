@@ -83,6 +83,10 @@ namespace Highgeek.McWebApp.Common.Services
             try
             {
                 GenerateUrlPost200Response result = apiInstance.GenerateUrlPost(userAgent, generateUrlPostRequest);
+                if (!result.Variant.HasValue)
+                {
+                    result.Variant = GenerateUrlPost200Response.VariantEnum.Classic;
+                }
                 _logger.LogWarning("Succes");
                 return result;
             }
