@@ -47,6 +47,6 @@
         await SignInManager.RefreshSignInAsync(user);
 
         NavigationManager.NavigateTo("Account/Manage/EnableAuthenticator");
-        _snack.Add("Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.", Severity.Warning)
+        _snack.Add("Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.", Severity.Warning);
     }
 }
