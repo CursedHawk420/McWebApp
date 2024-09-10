@@ -7,6 +7,10 @@
 	<UserSecretsId>$(McWebAppUserSecret)</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.15.3" />
