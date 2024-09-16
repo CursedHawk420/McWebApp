@@ -16,10 +16,9 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly MineskinApiCommunication _mineskinApi;
         private readonly string hostName = "https://ptero.highgeek.eu";
 
-        private static readonly ConfigProvider _configProvider = ConfigProvider.Instance;
 
-        private readonly string apiKey = _configProvider.GetConfigString("PterodactylOptions:ApiKey");
-        private readonly string bearerToken = _configProvider.GetConfigString("PterodactylOptions:BearerToken");
+        private readonly string apiKey = ConfigProvider.GetConfigString("PterodactylOptions:ApiKey");
+        private readonly string bearerToken = ConfigProvider.GetConfigString("PterodactylOptions:BearerToken");
 
         public PteroManager(UserManager<ApplicationUser> userManager, McserverMaindbContext mainDbContext, MineskinApiCommunication mineskinApiCommunication)
         {

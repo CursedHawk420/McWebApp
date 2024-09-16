@@ -4,24 +4,24 @@ using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Highgeek.McWebApp.Common.Helpers;
 
 namespace Highgeek.McWebApp.Common.Models.Contexts;
 
 public partial class McserverMaindbContext : DbContext
 {
-    private Helpers.ConfigProvider manager = Helpers.ConfigProvider.Instance;
 
     private protected string ConnectionString;
 
     public McserverMaindbContext()
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection");
     }
 
     public McserverMaindbContext(DbContextOptions<McserverMaindbContext> options)
         : base(options)
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection");
         Database.EnsureCreated();
     }
 

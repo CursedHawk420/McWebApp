@@ -23,7 +23,6 @@ using Highgeek.McWebApp.Common;
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.AddServiceDefaults();
-var configuration = ConfigProvider.Instance;
 
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
@@ -36,14 +35,14 @@ else
 
 builder.AddServiceDefaults();
 
-var connectionStringUsers = configuration.GetConnectionString("PostgresUsersConnection");
-var connectionStringKeys = configuration.GetConnectionString("PostgresKeysConnection");
-var connectionStringCms = configuration.GetConnectionString("PostgresCmsConnection");
+var connectionStringUsers = ConfigProvider.GetConnectionString("PostgresUsersConnection");
+var connectionStringKeys = ConfigProvider.GetConnectionString("PostgresKeysConnection");
+var connectionStringCms = ConfigProvider.GetConnectionString("PostgresCmsConnection");
 
-var connectionStringMC = configuration.GetConnectionString("MysqlMCServerConnection");
-var connectionStringMC_data = configuration.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
-var connectionStringMC_eco = configuration.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
-var connectionStringMC_husksync = configuration.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
+var connectionStringMC = ConfigProvider.GetConnectionString("MysqlMCServerConnection");
+var connectionStringMC_data = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
+var connectionStringMC_eco = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
+var connectionStringMC_husksync = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
 
 //users dbcontext Postgress
 builder.Services.AddDbContext<UsersDbContext>(options => options.UseNpgsql(connectionStringUsers), ServiceLifetime.Scoped);
@@ -88,12 +87,12 @@ builder.Services.AddSingleton<IEmailSender, EmailSender>();
 //MailKit options load
 builder.Services.Configure<MailKitEmailSenderOptions>(options =>
 {
-    options.Host_Address = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Address");
-    options.Host_Port = Convert.ToInt32(configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Port"));
-    options.Host_Username = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Account");
-    options.Host_Password = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:Password");
-    options.Sender_EMail = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:SenderEmail");
-    options.Sender_Name = configuration.GetConfigString("ExternalProviders:MailKit:SMTP:SenderName");
+    options.Host_Address = ConfigProvider.GetConfigString("ExternalProviders:MailKit:SMTP:Address");
+    options.Host_Port = Convert.ToInt32(ConfigProvider.GetConfigString("ExternalProviders:MailKit:SMTP:Port"));
+    options.Host_Username = ConfigProvider.GetConfigString("ExternalProviders:MailKit:SMTP:Account");
+    options.Host_Password = ConfigProvider.GetConfigString("ExternalProviders:MailKit:SMTP:Password");
+    options.Sender_EMail = ConfigProvider.GetConfigString("ExternalProviders:MailKit:SMTP:SenderEmail");
+    options.Sender_Name = ConfigProvider.GetConfigString("ExternalProviders:MailKit:SMTP:SenderName");
 });
 
 builder.Services.AddControllersWithViews();

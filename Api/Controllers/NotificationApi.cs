@@ -14,7 +14,7 @@ namespace Api.Controllers
         public NotificationApi(IEmailSender emailSender)
         {
             _emailSender = emailSender;
-            _email = ConfigProvider.Instance.GetConfigString("NotificationSettings:ToSend");
+            _email = ConfigProvider.GetConfigString("NotificationSettings:ToSend");
         }
 
 

@@ -15,11 +15,10 @@ namespace Highgeek.McWebApp.Common.Services
         public readonly UsersApi _usersApi;
         public readonly GroupsApi _groupApi;
 
-        private readonly ConfigProvider configProvider = ConfigProvider.Instance;
 
         public LuckPermsService()
         {
-            config.BasePath = configProvider.GetConfigString("LuckPermsOptions:Url");
+            config.BasePath = ConfigProvider.GetConfigString("LuckPermsOptions:Url");
             _usersApi = new UsersApi(config);
             _groupApi = new GroupsApi(config);
         }

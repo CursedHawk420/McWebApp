@@ -44,8 +44,8 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
         public DiscordBackgroundService(ILogger<DiscordBackgroundService> logger, IRedisUpdateService apiRedisUpdateService, CommandService commandService, LuckPermsService luckPermsService)
         {
-            _botToken = ConfigProvider.Instance.GetConfigString("DiscordAuthOptions:DiscordBotToken");
-            _guildId = Convert.ToUInt64(ConfigProvider.Instance.GetConfigString("DiscordAuthOptions:DiscordGuildId"));
+            _botToken = ConfigProvider.GetConfigString("DiscordAuthOptions:DiscordBotToken");
+            _guildId = Convert.ToUInt64(ConfigProvider.GetConfigString("DiscordAuthOptions:DiscordGuildId"));
             _redisUpdateService = apiRedisUpdateService;
             _luckPermsService = luckPermsService;
             _logger = logger;

@@ -9,19 +9,18 @@ namespace Highgeek.McWebApp.Common.Models.Contexts;
 
 public partial class McserverDatadbContext : DbContext
 {
-    private Helpers.ConfigProvider manager = Helpers.ConfigProvider.Instance;
 
     private protected string ConnectionString;
 
     public McserverDatadbContext()
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
     }
 
     public McserverDatadbContext(DbContextOptions<McserverDatadbContext> options)
         : base(options)
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
     }
 
     public virtual DbSet<Atm9CmiInventory> Atm9CmiInventories { get; set; }

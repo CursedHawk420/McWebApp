@@ -25,7 +25,7 @@ namespace Highgeek.McWebApp.Common.Services
             _configuration.BasePath = "https://api.mineskin.org";
             userAgent = "mcwebapp/1.0";
             _configuration.UserAgent = userAgent;
-            _configuration.AddApiKey(ConfigProvider.Instance.GetConfigString("MineSkinApi:ApiKey"), ConfigProvider.Instance.GetConfigString("MineSkinApi:ApiSecret"));
+            _configuration.AddApiKey(ConfigProvider.GetConfigString("MineSkinApi:ApiKey"), ConfigProvider.GetConfigString("MineSkinApi:ApiSecret"));
         }
 
         public SkinInfo GetTextureId(int mineskinid)

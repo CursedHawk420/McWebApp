@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.mcwebapp1_cms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -9,19 +10,18 @@ namespace Highgeek.McWebApp.Common.Models.Contexts;
 
 public partial class McWebApp1CmsContext : DbContext
 {
-    private Helpers.ConfigProvider manager = Helpers.ConfigProvider.Instance;
 
     private protected string ConnectionString;
 
     public McWebApp1CmsContext()
     {
-        ConnectionString = manager.GetConnectionString("PostgresCmsConnection");
+        ConnectionString = ConfigProvider.GetConnectionString("PostgresCmsConnection");
     }
 
     public McWebApp1CmsContext(DbContextOptions<McWebApp1CmsContext> options)
         : base(options)
     {
-        ConnectionString = manager.GetConnectionString("PostgresCmsConnection");
+        ConnectionString = ConfigProvider.GetConnectionString("PostgresCmsConnection");
     }
 
     public virtual DbSet<CarouselContent> CarouselContents { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.mcserver_ecodata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -8,19 +9,18 @@ namespace Highgeek.McWebApp.Common.Models.Contexts;
 
 public partial class McserverEcoDataContext : DbContext
 {
-    private Helpers.ConfigProvider manager = Helpers.ConfigProvider.Instance;
 
     private protected string ConnectionString;
 
     public McserverEcoDataContext()
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
     }
 
     public McserverEcoDataContext(DbContextOptions<McserverEcoDataContext> options)
         : base(options)
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
     }
 
     public virtual DbSet<EcoDatum> EcoData { get; set; }

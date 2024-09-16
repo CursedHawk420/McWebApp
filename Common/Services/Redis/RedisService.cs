@@ -10,7 +10,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 {
     public class RedisService
     {
-        public static readonly string host = ConfigProvider.Instance.GetConfigString("RedisOptions:Ip");
+        public static readonly string host = ConfigProvider.GetConfigString("RedisOptions:Ip");
 
 
         public static readonly ConnectionMultiplexer Redis = ConnectionMultiplexer.Connect(host);

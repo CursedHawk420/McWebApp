@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.mcserver_husksync;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
@@ -8,19 +9,18 @@ namespace Highgeek.McWebApp.Common.Models.Contexts;
 
 public partial class McserverHusksyncContext : DbContext
 {
-    private Helpers.ConfigProvider manager = Helpers.ConfigProvider.Instance;
 
     private protected string ConnectionString;
 
     public McserverHusksyncContext()
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
     }
 
     public McserverHusksyncContext(DbContextOptions<McserverHusksyncContext> options)
         : base(options)
     {
-        ConnectionString = manager.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
+        ConnectionString = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_husksync");
     }
 
     public virtual DbSet<HusksyncUser> HusksyncUsers { get; set; }

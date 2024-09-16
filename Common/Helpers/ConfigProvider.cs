@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace Highgeek.McWebApp.Common.Helpers
 {
-    public class ConfigProvider
+    public static class ConfigProvider
     {
-        public static readonly ConfigProvider Instance = new ConfigProvider();
 
-        public ConfigurationManager configurationManager;
+        public static ConfigurationManager configurationManager = GetConfigurationManager();
 
-        public ConfigurationManager GetConfigurationManager()
+        public static ConfigurationManager GetConfigurationManager()
         {
             if (configurationManager == null)
             {
@@ -31,12 +30,12 @@ namespace Highgeek.McWebApp.Common.Helpers
             return configurationManager;
         }
 
-        public string GetConfigString(string key)
+        public static string GetConfigString(string key)
         {
             return GetConfigurationManager()[key] ?? throw new InvalidOperationException("Configuration key '" + key + "' not found.");
         }
 
-        public string GetConnectionString(string connectionstring)
+        public static string GetConnectionString(string connectionstring)
         {
             return GetConfigurationManager().GetConnectionString(connectionstring) ?? throw new InvalidOperationException("Connection string '"+ connectionstring + "' not found.");
         }
