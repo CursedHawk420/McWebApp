@@ -9,7 +9,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>

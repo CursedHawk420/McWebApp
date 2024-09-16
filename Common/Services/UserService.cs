@@ -244,22 +244,28 @@ namespace Highgeek.McWebApp.Common.Services
         }
         public async void HandleEconomyChange(object? sender, string uuid)
         {
-            if (uuid.Contains(ApplicationUser.mcNickname))
+            if (HasConnectedAccount)
             {
-                string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
-                if (Economy.ContainsKey(id))
+                if (ApplicationUser.mcNickname is not null)
                 {
-                    Economy.Remove(id);
-                }
-                try
-                {
-                    Economy.Add(id, float.Parse(await RedisService.GetFromRedisAsync(uuid)));
-                }
-                catch(Exception ex)
-                {
+                    if (uuid.Contains(ApplicationUser.mcNickname))
+                    {
+                        string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+                        if (Economy.ContainsKey(id))
+                        {
+                            Economy.Remove(id);
+                        }
+                        try
+                        {
+                            Economy.Add(id, float.Parse(await RedisService.GetFromRedisAsync(uuid)));
+                        }
+                        catch (Exception ex)
+                        {
 
+                        }
+                        _refreshService.CallEcoRefresh();
+                    }
                 }
-                _refreshService.CallEcoRefresh();
             }
         }
 
