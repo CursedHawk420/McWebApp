@@ -5,3 +5,11 @@ function scrollToBottom(name) {
 function blazorGetTimezoneOffset() {
     return new Date().getTimezoneOffset();
 }
+
+function dynmapRemoveControls() {
+    var iframe = document.getElementById("iframe1");
+    var elmnt = iframe.contentWindow.document.getElementsByClassName("control-bar")[0];
+    var elmnt = iframe.contentWindow.document.getElementsByClassName("control-bar")[1];
+    var elmnt = iframe.contentWindow.document.getElementsByClassName("control-bar")[2];
+    elmnt.style.display = "none";
+}

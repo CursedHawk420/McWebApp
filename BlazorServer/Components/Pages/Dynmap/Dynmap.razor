@@ -1,5 +1,5 @@
 ﻿@page "/Dynmap"
-
+@inject IJSRuntime _js
 <PageTitle>Dynmap</PageTitle>
 <h3>Dynmap</h3>
 
@@ -7,22 +7,16 @@
 
 <div class=" fill-map">
     <div id="map">
-        <iframe name="iframe1" id="iframe1" src="https://dynmap.highgeek.eu/#survivalpriv_world:-60:0:21:1500:0:0:0:0:perspective"  title="Dynmap">
+        <iframe name="iframe1" id="iframe1" src="https://highgeek.eu/map/#survivalpriv_world:-60:0:21:1500:0:0:0:0:perspective" title="Dynmap">
         </iframe>
     </div>
 </div>
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", myFunction();
-
-    function myFunction() {
-        var iframe = document.getElementById("iframe1");
-        var elmnt = iframe.contentWindow.document.getElementsByClassName("control-bar")[0];
-        elmnt.style.visibility = "hidden";
-    }
-</script>
 
 @code {
-
+    protected override void OnAfterRender(bool firstRender)
+    {
+        _js.InvokeVoidAsync("dynmapRemoveControls");
+    }
 }
