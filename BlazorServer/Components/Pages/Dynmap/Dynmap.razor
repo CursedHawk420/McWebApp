@@ -25,5 +25,7 @@
     {
         //todo determine admin rights
         _js.InvokeVoidAsync("dynmapAppendCssRemoveControls");
+        Thread.Sleep(500);
+        _js.InvokeVoidAsync("invokeOpenPlayerList");
     }
 }
