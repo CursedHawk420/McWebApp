@@ -13,7 +13,6 @@ using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
 using OpenApi.Highgeek.LuckPermsApi.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 
