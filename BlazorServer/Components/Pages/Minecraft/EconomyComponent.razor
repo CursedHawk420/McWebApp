@@ -24,7 +24,7 @@
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
-            Economy = await _userService.Economy;
+            Economy = _userService.Economy;
             _refreshService.EcoRefreshRequested += RefreshAsync;
             _refreshService.PageRefreshRequested += RefreshAsync;
             l.LocaleRefreshRequested += RefreshAsync;
@@ -38,7 +38,7 @@
             // InvokeAsync is inherited, it syncs the call back to the render thread
             await InvokeAsync(() =>
             {
-                Economy = await _userService.Economy;
+                Economy = _userService.Economy;
                 StateHasChanged();
             });
         }
