@@ -7,7 +7,7 @@
 
 <div class=" fill-map">
     <div id="map">
-        <iframe name="iframe1" id="iframe1" src="https://highgeek.eu/map/#survivalpriv_world:-60:0:21:1500:0:0:0:0:perspective" title="Dynmap">
+        <iframe name="iframe1" id="iframe1" src="https://highgeek.eu/map/#survivalpriv_world:-60:0:21:1500:0:0:0:0:perspective" onload="@DynmapAppendCss" title="Dynmap">
         </iframe>
     </div>
 </div>
@@ -17,7 +17,13 @@
 @code {
     protected override void OnAfterRender(bool firstRender)
     {
-        Thread.Sleep(2000);
-        _js.InvokeVoidAsync("dynmapAppendCss");
+        //Thread.Sleep(2000);
+        //_js.InvokeVoidAsync("dynmapAppendCss");
+    }
+
+    public void DynmapAppendCss()
+    {
+        //todo determine admin rights
+        _js.InvokeVoidAsync("dynmapAppendCssRemoveControls");
     }
 }
