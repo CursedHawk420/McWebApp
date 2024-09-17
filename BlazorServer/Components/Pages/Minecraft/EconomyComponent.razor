@@ -3,7 +3,7 @@
 @inject ILocalizer l
 @implements IDisposable
 
-    @if(Economy.Count != 0)
+    @if(!Economy.IsNullOrEmpty())
     {
         <MudPaper Style="margin-right:1rem; padding:0.4rem">
             <span>
@@ -20,11 +20,13 @@
 
 
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
-            Economy = _userService.Economy;
+            if(!_userService.Economy.IsNullOrEmpty()){
+                Economy = _userService.Economy;
+            }
             _refreshService.EcoRefreshRequested += RefreshAsync;
             _refreshService.PageRefreshRequested += RefreshAsync;
             l.LocaleRefreshRequested += RefreshAsync;
