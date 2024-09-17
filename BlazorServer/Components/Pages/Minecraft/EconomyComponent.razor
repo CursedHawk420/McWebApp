@@ -3,11 +3,11 @@
 @inject ILocalizer l
 @implements IDisposable
 
-    @if(Economy is not null)
+    @if(_userService.Economy.Count != 0)
     {
         <MudPaper Style="margin-right:1rem; padding:0.4rem">
             <span>
-                @foreach (var item in Economy)
+                @foreach (var item in _userService.Economy)
                 {
                     <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
                 }
@@ -16,7 +16,7 @@
     }
 
 @code {
-    Dictionary<string, float> Economy { get; set; }
+    //Dictionary<string, float> Economy { get; set; }
 
 
 
@@ -24,19 +24,19 @@
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
-            Economy = await _userService.GetEconomyModel();
+            //Economy = await _userService.GetEconomyModel();
             _refreshService.EcoRefreshRequested += RefreshAsync;
             _refreshService.PageRefreshRequested += RefreshAsync;
             l.LocaleRefreshRequested += RefreshAsync;
         }
     }
 
-        public async void RefreshAsync()
+    public async void RefreshAsync()
     {
         @if (_userService.Loaded && _userService.HasConnectedAccount)
         {
             // InvokeAsync is inherited, it syncs the call back to the render thread
-            Economy = await _userService.GetEconomyModel();
+            //Economy = await _userService.GetEconomyModel();
             await InvokeAsync(() =>
             {
                 StateHasChanged();

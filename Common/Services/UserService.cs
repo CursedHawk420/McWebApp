@@ -34,7 +34,8 @@ namespace Highgeek.McWebApp.Common.Services
         public Task DisconnectGameAccount();
         public Task UpdatePlayerSettings();
 
-        public Task<Dictionary<string, float>> GetEconomyModel();
+        //public Task<Dictionary<string, float>> GetEconomyModel();
+        public Dictionary<string, float> Economy { get; set; }
 
     }
     public class UserService : IDisposable, IUserService
@@ -72,7 +73,7 @@ namespace Highgeek.McWebApp.Common.Services
         public List<ChannelSettingsAdapter> JoinedChannels { get; set; }
         public List<ChannelSettingsAdapter> AvaiableChannels { get; set; }
 
-        private Dictionary<string, float> Economy = new Dictionary<string, float>();
+        public Dictionary<string, float> Economy { get; set; }
 
         public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILocalizer localizer, ICookieService cookieService, ILogger<UserService> logger)
         {
@@ -91,6 +92,7 @@ namespace Highgeek.McWebApp.Common.Services
             ChannelOut = new ChannelSettingsAdapter();
             JoinedChannels = new List<ChannelSettingsAdapter>();
             AvaiableChannels = new List<ChannelSettingsAdapter>();
+            Economy = new Dictionary<string, float>();
 
             _refreshService.ServiceRefreshRequested += RefreshServiceState;
             _redisUpdateService.PlayersSettingsChanged += FetchPlayerSettingsFromRedis;
@@ -233,7 +235,7 @@ namespace Highgeek.McWebApp.Common.Services
             _refreshService.CallEcoRefresh();
         }
 
-        public async Task< Dictionary<string, float>> GetEconomyModel()
+        /*public async Task<Dictionary<string, float>> GetEconomyModel()
         {
             if(Economy is not null){
             return Economy;
@@ -241,7 +243,7 @@ namespace Highgeek.McWebApp.Common.Services
                 await EconomyLoad();
                 return await GetEconomyModel();
             }
-        }
+        }*/
         public async void HandleEconomyChange(object? sender, string uuid)
         {
             if (HasConnectedAccount)
