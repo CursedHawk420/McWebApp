@@ -17,6 +17,7 @@
 @code {
     protected override void OnAfterRender(bool firstRender)
     {
+        Thread.Sleep(2000);
         _js.InvokeVoidAsync("dynmapAppendCss");
     }
 }
