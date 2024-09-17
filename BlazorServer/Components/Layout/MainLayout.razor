@@ -31,11 +31,11 @@
                     <MudSpacer />
                     @if (_userService.Loaded)
                     {
-                        <LanguageSwitch />
+                        <LanguageSwitch/>
                     }
                     @if (_userService.HasConnectedAccount)
                     {
-                    <EconomyComponent/>
+                        <EconomyComponent/>
                         <a href="/Minecraft/Account/Statistics">
                             <MudAvatar>
                                 <MudImage Src="@("https://mc-heads.net/avatar/"+_userService.ApplicationUser.SkinHeadPicture)">

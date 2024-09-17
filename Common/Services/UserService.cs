@@ -128,8 +128,8 @@ namespace Highgeek.McWebApp.Common.Services
         {
             MinecraftUser = await _mcUserManager.GetUserAsync(uuid);
             await SetLuckpermsUser(uuid);
-            HasConnectedAccount = true;
             await EconomyLoad();
+            HasConnectedAccount = true;
 
             await SetAvaiableChannels();
 
