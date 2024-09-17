@@ -12,4 +12,5 @@ function dynmapRemoveControls() {
     var elmnt = iframe.contentWindow.document.getElementsByClassName("control-bar")[1];
     var elmnt = iframe.contentWindow.document.getElementsByClassName("control-bar")[2];
     elmnt.style.display = "none";
+    elmnt.style.visibility = "hidden";
 }
