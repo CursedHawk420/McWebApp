@@ -7,13 +7,14 @@
 
 <PageTitle>HighGeek</PageTitle>
 
-<div class="container">
+<div class="container" style="height:100%;">
     <div class="row">
         <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">@_localizer["WelcomeMessage"]</MudText>
     </div>
-    
-    <div class="row mx-auto" style="max-height:50em;height: calc(150vh - 44em); width:98%">
-        <MudCarousel Class="justify-center" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="CarouselContent">
+
+
+    <div class="row mx-auto" style="max-height:50em;height: 100%; width:98%">
+        <MudCarousel Class="" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="CarouselContent">
             @foreach (var item in carousel)
             {
                 <MudCarouselItem Transition="transition" Color="@Color.Transparent" Style="">
@@ -24,7 +25,77 @@
             }
         </MudCarousel>
     </div>
+
+    <!--
+    <div class="row mx-auto" style="max-height:50em;height: calc(150vh - 44em); width:98%">
+        <MudCarousel Class="" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="CarouselContent">
+            @foreach (var item in carousel)
+            {
+                <MudCarouselItem Transition="transition" Color="@Color.Transparent" Style="">
+                    <MudImage Src="@item.Imageurl" Alt="Swedish Farm House" Style="width:100%;" Class="" />
+                    <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)_localizer[item.Header])</MudText>
+                    <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)_localizer[item.Content])</MudText>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
+    </div>
+
+    <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="false">
+        <div class="carousel-indicators">
+            @foreach (var item in carousel)
+            {
+                if (item.Order == 0)
+                {
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="@item.Order" class="active" aria-current="true" aria-label="@item.Header"></button>
+                }
+                else
+                {
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="@item.Order" aria-label="@item.Header"></button>
+                }
+
+            }
+        </div>
+        <div class="carousel-inner">
+            @foreach (var item in carousel)
+            {
+                if (item.Order == 0)
+                {
+                    <div class="active carousel-item" data-bs-interval="0">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>@((MarkupString)(_localizer[@item.Header]))</h5>
+                            <p>@((MarkupString)(_localizer[@item.Content]))</p>
+                        </div>
+                        <img src="@item.Imageurl" class="d-block w-100" alt="...">
+                    </div>
+                }
+                else
+                {
+                    <div class="carousel-item" data-bs-interval="0">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>@((MarkupString)(_localizer[@item.Header]))</h5>
+                            <p>@((MarkupString)(_localizer[@item.Content]))</p>
+                        </div>
+                        <img src="@item.Imageurl" class="d-block w-100" alt="...">
+                    </div>
+                }
+            }
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+        -->
+
+
+
 </div>
+
 @code {
     private bool arrows = true;
     private bool bullets = true;
