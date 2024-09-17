@@ -14,3 +14,12 @@ function dynmapRemoveControls() {
     elmnt.style.display = "none";
     elmnt.style.visibility = "hidden";
 }
+
+function dynmapAppendCss() {
+    var cssLink = document.createElement("link");
+    cssLink.href = "dynmap-custom.css";
+    cssLink.rel = "stylesheet";
+    cssLink.type = "text/css";
+    frames['iframe1'].document.head.appendChild(cssLink);
+}
+
