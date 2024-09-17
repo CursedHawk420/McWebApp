@@ -35,15 +35,14 @@
 
     public async void RefreshAsync()
     {
-        @if (_userService.Loaded && _userService.HasConnectedAccount)
-        {
             // InvokeAsync is inherited, it syncs the call back to the render thread
-            await InvokeAsync(() =>
-            {
+        await InvokeAsync(() =>
+        {
+            if(!_userService.Economy.IsNullOrEmpty()){
                 Economy = _userService.Economy;
-                StateHasChanged();
-            });
-        }
+            }
+            StateHasChanged();
+        });
     }
 
 
