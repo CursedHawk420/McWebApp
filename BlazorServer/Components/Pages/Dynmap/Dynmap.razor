@@ -1,5 +1,6 @@
 ﻿@page "/Dynmap"
 @inject IJSRuntime _js
+@inject IUserService _userService
 <PageTitle>Dynmap</PageTitle>
 <h3>Dynmap</h3>
 
@@ -15,17 +16,17 @@
 
 
 @code {
-    protected override void OnAfterRender(bool firstRender)
-    {
-        //Thread.Sleep(2000);
-        //_js.InvokeVoidAsync("dynmapAppendCss");
-    }
 
     public void DynmapAppendCss()
     {
         //todo determine admin rights
+        if (_userService.HasConnectedAccount)
+        {
+            if (_userService.LpUser.ParentGroups.Contains("og"))
+            {
+                return;
+            }
+        }
         _js.InvokeVoidAsync("dynmapAppendCssRemoveControls");
-        Thread.Sleep(500);
-        _js.InvokeVoidAsync("invokeOpenPlayerList");
     }
 }

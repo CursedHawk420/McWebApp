@@ -13,7 +13,3 @@ function dynmapAppendCssRemoveControls() {
     cssLink.type = "text/css";
     frames['iframe1'].document.head.appendChild(cssLink);
 }
-
-function invokeOpenPlayerList() {
-    frames['iframe1'].document.contentWindow.openPlayerList();
-}
