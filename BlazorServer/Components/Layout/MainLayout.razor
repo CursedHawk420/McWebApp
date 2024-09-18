@@ -74,7 +74,7 @@
                             <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
                                 <ChildContent>
                                 <div class="item-container">
-                                        <MudImage Src="@context.TextureUrl" Style="height:33px;width:33px;"/>
+                                        <MudImage Src="@(context.PlayerHeadTextureId is not null ? ("https://mc-heads.net/head/" + context.PlayerHeadTextureId) : context.TextureUrl)" Style="height:33px;width:33px;"/>
                                         @if (context.Amount > 1)
                                         {
                                             <MudText Class="item-bottom-right-text" Style="font-family:'Minecraft'" Typo="Typo.caption">@context.Amount</MudText>

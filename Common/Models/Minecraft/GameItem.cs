@@ -23,6 +23,9 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         public ListTag? Modifiers { get; set; }
         public CompoundTag? PublicBukkitValues { get; set; }
         public string? Id { get; set; }
+        public CompoundTag HeadPlayerProfile {get; set;}
+        public CompoundTag HeadProperties {get; set;}
+        public string PlayerHeadTextureId {get; set;}
 
 
         public static string AIRITEM = "{\r\n    \"id\": \"minecraft:air\"\r\n}";
@@ -55,7 +58,35 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             PublicBukkitValues = GetBukkitValues();
             CustomName = GetCustomName();
             DisplayName = GetDisplayName();
+
+            if(Id == "minecraft:player_head"){
+                try{
+                    TrySetMinecraftProfile();
+                }catch(Exception ex){
+
+                }
+            }
         }
+
+
+        public void TrySetMinecraftProfile(){
+            if(Components.ContainsKey("minecraft:profile")){
+                HeadPlayerProfile = (CompoundTag)Components["minecraft:profile"];
+                if(HeadPlayerProfile.ContainsKey("properties")){
+                    var list = (ListTag) HeadPlayerProfile["properties"];
+                    HeadProperties = (CompoundTag) list[0];
+                    if(HeadProperties.ContainsKey("value")){
+                        var value = (StringTag) HeadProperties["value"];
+                        byte[] data = Convert.FromBase64String(value);
+                        string decodedString = System.Text.Encoding.UTF8.GetString(data);
+                        int startIndex = decodedString.IndexOf("http://textures.minecraft.net/texture/") + 38;
+                        int length = decodedString.Length - startIndex - 4;
+                        PlayerHeadTextureId = decodedString.Substring(startIndex, length);
+                    }
+                }
+            }
+        }
+
 
         public DisplayNameAdapter GetDisplayName()
         {
