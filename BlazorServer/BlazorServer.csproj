@@ -73,7 +73,7 @@
 			<HintPath>..\Common\Libraries\OpenApi.Highgeek.LuckPermsApi.dll</HintPath>
 		</Reference>
 		<Reference Include="SharpNBT">
-			<HintPath>..\Common\Libraries\SharpNBT-Custom.dll</HintPath>
+			<HintPath>..\Common\Libraries\SharpNBT.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 </Project>

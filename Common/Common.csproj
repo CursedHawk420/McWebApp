@@ -75,7 +75,7 @@
 			<HintPath>Libraries\OpenApi.Highgeek.LuckPermsApi.dll</HintPath>
 		</Reference>
 		<Reference Include="SharpNBT">
-			<HintPath>Libraries\SharpNBT-Custom.dll</HintPath>
+			<HintPath>Libraries\SharpNBT.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
