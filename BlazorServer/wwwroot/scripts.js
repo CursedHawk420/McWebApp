@@ -11,5 +11,5 @@ function dynmapAppendCssRemoveControls() {
     cssLink.href = "dynmap-removecontrols.css";
     cssLink.rel = "stylesheet";
     cssLink.type = "text/css";
-    frames['iframe1'].document.head.appendChild(cssLink);
+    frames['iframedynmap1'].document.head.appendChild(cssLink);
 }

@@ -1,17 +1,27 @@
 ﻿using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Routing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Highgeek.McWebApp.Common.Helpers
 {
     public class ColorAdapter
     {
+        private static Regex HexRegex = new Regex("#[a-fA-F0-9]{6}");
+
         public static string ToHtmlString(string input)
         {
+            var match = HexRegex.Match(input);
+
+            if (match.Success)
+            {
+                input = input.Replace("#", "&x");
+            }
             string output = "";
             input = input.Replace("§", "&");
             if (input.Contains("&"))
@@ -21,7 +31,15 @@ namespace Highgeek.McWebApp.Common.Helpers
                 {
                     if (s.Length > 1)
                     {
-                        output += "<span style= \"font-family:'Minecraft';color:" + GetColorFromMinecraftCode(s.Substring(0, 1)) + ";\">" + s.Substring(1, s.Length - 1) + "</span>";
+                        string color = s.Substring(0, 1);
+                        if (color.StartsWith("x"))
+                        {
+                            output += "<span style= \"font-family:'Minecraft';color:#" +s.Substring(1, 6)+ ";\">" + s.Substring(7, s.Length - 7) + "</span>";
+                        }
+                        else
+                        {
+                            output += "<span style= \"font-family:'Minecraft';color:" + GetColorFromMinecraftCode(s.Substring(0, 1)) + ";\">" + s.Substring(1, s.Length - 1) + "</span>";
+                        }
                     }
                 }
                 return output;
