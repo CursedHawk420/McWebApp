@@ -1,4 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
+using Highgeek.McWebApp.Common.Services.Redis;
 using SharpNBT;
 using SharpNBT.SNBT;
 using System.Globalization;
@@ -30,7 +31,15 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         {
             this.Json = json;
             this.OriginUuid = originUuid;
-            CompoundTag = StringNbt.Parse(json);
+            try
+            {
+                CompoundTag = StringNbt.Parse(json);
+            }
+            catch (Exception ex)
+            {
+                CompoundTag = StringNbt.Parse("{\r\n    DataVersion: 3955,\r\n    count: 1,\r\n    id: \"minecraft:barrier\"\r\n}");
+                RedisService.SetInRedis("asd:asd", ex.Message);
+            }
             Amount = GetCount();
             Id = ((StringTag)CompoundTag["id"]).Value;
             Name = Id.ToLower().Substring(Id.IndexOf(":") + 1, Id.Length - Id.IndexOf(":") - 1);

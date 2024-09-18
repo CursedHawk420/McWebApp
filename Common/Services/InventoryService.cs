@@ -136,6 +136,10 @@ namespace Highgeek.McWebApp.Common.Services
         }
         public async Task ItemDroped(MudItemDropInfo<GameItem> dropItem)
         {
+            if (dropItem.Item.Id == "minecraft:barrier")
+            {
+                return;
+            }
             string olduuid = dropItem.Item.Identifier;
 
 
