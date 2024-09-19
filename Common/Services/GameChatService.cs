@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Org.BouncyCastle.Asn1.BC;
 using Microsoft.AspNetCore.Components.Authorization;
 using Sharpdactyl.Models.User;
+using Highgeek.McWebApp.Common.Helpers;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -80,7 +81,7 @@ namespace Highgeek.McWebApp.Common.Services
                 _refreshService.CallChatRefresh();
             }catch(Exception ex)
             {
-
+                ex.WriteExceptionToRedis();
             }
         }
 

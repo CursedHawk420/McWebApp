@@ -1,3 +1,4 @@
+using Highgeek.McWebApp.Common.Services.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,6 +56,15 @@ namespace Highgeek.McWebApp.Common.Helpers
                 return true;
             }
             return collection.Count < 1;
+        }
+
+
+        public static async void WriteExceptionToRedis(this Exception exception)
+        {
+            DateTime dateTime = DateTime.UtcNow;
+
+            string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF").Replace(":", "-");
+            await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + date, exception.ToJson());
         }
     }
 }

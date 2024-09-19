@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Highgeek.McWebApp.Common.Helpers;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +55,7 @@ namespace Highgeek.McWebApp.Common.Services
                 return await JSRuntime.InvokeAsync<string>("eval", $"document.cookie");
             }catch (Exception ex)
             {
+                ex.WriteExceptionToRedis();
                 return null;
             }
         }

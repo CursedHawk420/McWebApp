@@ -1,4 +1,5 @@
-﻿using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
+﻿using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
 using Highgeek.McWebApp.Common.Services.Redis;
 using SharpNBT;
 using SharpNBT.SNBT;
@@ -41,7 +42,7 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             catch (Exception ex)
             {
                 CompoundTag = StringNbt.Parse("{\r\n    DataVersion: 3955,\r\n    count: 1,\r\n    id: \"minecraft:barrier\"\r\n}");
-                RedisService.SetInRedis("asd:asd", ex.Message);
+                ex.WriteExceptionToRedis();
             }
             Amount = GetCount();
             Id = ((StringTag)CompoundTag["id"]).Value;
@@ -62,8 +63,9 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             if(Id == "minecraft:player_head"){
                 try{
                     TrySetMinecraftProfile();
-                }catch(Exception ex){
-
+                }catch(Exception ex)
+                {
+                    ex.WriteExceptionToRedis();
                 }
             }
         }

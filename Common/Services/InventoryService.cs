@@ -1,4 +1,5 @@
-﻿using Highgeek.McWebApp.Common.Models;
+﻿using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Models.Contexts;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 using Highgeek.McWebApp.Common.Models.Minecraft;
@@ -94,6 +95,7 @@ namespace Highgeek.McWebApp.Common.Services
                         AllItems.AddRange(inv.Items);
                     }catch (NullReferenceException ex)
                     {
+                        ex.WriteExceptionToRedis();
                         _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
                     }
                 }
@@ -102,6 +104,7 @@ namespace Highgeek.McWebApp.Common.Services
             }
             catch (Exception ex)
             {
+                ex.WriteExceptionToRedis();
                 _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
             }
         }

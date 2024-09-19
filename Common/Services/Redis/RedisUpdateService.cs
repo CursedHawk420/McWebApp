@@ -4,6 +4,7 @@ using Highgeek.McWebApp.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Highgeek.McWebApp.Common.Helpers;
 
 namespace Highgeek.McWebApp.Common.Services.Redis
 {
@@ -74,6 +75,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             }
             catch (Exception ex)
             {
+                ex.WriteExceptionToRedis();
                 //Unable to parse type, some minecraft java plugin caused this
                 _logger.LogWarning("Failed to parse Uuid of redis set event");
                 return;
@@ -131,8 +133,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 {
                     PlayersListChanged?.Invoke(this, uuid);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    ex.WriteExceptionToRedis();
                     return;
                 }
             }
@@ -146,8 +149,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 {
                     PlayersSettingsChanged?.Invoke(this, uuid);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    ex.WriteExceptionToRedis();
                     return;
                 }
             }

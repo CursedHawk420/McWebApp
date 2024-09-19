@@ -120,6 +120,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             }
             catch (Exception ex)
             {
+                ex.WriteExceptionToRedis();
                 _logger.LogInformation(
                     $"Failed to execute DiscordBackgroundService with exception message {ex.Message}. Good luck next round!\n Stacktrace: \n{ex.StackTrace}");
                 return Task.CompletedTask;
@@ -273,6 +274,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             }
             catch (Exception ex)
             {
+                ex.WriteExceptionToRedis();
                 _logger.LogInformation($"DiscordSocketListener MessageReceived exception: \n" + ex.Message);
                 return;
             }
@@ -305,6 +307,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                     }
                     catch (Exception ex)
                     {
+                        ex.WriteExceptionToRedis();
                         _logger.LogInformation($"DiscordSocketListener SendChatMessageToDiscord exception: \n" + ex.Message);
                     }
                 }

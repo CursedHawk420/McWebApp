@@ -147,6 +147,7 @@
         }
         catch (Exception ex)
         {
+            ex.WriteExceptionToRedis();
             _logger.LogWarning("MainLayout UserInit() error: " + ex.Message);
         }
 
@@ -172,6 +173,7 @@
         }
         catch (Exception ex)
         {
+            ex.WriteExceptionToRedis();
             _logger.LogWarning("MainLayout Refresh() error: " + ex.Message);
         }
     }
@@ -194,6 +196,7 @@
         }
         catch (Exception ex)
         {
+            ex.WriteExceptionToRedis();
             _logger.LogWarning("MainLayout RefreshInventory() error: " + ex.Message);
         }
     }
@@ -255,6 +258,7 @@
                     }
                     catch (Exception ex)
                     {
+                        ex.WriteExceptionToRedis();
                         _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n" + ex.Message + "\nTrace: \n" + ex.StackTrace);
                     }
                 });
@@ -262,6 +266,7 @@
         }
         catch (Exception ex)
         {
+            ex.WriteExceptionToRedis();
             _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n" + ex.Message + "\nTrace: \n" + ex.StackTrace);
         }
     }

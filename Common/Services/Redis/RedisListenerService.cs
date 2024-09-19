@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Highgeek.McWebApp.Common.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -35,6 +36,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             }
             catch (Exception ex)
             {
+                ex.WriteExceptionToRedis();
                 _logger.LogInformation(
                     $"Failed to execute RedisListenerService with exception message {ex.Message}. Good luck next round!\n Stacktrace: \n{ex.StackTrace}");
                 return Task.CompletedTask;

@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Highgeek.McWebApp.Common.Helpers.Channels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
+using Highgeek.McWebApp.Common.Helpers;
 using Microsoft.Extensions.Logging;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
 
@@ -204,9 +205,10 @@ namespace Highgeek.McWebApp.Common.Services
                     _refreshService.CallChatServiceRefresh();
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogWarning("SetPlayerSettings() failed!: \nMessage: " + e.Message + "\nStacktrace: \n" + e.StackTrace);
+                ex.WriteExceptionToRedis();
+                _logger.LogWarning("SetPlayerSettings() failed!: \nMessage: " + ex.Message + "\nStacktrace: \n" + ex.StackTrace);
             }
         }
 
@@ -263,7 +265,7 @@ namespace Highgeek.McWebApp.Common.Services
                         }
                         catch (Exception ex)
                         {
-
+                            ex.WriteExceptionToRedis();
                         }
                         _refreshService.CallEcoRefresh();
                     }

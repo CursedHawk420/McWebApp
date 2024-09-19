@@ -1,4 +1,5 @@
-﻿using Highgeek.McWebApp.Common.Permissions.Requirements;
+﻿using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Permissions.Requirements;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -34,7 +35,7 @@ namespace Highgeek.McWebApp.Common.Permissions
             }
             catch (Exception ex)
             {
-
+                ex.WriteExceptionToRedis();
                 return Task.FromResult<AuthorizationPolicy?>(null);
             }
         }

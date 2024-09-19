@@ -39,11 +39,12 @@ namespace Highgeek.McWebApp.Common.Services
                 Debug.WriteLine(result);
                 return result;
             }
-            catch (ApiException e)
+            catch (ApiException ex)
             {
-                Debug.Print("Exception when calling GetApi.GetIdIdGet: " + e.Message);
-                Debug.Print("Status Code: " + e.ErrorCode);
-                Debug.Print(e.StackTrace);
+                ex.WriteExceptionToRedis();
+                Debug.Print("Exception when calling GetApi.GetIdIdGet: " + ex.Message);
+                Debug.Print("Status Code: " + ex.ErrorCode);
+                Debug.Print(ex.StackTrace);
 
                 return null;
             }
@@ -68,8 +69,9 @@ namespace Highgeek.McWebApp.Common.Services
                 //Debug.WriteLine(result);
                 //return result;
             }
-            catch (ApiException e)
+            catch (ApiException ex)
             {
+                ex.WriteExceptionToRedis();
                 return null;
             }
         }
@@ -90,9 +92,10 @@ namespace Highgeek.McWebApp.Common.Services
                 _logger.LogWarning("Succes");
                 return result;
             }
-            catch (ApiException e)
+            catch (ApiException ex)
             {
-                _logger.LogWarning("Mineskin error \nMessage: " + e.Message + "\nStacktrace: \n" + e.StackTrace);
+                ex.WriteExceptionToRedis();
+                _logger.LogWarning("Mineskin error \nMessage: " + ex.Message + "\nStacktrace: \n" + ex.StackTrace);
                 return null;
             }
         }
