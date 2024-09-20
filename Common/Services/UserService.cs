@@ -16,11 +16,11 @@ namespace Highgeek.McWebApp.Common.Services
 {
     public interface IUserService : IDisposable
     {
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
-        public User LpUser { get; set; }
+        public User? LpUser { get; set; }
 
-        public MinecraftUser MinecraftUser { get; set; }
+        public MinecraftUser? MinecraftUser { get; set; }
 
         public bool HasConnectedAccount { get; set; }
 
@@ -57,18 +57,18 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly ILogger<UserService> _logger;
 
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
-        public User LpUser { get; set; }
+        public User? LpUser { get; set; }
 
-        public MinecraftUser MinecraftUser { get; set; }
+        public MinecraftUser? MinecraftUser { get; set; }
 
         public bool HasConnectedAccount { get; set; }
 
 
         public bool Loaded { get; set; }
 
-        public PlayerServerSettings PlayerServerSettings { get; set; }
+        public PlayerServerSettings? PlayerServerSettings { get; set; }
 
         public ChannelSettingsAdapter ChannelOut { get; set; }
         public List<ChannelSettingsAdapter> JoinedChannels { get; set; }

@@ -1,8 +1,10 @@
 ﻿using Highgeek.McWebApp.Common.Helpers;
+using MimeKit.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,12 +12,20 @@ namespace Highgeek.McWebApp.Common.Models
 {
     public class StatusModel
     {
+        public string? Id { get; set; }
         public string? UserMessage { get; set; }
         public string? StatckTrace { get; set; }
         public bool Success { get; set; }
         public object? Object { get; set; }
         public Exception? Exception { get; set; }
+        public string? ExceptionString { get; set; }
         public string? Time {  get; set; }
+
+
+        public StatusModel()
+        {
+            this.Success = true;
+        }
 
         public StatusModel(string userMessage)
         {
@@ -36,13 +46,14 @@ namespace Highgeek.McWebApp.Common.Models
             this.UserMessage = userMessage;
             this.Success = false;
             this.Exception = exception;
-
+            this.ExceptionString = exception.ToJson();
+            this.Id = Guid.NewGuid().ToString();
 
             DateTime dateTime = DateTime.UtcNow;
 
             this.Time = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF").Replace(":", "-");
 
-            exception.WriteExceptionToRedis(this);
+            this.WriteStatusModelToRedis();
         }
 
 

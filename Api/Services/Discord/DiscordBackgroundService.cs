@@ -428,8 +428,15 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 DiscordAccount discordAccount = await _mcMainContext.DiscordAccounts.FirstOrDefaultAsync(x => x.Uuid == log.TargetUuid.ToString());
                 if(discordAccount != null)
                 {
-                    await UpdateDiscordRoles(discordAccount);
-                    await RedisService.SetInRedis(uuid.Replace("toresolve", "resolved"), log.ToJson());
+                    var status = await UpdateDiscordRoles(discordAccount);
+                    if (status.Success)
+                    {
+                        await RedisService.SetInRedis(uuid.Replace("toresolve", "resolved"), log.ToJson());
+                    }
+                    else
+                    {
+                        await RedisService.SetInRedis(uuid.Replace("toresolve", "failed"), log.ToJson() + ", " + status.ToJson());
+                    }
                 }
                 else
                 {
@@ -439,11 +446,11 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             }
             catch(Exception ex)
             {
-                ex.WriteExceptionToRedis();
+                new StatusModel("Error updating discord roles, resolution needed!", ex);
             }
         }
 
-        public async Task UpdateDiscordRoles(DiscordAccount discordAccount)
+        public async Task<StatusModel> UpdateDiscordRoles(DiscordAccount discordAccount)
         {
             try
             {
@@ -456,11 +463,11 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                 await user.ModifyAsync(x => {
                     x.Nickname = discordAccount.Playername;
                 });
-                AddDiscordRoles(user, list);
+                return await AddDiscordRoles(user, list);
             }
             catch(Exception ex)
             {
-                ex.WriteExceptionToRedis();
+                return new StatusModel("Error updating discord roles, resolution needed!", ex);
             }
         }
 
@@ -469,16 +476,40 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             return GetMatchingDiscordId(rolePairs, role).DiscordId;
         }
 
-        public async Task AddDiscordRoles(IGuildUser user, List<ulong> rolesToAdd)
+        public async Task<StatusModel> RemoveAllDiscordRoles(IGuildUser user)
         {
             try
             {
-                await (user as IGuildUser).RemoveRolesAsync(user.RoleIds);
+                foreach (var role in rolePairs)
+                {
+                    user.RemoveRoleAsync(role.DiscordId);
+                }
+                return new StatusModel();
+            }
+            catch (Exception ex)
+            {
+                return new StatusModel("Error updating discord roles, resolution needed!", ex);
+            }
+        }
 
-                await (user as IGuildUser).AddRolesAsync(rolesToAdd);
+        public async Task<StatusModel> AddDiscordRoles(IGuildUser user, List<ulong> rolesToAdd)
+        {
+            try
+            {
+                var status = await RemoveAllDiscordRoles(user);
+
+                if (status.Success)
+                {
+                    await (user as IGuildUser).AddRolesAsync(rolesToAdd);
+                    return new StatusModel();
+                }
+                else
+                {
+                    return status;
+                }
             }catch(Exception ex)
             {
-                StatusModel status = new StatusModel("Error updating discord roles, resolution needed!", ex);
+                return new StatusModel("Error updating discord roles, resolution needed!", ex);
             }
         }
 

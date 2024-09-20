@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
+using Highgeek.McWebApp.Common.Models;
+using Highgeek.McWebApp.Common.Data.Plan;
 
 namespace Highgeek.McWebApp.Common.Helpers
 {
@@ -57,6 +59,15 @@ namespace Highgeek.McWebApp.Common.Helpers
             var info = new ExceptionInfo(ex, includeInnerException, includeStackTrace);
 
             return JsonSerializer.Serialize(info, options ?? _defaultJsonSerializerOptions);
+        }
+
+
+        public static string ToJson(this StatusModel status,
+            bool includeInnerException = true,
+            bool includeStackTrace = true,
+            JsonSerializerOptions options = null)
+        {
+            return JsonSerializer.Serialize(status, options ?? _defaultJsonSerializerOptions);
         }
     }
 }

@@ -66,14 +66,13 @@ namespace Highgeek.McWebApp.Common.Helpers
 
             string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF");
 
-            await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + date.Replace(":", "-") + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), exception.ToJson());
+            await RedisService.SetInRedis("errors:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":exceptions:" + date.Replace(":", "-") + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), exception.ToJson());
         }
 
 
-        public static async void WriteExceptionToRedis(this Exception exception, StatusModel statusModel)
+        public static async void WriteStatusModelToRedis(this StatusModel statusModel)
         {
-
-            await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + statusModel.Time + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), exception.ToJson());
+            await RedisService.SetInRedis("errors:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":statusmodels:" + statusModel.Time + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), statusModel.ToJson());
         }
     }
 }
