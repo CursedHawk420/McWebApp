@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static Highgeek.McWebApp.Common.Helpers.ExceptionExtensions;
 
 namespace Highgeek.McWebApp.Common.Models
 {
@@ -17,10 +18,11 @@ namespace Highgeek.McWebApp.Common.Models
         public string? StatckTrace { get; set; }
         public bool Success { get; set; }
         public object? Object { get; set; }
-        public Exception? Exception { get; set; }
-        public string? ExceptionString { get; set; }
+        public ExceptionInfo? ExceptionInfo { get; set; }
         public string? Time {  get; set; }
 
+        //TODO: get more information about error, userids, etc. and log to redis 
+        //Instead redis use database??
 
         public StatusModel()
         {
@@ -45,8 +47,7 @@ namespace Highgeek.McWebApp.Common.Models
         {
             this.UserMessage = userMessage;
             this.Success = false;
-            this.Exception = exception;
-            this.ExceptionString = exception.ToJson();
+            this.ExceptionInfo = new ExceptionInfo(exception);
             this.Id = Guid.NewGuid().ToString();
 
             DateTime dateTime = DateTime.UtcNow;
