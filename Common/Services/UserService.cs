@@ -142,10 +142,11 @@ namespace Highgeek.McWebApp.Common.Services
             await SetPlayerSettings();
         }
 
-        public async void ListenForLuckUpdate(object? sender, LuckpermsRedisLogAdapter redisLogAdapter)
+        public async void ListenForLuckUpdate(object? sender, string uuid)
         {
             if (ApplicationUser is not null && ApplicationUser.mcNickname is not null)
             {
+                var redisLogAdapter = LuckpermsRedisLogAdapter.FromJson(await RedisService.GetFromRedisAsync(uuid));
                 if (redisLogAdapter.TargetUuid.Equals(ApplicationUser.mcUUID))
                 {
                     await SetLuckpermsUser(ApplicationUser.mcUUID);
