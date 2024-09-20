@@ -15,6 +15,8 @@ using OpenApi.Highgeek.LuckPermsApi.Model;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using MudBlazor;
+using System.Text;
 
 namespace Highgeek.McWebApp.Api.Services.Discord
 {
@@ -326,6 +328,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
         }
 
+        private static Regex HexRegex = new Regex("#[a-fA-F0-9]{6}");
 
         public static RedisChatEntryAdapter RemoveColorCodes(RedisChatEntryAdapter chatEntryAdapter)
         {
@@ -355,6 +358,18 @@ namespace Highgeek.McWebApp.Api.Services.Discord
                     }
                 }
                 chatEntryAdapter.Message = message;
+            }
+
+            var match = HexRegex.Match(chatEntryAdapter.Message);
+            int run = 0;
+            while (match.Success)
+            {
+                var aStringBuilder = new StringBuilder(chatEntryAdapter.Message);
+                aStringBuilder.Remove(match.Index - run, 7);
+                //input = input.Replace("#", "&x");
+                run = run + 7;
+                chatEntryAdapter.Message = aStringBuilder.ToString();
+                match = match.NextMatch();
             }
 
             return chatEntryAdapter;

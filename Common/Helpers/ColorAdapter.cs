@@ -17,10 +17,16 @@ namespace Highgeek.McWebApp.Common.Helpers
         public static string ToHtmlString(string input)
         {
             var match = HexRegex.Match(input);
-
-            if (match.Success)
+            int run = 0;
+            while (match.Success)
             {
-                input = input.Replace("#", "&x");
+                var aStringBuilder = new StringBuilder(input);
+                aStringBuilder.Remove(match.Index + run, 1);
+                aStringBuilder.Insert(match.Index + run, "&x");
+                run++;
+                //input = input.Replace("#", "&x");
+                input = aStringBuilder.ToString();
+                match = match.NextMatch();
             }
             string output = "";
             input = input.Replace("§", "&");
