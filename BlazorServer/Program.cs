@@ -50,32 +50,6 @@ else
 
 builder.AddServiceDefaults();
 
-/*
-builder.Logging.AddOpenTelemetry(logging =>
-{
-    logging.IncludeFormattedMessage = true;
-    logging.IncludeScopes = true;
-});
-
-builder.Services.AddOpenTelemetry()
-    .WithMetrics(metrics =>
-    {
-        metrics.AddRuntimeInstrumentation()
-            .AddMeter("Microsoft.AspNetCore.Hosting", "Microsoft.AspNetCore.Server.Kestrel", "System.Net.Http");
-    })
-    .WithTracing(tracing =>
-    {
-        tracing.AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation();
-    });
-
-var useOtlpExporter = !string.IsNullOrWhiteSpace(configuration.GetConfigString("OTEL_EXPORTER_OTLP_ENDPOINT"));
-if (useOtlpExporter)
-{
-    builder.Services.AddOpenTelemetry().UseOtlpExporter();
-}*/
-
-
 var connectionStringUsers = ConfigProvider.GetConnectionString("PostgresUsersConnection");
 var connectionStringKeys = ConfigProvider.GetConnectionString("PostgresKeysConnection");
 var connectionStringCms = ConfigProvider.GetConnectionString("PostgresCmsConnection");
@@ -153,7 +127,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameChatService, GameChatService>();
 
 builder.Services.AddScoped<IInventoryService, InventoryService>();
-//builder.Services.AddScoped<ImageCacheService>();
 
 builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddSingleton<IRedisUpdateService, RedisUpdateService>();

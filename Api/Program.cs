@@ -22,7 +22,6 @@ using Highgeek.McWebApp.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.AddServiceDefaults();
 Environment.SetEnvironmentVariable("HIGHGEEK_APPNAME", "dotnet_api");
 
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
@@ -115,25 +114,6 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
-
-/*
-builder.Services.UseHttpClientMetrics();
-builder.Logging.AddOpenTelemetry(options =>
-{
-    options
-        .SetResourceBuilder(
-            ResourceBuilder.CreateDefault()
-                .AddService("api"));
-    options.IncludeFormattedMessage = true;
-    options.IncludeScopes = true;
-
-});
-builder.Services.AddOpenTelemetry()
-      .ConfigureResource(resource => resource.AddService("api"))
-      .WithTracing(tracing => tracing
-          .AddAspNetCoreInstrumentation())
-      .WithMetrics(metrics => metrics
-          .AddAspNetCoreInstrumentation()).UseOtlpExporter();*/
 
 var app = builder.Build();
 

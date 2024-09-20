@@ -28,7 +28,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<string> PlayersEconomyChanged;
 
-        public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
+        public event EventHandler<string> LuckpermsChanged;
 
 
         event Action LocaleChangeRequested;
@@ -52,7 +52,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> OtherRedisSetChange;
         public event EventHandler<string> SettingsChanged;
         public event EventHandler<string> PlayersSettingsChanged;
-        public event EventHandler<LuckpermsRedisLogAdapter> LuckpermsChanged;
+        public event EventHandler<string> LuckpermsChanged;
         public event EventHandler<string> PlayersListChanged;
         public event EventHandler<string> PlayersEconomyChanged;
 
@@ -161,8 +161,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         {
             if (uuid.StartsWith("luckperms:log:toresolve:"))
             {
-
-                LuckpermsChanged?.Invoke(this, LuckpermsRedisLogAdapter.FromJson(await RedisService.GetFromRedisAsync(uuid)));
+                LuckpermsChanged?.Invoke(this, uuid);
             }
         }
 

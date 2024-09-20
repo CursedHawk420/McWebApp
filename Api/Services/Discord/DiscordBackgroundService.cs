@@ -419,24 +419,49 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             await RedisService.SetInRedis(chatEntry.Uuid, chatEntry.ToJson());
         }
 
-        public async void LuckpermsChangedEvent(object sender, LuckpermsRedisLogAdapter log)
+        public async void LuckpermsChangedEvent(object? sender, string uuid)
         {
-            //DiscordAccount discordAccount = await _mcMainContext.DiscordAccounts.FirstOrDefaultAsync(x => x.Uuid == log.TargetUuid.ToString());
-            //await UpdateDiscordRoles(discordAccount);
+            try
+            {
+                var log = LuckpermsRedisLogAdapter.FromJson(await RedisService.GetFromRedisAsync(uuid));
+
+                DiscordAccount discordAccount = await _mcMainContext.DiscordAccounts.FirstOrDefaultAsync(x => x.Uuid == log.TargetUuid.ToString());
+                if(discordAccount != null)
+                {
+                    await UpdateDiscordRoles(discordAccount);
+                    await RedisService.SetInRedis(uuid.Replace("toresolve", "resolved"), log.ToJson());
+                }
+                else
+                {
+                    await RedisService.SetInRedis(uuid.Replace("toresolve", "miss"), log.ToJson());
+                }
+
+            }
+            catch(Exception ex)
+            {
+                ex.WriteExceptionToRedis();
+            }
         }
 
         public async Task UpdateDiscordRoles(DiscordAccount discordAccount)
         {
-            User luckUser = await _luckPermsService.GetUserAsync(discordAccount.Uuid);
-            
-            var list = new List<ulong>();
-            ulong Ulong = Convert.ToUInt64(discordAccount.Discord);
-            list.Add(await TransformLuckpermsRoleToDiscord(luckUser.Metadata.PrimaryGroup));
-            IGuildUser user = _guild.GetUser(Ulong);
-            await user.ModifyAsync(x => {
-                x.Nickname = discordAccount.Playername;
-            });
-            AddDiscordRoles(user, list);
+            try
+            {
+                User luckUser = await _luckPermsService.GetUserAsync(discordAccount.Uuid);
+
+                var list = new List<ulong>();
+                ulong Ulong = Convert.ToUInt64(discordAccount.Discord);
+                list.Add(await TransformLuckpermsRoleToDiscord(luckUser.Metadata.PrimaryGroup));
+                IGuildUser user = _guild.GetUser(Ulong);
+                await user.ModifyAsync(x => {
+                    x.Nickname = discordAccount.Playername;
+                });
+                AddDiscordRoles(user, list);
+            }
+            catch(Exception ex)
+            {
+                ex.WriteExceptionToRedis();
+            }
         }
 
         public async Task<ulong> TransformLuckpermsRoleToDiscord(string role) 
@@ -446,7 +471,15 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
         public async Task AddDiscordRoles(IGuildUser user, List<ulong> rolesToAdd)
         {
-            await (user as IGuildUser).AddRolesAsync(rolesToAdd);
+            try
+            {
+                await (user as IGuildUser).RemoveRolesAsync(user.RoleIds);
+
+                await (user as IGuildUser).AddRolesAsync(rolesToAdd);
+            }catch(Exception ex)
+            {
+                StatusModel status = new StatusModel("Error updating discord roles, resolution needed!", ex);
+            }
         }
 
 
@@ -456,7 +489,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             if (discordCodeEntry is not null && discordCodeEntry.Code == code)
             {
 
-                return new StatusModel("Successfully connected account!", discordCodeEntry);
+                return new StatusModel("Successfully connected account!", discordCodeEntry, true);
             }
             else
             {

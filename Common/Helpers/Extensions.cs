@@ -1,3 +1,4 @@
+using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Services.Redis;
 using System;
 using System.Collections.Generic;
@@ -66,6 +67,13 @@ namespace Highgeek.McWebApp.Common.Helpers
             string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF");
 
             await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + date.Replace(":", "-") + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), exception.ToJson());
+        }
+
+
+        public static async void WriteExceptionToRedis(this Exception exception, StatusModel statusModel)
+        {
+
+            await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + statusModel.Time + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), exception.ToJson());
         }
     }
 }
