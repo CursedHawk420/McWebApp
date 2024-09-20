@@ -63,8 +63,9 @@ namespace Highgeek.McWebApp.Common.Helpers
         {
             DateTime dateTime = DateTime.UtcNow;
 
-            string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF").Replace(":", "-");
-            await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + date, exception.ToJson());
+            string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF");
+
+            await RedisService.SetInRedis("exceptions:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":" + date.Replace(":", "-") + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), exception.ToJson());
         }
     }
 }

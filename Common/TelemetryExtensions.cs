@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Highgeek.McWebApp.Common
 {
-    public static class Extensions
+    public static class TelemetryExtensions
     {
         public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
         {

@@ -23,7 +23,7 @@ RUN dotnet publish "./BlazorServer.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV HIGHGEEK_APPNAME=dotnet_blazorserver
+#ENV HIGHGEEK_APPNAME=prod:dotnet_blazorserver
 ### Install the agent
 ##USER root
 ##RUN apt-get update && apt-get install -y wget ca-certificates gnupg \

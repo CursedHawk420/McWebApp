@@ -33,12 +33,18 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.AddServiceDefaults();
 
 
+Environment.SetEnvironmentVariable("HIGHGEEK_APPNAME", "dotnet_blazorserver");
+
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
+    Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
+
     builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
 }
 else
 {
+    Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
+
     builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
 }
 
