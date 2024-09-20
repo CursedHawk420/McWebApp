@@ -482,7 +482,10 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             {
                 foreach (var role in rolePairs)
                 {
-                    user.RemoveRoleAsync(role.DiscordId);
+                    if (user.RoleIds.Contains(role.DiscordId))
+                    {
+                        await user.RemoveRoleAsync(role.DiscordId);
+                    }
                 }
                 return new StatusModel();
             }
