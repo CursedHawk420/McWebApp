@@ -75,16 +75,14 @@
                 </div>
             }
 
-
-            <AuthorizeView Policy="group.sa" Context="admin">
-                <Authorized>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Admin/Manage">
-                            <span class="bi bi-asterisk-fill-nav-menu" aria-hidden="true"></span> @l["nav-admin"]
-                        </NavLink>
-                    </div>
-                </Authorized>
-            </AuthorizeView>
+            @if (_userService.IsAdmin)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Admin/Manage">
+                        <span class="bi bi-asterisk-fill-nav-menu" aria-hidden="true"></span> @l["nav-admin"]
+                    </NavLink>
+                </div>
+            }
 
             <div class="nav-item px-3">
                 <form action="Account/Logout" method="post">

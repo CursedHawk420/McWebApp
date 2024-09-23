@@ -1,15 +1,104 @@
 ﻿@page "/Admin/Manage/Users"
 @inject ILocalizer l
 @implements IDisposable
+@inject UserManager<ApplicationUser> _userManager
+@inject MinecraftUserManager _mcUserManager
+@inject IUserService _userService
+@inject IRefreshService _refreshService
 
 <PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-users"])</PageTitle>
 
 <h3>@l["nav-admin-users"]</h3>
+@if (_userService.Loaded)
+{
+    @if (LoadingComplete)
+    {
+        <MudTable Items="@applicationUsers" Hover="true" Breakpoint="Breakpoint.Sm">
+            <ColGroup>
+                <col style="width:300px;" />
+                <col />
+                <col style="width:100px;" />
+            </ColGroup>
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>Username</MudTh>
+                <MudTh>McUsername</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.ApplicationUser.Id</MudTd>
+                <MudTd DataLabel="Username">@context.ApplicationUser.UserName</MudTd>
+                <MudTd DataLabel="Username">@(context.HasConnectedAccount ? context.MinecraftUser.NickName : "No Account")</MudTd>
+                <MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.ApplicationUser.Id))">@((context.ShowDetails == true) ? "Hide" : "Show") Address Details</MudButton></MudTd>
+            </RowTemplate>
+            <ChildRowContent>
+                @if (context.ShowDetails)
+                {
+                    <MudTr>
+                        <td colspan="4">
+                            <MudCard Elevation="0">
+                                <MudCardHeader>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.body1">Account Details for <strong>@context.ApplicationUser.UserName</strong></MudText>
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                                <MudCardContent Class="pa-0">
+                                </MudCardContent>
+                            </MudCard>
+                        </td>
+                    </MudTr>
+                }
+            </ChildRowContent>
+        </MudTable>
+    }
+}
 
 @code {
+    public IList<ApplicationUserData> applicationUsers = new List<ApplicationUserData>();
+
+    public bool LoadingComplete = false;
+
     protected override void OnInitialized()
     {
         l.LocaleRefreshRequested += RefreshAsync;
+        _refreshService.PageRefreshRequested += RefreshAsync;
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (_userService.Loaded)
+        {
+            if (firstRender)
+            {
+                UsersInit();
+            }
+        }
+    }
+
+    public async void UsersInit()
+    {
+        foreach (var user in _userManager.Users)
+        {
+            ApplicationUserData data = new ApplicationUserData();
+
+            data.ApplicationUser = user;
+
+            if (user.mcUUID is not null)
+            {
+                data.HasConnectedAccount = true;
+                data.MinecraftUser = await _mcUserManager.GetUserAsync(user.mcUUID);
+            }
+            applicationUsers.Add(data);
+        }
+        LoadingComplete = true;
+        RefreshAsync();
+    }
+
+    private void ShowBtnPress(string nr)
+    {
+        ApplicationUserData tmpPerson = applicationUsers.First(f => f.ApplicationUser.Id == nr);
+        tmpPerson.ShowDetails = !tmpPerson.ShowDetails;
     }
 
 
@@ -26,5 +115,16 @@
     public void Dispose()
     {
         l.LocaleRefreshRequested -= RefreshAsync;
+    }
+
+    public class ApplicationUserData
+    {
+        public ApplicationUser ApplicationUser { get; set; }
+
+        public MinecraftUser? MinecraftUser { get; set; }
+
+        public bool ShowDetails = false;
+
+        public bool HasConnectedAccount = false;
     }
 }
