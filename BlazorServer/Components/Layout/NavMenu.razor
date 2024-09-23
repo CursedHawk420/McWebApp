@@ -75,16 +75,16 @@
                 </div>
             }
 
-            
-    <AuthorizeView Policy="group.sa" Context="admin">
-        <Authorized>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Admin/Manage">
-                    <span class="bi bi-asterisk-fill-nav-menu" aria-hidden="true"></span> @l["nav-admin"]
-                </NavLink>
-            </div>
-        </Authorized>
-    </AuthorizeView>
+
+            <AuthorizeView Policy="group.sa" Context="admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="Admin/Manage">
+                            <span class="bi bi-asterisk-fill-nav-menu" aria-hidden="true"></span> @l["nav-admin"]
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
 
             <div class="nav-item px-3">
                 <form action="Account/Logout" method="post">
@@ -114,23 +114,23 @@
     <div class="nav-item px-6" style="position:fixed;bottom:0;">
     </div>
     <!--
-    <div class="nav-item px-6" style="position:fixed;bottom:0;">
-        <form action="https://minecraftservery.eu/server" style="max-width:350px;" novalidate>
-            <input type="hidden" name="id" value="1743">
-            @if (_userService.HasConnectedAccount)
-            {
-                <input type="text" style="background:#f1f3f4;text-align:center;width:100%;font-size:15px;box-sizing:border-box;padding:10px;margin-bottom:10px;border:none;border-radius:3px;" name="nick" placeholder="Přezdívka" value="@_userService.ApplicationUser.mcNickname">
-            }
-            else
-            {
-                <input type="text" style="background:#f1f3f4;text-align:center;width:100%;font-size:15px;box-sizing:border-box;padding:10px;margin-bottom:10px;border:none;border-radius:3px;" name="nick" placeholder="Přezdívka" value="">
-            }
-            <br>
-            <input type="submit" class="btn-primary" style="text-align:center;font-size:15px;font-weight:600;width:100%;border:none;cursor:pointer;padding:10px;border-radius:3px;text-decoration:none;" value="Hlasovat na 
-MinecraftServery.eu">
-        </form>
-    </div>
-    -->
+        <div class="nav-item px-6" style="position:fixed;bottom:0;">
+            <form action="https://minecraftservery.eu/server" style="max-width:350px;" novalidate>
+                <input type="hidden" name="id" value="1743">
+    @if (_userService.HasConnectedAccount)
+    {
+                    <input type="text" style="background:#f1f3f4;text-align:center;width:100%;font-size:15px;box-sizing:border-box;padding:10px;margin-bottom:10px;border:none;border-radius:3px;" name="nick" placeholder="Přezdívka" value="@_userService.ApplicationUser.mcNickname">
+    }
+    else
+    {
+                    <input type="text" style="background:#f1f3f4;text-align:center;width:100%;font-size:15px;box-sizing:border-box;padding:10px;margin-bottom:10px;border:none;border-radius:3px;" name="nick" placeholder="Přezdívka" value="">
+    }
+                <br>
+                <input type="submit" class="btn-primary" style="text-align:center;font-size:15px;font-weight:600;width:100%;border:none;cursor:pointer;padding:10px;border-radius:3px;text-decoration:none;" value="Hlasovat na
+    MinecraftServery.eu">
+            </form>
+        </div>
+        -->
 </MudNavMenu>
 @code {
     private string? currentUrl;
