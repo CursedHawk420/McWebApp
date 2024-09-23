@@ -26,6 +26,8 @@ namespace Highgeek.McWebApp.Common.Services
 
         public bool Loaded { get; set; }
 
+        public bool IsAdmin { get; set; }
+
         public PlayerServerSettings PlayerServerSettings { get; set; }
         public ChannelSettingsAdapter ChannelOut { get; set; }
         public List<ChannelSettingsAdapter> JoinedChannels { get; set; }
@@ -68,6 +70,8 @@ namespace Highgeek.McWebApp.Common.Services
 
         public bool Loaded { get; set; }
 
+        public bool IsAdmin { get; set; }
+
         public PlayerServerSettings? PlayerServerSettings { get; set; }
 
         public ChannelSettingsAdapter ChannelOut { get; set; }
@@ -80,6 +84,7 @@ namespace Highgeek.McWebApp.Common.Services
         {
             Loaded = false;
             HasConnectedAccount = false;
+            IsAdmin = false;
 
             _mcUserManager = minecraftUserManager;
             _userManager = userManager;
@@ -157,6 +162,14 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task SetLuckpermsUser(string uuid)
         {
             LpUser = await _luckPermsService.GetUserAsync(uuid);
+
+            if(LpUser is not null)
+            {
+                if (LpUser.ParentGroups.Contains("sa"))
+                {
+                    IsAdmin = true;
+                }
+            }
         }
 
         public async void RefreshServiceState()

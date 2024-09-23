@@ -76,4 +76,7 @@
 			<HintPath>..\Common\Libraries\SharpNBT.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Components\Admin\" />
+	</ItemGroup>
 </Project>
