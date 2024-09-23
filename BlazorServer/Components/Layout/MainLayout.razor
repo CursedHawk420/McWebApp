@@ -18,6 +18,9 @@
 
 <!--<MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))"  />
 <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme"  />-->
+
+                        @if (_userService.Loaded)
+                        {
 <CascadingValue Value="this">
     <MudDropContainer T="GameItem" Items="_invService.AllItems" CanDropClass="mud-border-info" NoDropClass="mud-border-error" CanDrop="@( (item,identifier ) => _invService.AllItems.Count(x => x.Identifier == identifier ) == 0)" ItemsSelector="@((item,dropzone) => item.Identifier == dropzone)" ItemPicked="_invService.ItemPicked" ItemDropped="_invService.ItemDroped"
                       Class="" @ref="MainDropContainer">
@@ -45,24 +48,24 @@
                         </a>
                     }
                 </MudAppBar>
+                        @if (_userService.Loaded)
+                        {
                 <MudDrawer @bind-Open="@_drawerOpen" Color="Color.Dark">
                     <NavMenu />
                 </MudDrawer>
                 <MudMainContent>
                     <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-                        @if (_userService.Loaded)
-                        {
                             @Body
                             <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
                             <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu  d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
-                        }
+
+                    </MudContainer>
+                </MudMainContent>                        }
                         else
                         {
                             <PageTitle>HighGeek - Loading</PageTitle>
                             <h1>Loading...</h1>
                         }
-                    </MudContainer>
-                </MudMainContent>
             </MudLayout>
 
         </ChildContent>
@@ -104,6 +107,12 @@
         </ItemRenderer>
     </MudDropContainer>
 </CascadingValue>
+                        }
+                        else
+                        {
+                            <PageTitle>HighGeek - Loading</PageTitle>
+                            <h1>Loading...</h1>
+                        }
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
