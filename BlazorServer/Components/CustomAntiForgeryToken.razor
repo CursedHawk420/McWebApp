@@ -1,0 +1,21 @@
+@using Microsoft.AspNetCore.Antiforgery;
+
+@inject IHttpContextAccessor _httpContextAccessor
+@inject IAntiforgery _antiforgery
+
+
+<input type="hidden" name="__RequestVerificationToken" value="@GetAntiforgeryToken()">
+
+@code {
+    
+public string GetAntiforgeryToken()
+{
+    var httpContext = _httpContextAccessor.HttpContext;
+    if (httpContext == null)
+    {
+        throw new InvalidOperationException("HttpContext is not available.");
+    }
+    var tokens = _antiforgery.GetAndStoreTokens(httpContext);
+    return tokens.RequestToken;
+}
+}

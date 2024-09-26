@@ -185,6 +185,12 @@ namespace Highgeek.McWebApp.Common.Services
             MinecraftUser = null;
             LpUser = null;
             HasConnectedAccount = false;
+            PlayerServerSettings = null;
+            JoinedChannels = null;
+            ChannelOut = null;
+            AvaiableChannels = null;
+            IsAdmin = false;
+            Economy.Clear();
             ApplicationUser = await _userManager.FindByIdAsync(ApplicationUser.Id);
             _refreshService.CallInventoryServiceRefresh();
         }

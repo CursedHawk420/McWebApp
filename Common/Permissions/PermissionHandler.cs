@@ -37,8 +37,9 @@ namespace Highgeek.McWebApp.Common.Permissions
             // policies(and requirements/handlers) are in use.
             _logger.LogWarning("Evaluating authorization requirement for permission \"" + requirement.Permission + "\"");
 
-
-            _userService.ApplicationUser = await _userManager.GetUserAsync(context.User);
+            if (_userService.ApplicationUser is null){
+                _userService.ApplicationUser = await _userManager.GetUserAsync(context.User);
+            }
 
 
 
