@@ -1,10 +1,10 @@
 ﻿@page "/Admin/Manage/Users"
-@inject ILocalizer l
 @implements IDisposable
-@inject UserManager<ApplicationUser> _userManager
-@inject MinecraftUserManager _mcUserManager
+@inject ILocalizer l
 @inject IUserService _userService
 @inject IRefreshService _refreshService
+@inject UserManager<ApplicationUser> _userManager
+@inject MinecraftUserManager _mcUserManager
 
 <PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-users"])</PageTitle>
 
@@ -16,33 +16,46 @@
         <MudTable Items="@applicationUsers" Hover="true" Breakpoint="Breakpoint.Sm">
             <ColGroup>
                 <col style="width:300px;" />
-                <col />
+                <col style="width:100px;" />
+                <col style="width:100px;" />
                 <col style="width:100px;" />
             </ColGroup>
             <HeaderContent>
                 <MudTh>Id</MudTh>
                 <MudTh>Username</MudTh>
-                <MudTh>McUsername</MudTh>
+                <MudTh>Gamename</MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Id">@context.ApplicationUser.Id</MudTd>
                 <MudTd DataLabel="Username">@context.ApplicationUser.UserName</MudTd>
-                <MudTd DataLabel="Username">@(context.HasConnectedAccount ? context.MinecraftUser.NickName : "No Account")</MudTd>
-                <MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.ApplicationUser.Id))">@((context.ShowDetails == true) ? "Hide" : "Show") Address Details</MudButton></MudTd>
+                <MudTd DataLabel="Gamename">@(context.HasConnectedAccount ? context.MinecraftUser.NickName : l["offline"])</MudTd>
+                <MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.ApplicationUser.Id))">@((context.ShowDetails == true) ? l["HideDetails"] : l["ShowDetails"])</MudButton></MudTd>
             </RowTemplate>
             <ChildRowContent>
                 @if (context.ShowDetails)
                 {
                     <MudTr>
                         <td colspan="4">
-                            <MudCard Elevation="0">
+                            <MudCard Elevation="1">
                                 <MudCardHeader>
                                     <CardHeaderContent>
-                                        <MudText Typo="Typo.body1">Account Details for <strong>@context.ApplicationUser.UserName</strong></MudText>
+                                        <MudText Typo="Typo.body1">@l["AdminUsersAccountDetails"] <strong>@context.ApplicationUser.UserName</strong></MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent Class="pa-0">
+                                    <MudTable T="ApplicationUserData" Hover="true" Context="DetailsContext" Breakpoint="Breakpoint.Sm">
+                                        <ColGroup>
+                                            <col style="width:300px;" />
+                                            <col style="width:100px;" />
+                                            <col style="width:100px;" />
+                                        </ColGroup>
+                                        <RowTemplate>
+                                            <MudTd DataLabel="Id">@context.ApplicationUser.Id</MudTd>
+                                            <MudTd DataLabel="Username">@context.ApplicationUser.UserName</MudTd>
+                                            <MudTd DataLabel="Gamename">@(context.HasConnectedAccount ? context.MinecraftUser.NickName : l["offline"])</MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
                                 </MudCardContent>
                             </MudCard>
                         </td>
