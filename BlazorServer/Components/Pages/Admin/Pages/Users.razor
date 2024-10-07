@@ -44,18 +44,14 @@
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent Class="pa-0">
-                                    <MudTable T="ApplicationUserData" Hover="true" Context="DetailsContext" Breakpoint="Breakpoint.Sm">
-                                        <ColGroup>
-                                            <col style="width:300px;" />
-                                            <col style="width:100px;" />
-                                            <col style="width:100px;" />
-                                        </ColGroup>
-                                        <RowTemplate>
-                                            <MudTd DataLabel="Id">@context.ApplicationUser.Id</MudTd>
-                                            <MudTd DataLabel="Username">@context.ApplicationUser.UserName</MudTd>
-                                            <MudTd DataLabel="Gamename">@(context.HasConnectedAccount ? context.MinecraftUser.NickName : l["offline"])</MudTd>
-                                        </RowTemplate>
-                                    </MudTable>
+                                    @if (context.HasConnectedAccount)
+                                    {
+                                        <MudImage Src="@("https://api.highgeek.eu/api/skins/playerhead/" + context.ApplicationUser.mcNickname)"></MudImage>
+                                        @foreach (var item in context.Economy)
+                                        {
+                                            <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
+                                        }
+                                    }
                                 </MudCardContent>
                             </MudCard>
                         </td>
@@ -101,7 +97,16 @@
             {
                 data.HasConnectedAccount = true;
                 data.MinecraftUser = await _mcUserManager.GetUserAsync(user.mcUUID);
+                data.Economy = new Dictionary<string, float>();
+
+                foreach (var uuid in await RedisService.GetKeysList("economy:players:" + user.mcNickname + ":*"))
+                {
+                    float integer = float.Parse(await RedisService.GetFromRedisAsync(uuid));
+                    string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+                    data.Economy.Add(id, integer);
+                }
             }
+
             applicationUsers.Add(data);
         }
         LoadingComplete = true;
@@ -128,6 +133,7 @@
     public void Dispose()
     {
         l.LocaleRefreshRequested -= RefreshAsync;
+        _refreshService.PageRefreshRequested -= RefreshAsync;
     }
 
     public class ApplicationUserData
@@ -139,5 +145,9 @@
         public bool ShowDetails = false;
 
         public bool HasConnectedAccount = false;
+
+        public Dictionary<string, float>? Economy { get; set; }
+
+
     }
 }
