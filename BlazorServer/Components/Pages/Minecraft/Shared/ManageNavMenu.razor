@@ -58,7 +58,10 @@
     }
     public async void Refresh()
     {
-        StateHasChanged();
+        await InvokeAsync(async () =>
+        {
+            StateHasChanged();
+        });
     }
 
     public async ValueTask DisposeAsync()

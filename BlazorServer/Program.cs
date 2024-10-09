@@ -160,6 +160,14 @@ if (builder.Environment.IsProduction())
     });
 }
 
+//user validation test
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.FromMinutes(1);
+});
+
+builder.Services.AddSingleton<IConnectedUsersService, ConnectedUsersService>();
+
 
 //MailKit options load
 builder.Services.Configure<MailKitEmailSenderOptions>(options =>

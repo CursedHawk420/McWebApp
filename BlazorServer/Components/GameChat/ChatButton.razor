@@ -44,7 +44,10 @@
         if (_userService.LpUser is null){
             IsChatOpen = false;
         }
-        StateHasChanged();
+        await InvokeAsync(async () =>
+        {
+            StateHasChanged();
+        });
     }
 
     private async void CloseChatWindow()

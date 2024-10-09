@@ -1,10 +1,12 @@
 ﻿@page "/Admin/Manage/Users"
+@using Highgeek.McWebApp.BlazorServer.Components.Pages.Admin.Pages.Users.Components
 @implements IDisposable
 @inject ILocalizer l
 @inject IUserService _userService
 @inject IRefreshService _refreshService
 @inject UserManager<ApplicationUser> _userManager
 @inject MinecraftUserManager _mcUserManager
+@inject IConnectedUsersService _connectedUsersService
 
 <PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-users"])</PageTitle>
 
@@ -29,7 +31,7 @@
             <RowTemplate>
                 <MudTd DataLabel="Id">@context.ApplicationUser.Id</MudTd>
                 <MudTd DataLabel="Username">@context.ApplicationUser.UserName</MudTd>
-                <MudTd DataLabel="Gamename">@(context.HasConnectedAccount ? context.MinecraftUser.NickName : l["offline"])</MudTd>
+                <MudTd DataLabel="Gamename">@(context.ApplicationUser.mcNickname is not null ? context.ApplicationUser.mcNickname : l["offline"])</MudTd>
                 <MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.ApplicationUser.Id))">@((context.ShowDetails == true) ? l["HideDetails"] : l["ShowDetails"])</MudButton></MudTd>
             </RowTemplate>
             <ChildRowContent>
@@ -44,14 +46,12 @@
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent Class="pa-0">
-                                    @if (context.HasConnectedAccount)
+                                    <AccountComponent ApplicationUser="context.ApplicationUser"></AccountComponent>
+                                    @if (context.ApplicationUser.mcUUID is not null)
                                     {
-                                        <MudImage Src="@("https://api.highgeek.eu/api/skins/playerhead/" + context.ApplicationUser.mcNickname)"></MudImage>
-                                        @foreach (var item in context.Economy)
-                                        {
-                                            <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
-                                        }
+                                        <MinecraftComponent ApplicationUser="context.ApplicationUser"></MinecraftComponent>
                                     }
+
                                 </MudCardContent>
                             </MudCard>
                         </td>
@@ -63,7 +63,7 @@
 }
 
 @code {
-    public IList<ApplicationUserData> applicationUsers = new List<ApplicationUserData>();
+    public IList<AppUser> applicationUsers = new List<AppUser>();
 
     public bool LoadingComplete = false;
 
@@ -71,6 +71,7 @@
     {
         l.LocaleRefreshRequested += RefreshAsync;
         _refreshService.PageRefreshRequested += RefreshAsync;
+        _connectedUsersService.AdminViewRefreshRequested += UsersInitDelay;
 
     }
 
@@ -85,37 +86,28 @@
         }
     }
 
+    public async void UsersInitDelay()
+    {
+        Thread.Sleep(2000);
+        UsersInit();
+    }
+
     public async void UsersInit()
     {
+        applicationUsers = new List<AppUser>();
+
         foreach (var user in _userManager.Users)
         {
-            ApplicationUserData data = new ApplicationUserData();
-
-            data.ApplicationUser = user;
-
-            if (user.mcUUID is not null)
-            {
-                data.HasConnectedAccount = true;
-                data.MinecraftUser = await _mcUserManager.GetUserAsync(user.mcUUID);
-                data.Economy = new Dictionary<string, float>();
-
-                foreach (var uuid in await RedisService.GetKeysList("economy:players:" + user.mcNickname + ":*"))
-                {
-                    float integer = float.Parse(await RedisService.GetFromRedisAsync(uuid));
-                    string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
-                    data.Economy.Add(id, integer);
-                }
-            }
-
-            applicationUsers.Add(data);
+            applicationUsers.Add(new AppUser(user));
         }
+
         LoadingComplete = true;
         RefreshAsync();
     }
 
     private void ShowBtnPress(string nr)
     {
-        ApplicationUserData tmpPerson = applicationUsers.First(f => f.ApplicationUser.Id == nr);
+        AppUser tmpPerson = applicationUsers.First(f => f.ApplicationUser.Id == nr);
         tmpPerson.ShowDetails = !tmpPerson.ShowDetails;
     }
 
@@ -134,20 +126,18 @@
     {
         l.LocaleRefreshRequested -= RefreshAsync;
         _refreshService.PageRefreshRequested -= RefreshAsync;
+        _connectedUsersService.AdminViewRefreshRequested -= UsersInitDelay;
     }
 
-    public class ApplicationUserData
+
+    public class AppUser
     {
         public ApplicationUser ApplicationUser { get; set; }
-
-        public MinecraftUser? MinecraftUser { get; set; }
-
         public bool ShowDetails = false;
 
-        public bool HasConnectedAccount = false;
-
-        public Dictionary<string, float>? Economy { get; set; }
-
-
+        public AppUser(ApplicationUser applicationUser)
+        {
+            this.ApplicationUser = applicationUser;
+        }
     }
 }

@@ -6,6 +6,7 @@
 @inject IRefreshService _refreshService
 @inject NavigationManager _navManager
 @inject ILocalizer l
+@inject IConnectedUsersService _connectedUsersService
 
 @attribute [PermissionsAuthorize("connectedaccount")]
 
@@ -31,6 +32,7 @@
         _refreshService.CallServiceRefresh();
         if (result.Success)
         {
+            _connectedUsersService.CallAdminViewRefresh();
             _navManager.NavigateTo("/");
         }
         else

@@ -11,6 +11,7 @@ using Highgeek.McWebApp.Common.Models.Adapters.LuckpermsRedisLogAdapter;
 using Highgeek.McWebApp.Common.Helpers;
 using Microsoft.Extensions.Logging;
 using Highgeek.McWebApp.Common.Models.mcserver_maindb;
+using Microsoft.AspNetCore.Components;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -24,7 +25,11 @@ namespace Highgeek.McWebApp.Common.Services
 
         public bool HasConnectedAccount { get; set; }
 
+        public IRefreshService _refreshService { get; }
+
         public bool Loaded { get; set; }
+
+        public string ServiceId { get; set; }
 
         public bool IsAdmin { get; set; }
 
@@ -47,7 +52,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly IRefreshService _refreshService;
+        public IRefreshService _refreshService { get; }
 
         private readonly IRedisUpdateService _redisUpdateService;
 
@@ -59,6 +64,8 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly ILogger<UserService> _logger;
 
+        private readonly NavigationManager _navigationManager;
+
         public ApplicationUser? ApplicationUser { get; set; }
 
         public User? LpUser { get; set; }
@@ -67,6 +74,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public bool HasConnectedAccount { get; set; }
 
+        public string ServiceId { get; set; } = Guid.NewGuid().ToString();
 
         public bool Loaded { get; set; }
 
@@ -80,7 +88,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public Dictionary<string, float> Economy { get; set; }
 
-        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILocalizer localizer, ICookieService cookieService, ILogger<UserService> logger)
+        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILocalizer localizer, ICookieService cookieService, ILogger<UserService> logger, NavigationManager navigationManager)
         {
             Loaded = false;
             HasConnectedAccount = false;
@@ -94,6 +102,7 @@ namespace Highgeek.McWebApp.Common.Services
             _localizer = localizer;
             _cookieService = cookieService;
             _logger = logger;
+            _navigationManager = navigationManager;
 
             ChannelOut = new ChannelSettingsAdapter();
             JoinedChannels = new List<ChannelSettingsAdapter>();
@@ -132,6 +141,11 @@ namespace Highgeek.McWebApp.Common.Services
 
         public async Task SetMinecraftUserAsync(string uuid)
         {
+            ChannelOut = new ChannelSettingsAdapter();
+            JoinedChannels = new List<ChannelSettingsAdapter>();
+            AvaiableChannels = new List<ChannelSettingsAdapter>();
+            Economy = new Dictionary<string, float>();
+
             MinecraftUser = await _mcUserManager.GetUserAsync(uuid);
             await SetLuckpermsUser(uuid);
             await EconomyLoad();
@@ -181,7 +195,11 @@ namespace Highgeek.McWebApp.Common.Services
             }
         }
 
-        public async Task DisconnectGameAccount(){
+        public async Task DisconnectGameAccount()
+        {
+            ApplicationUser = await _userManager.FindByIdAsync(ApplicationUser.Id);
+            ApplicationUser.mcNickname = null;
+            ApplicationUser.mcUUID = null;
             MinecraftUser = null;
             LpUser = null;
             HasConnectedAccount = false;
@@ -191,8 +209,8 @@ namespace Highgeek.McWebApp.Common.Services
             AvaiableChannels = null;
             IsAdmin = false;
             Economy.Clear();
-            ApplicationUser = await _userManager.FindByIdAsync(ApplicationUser.Id);
             _refreshService.CallInventoryServiceRefresh();
+            _navigationManager.NavigateTo("/");
         }
 
         public async void FetchPlayerSettingsFromRedis(object? sender, string uuid)

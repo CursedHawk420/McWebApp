@@ -1,0 +1,50 @@
+﻿@page "/Admin/Manage/ActiveSessions"
+
+@using Highgeek.McWebApp.BlazorServer.Components.Pages.Admin.Pages.Users.Components
+@implements IDisposable
+@inject ILocalizer l
+@inject IConnectedUsersService _globalUserService
+
+<PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-ActiveSessions"])</PageTitle>
+
+<h3>@l["nav-admin-ActiveSessions"]</h3>
+
+@foreach (var service in _globalUserService.Users)
+{
+    <p>@((service.ServiceId + " ") + (service.ApplicationUser is not null ? service.ApplicationUser.Email : l["offline"]))</p>
+}
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        l.LocaleRefreshRequested += RefreshAsync;
+        _globalUserService.SessionRemoved += RefreshList;
+        _globalUserService.SessionAdded += RefreshList;
+    }
+
+    private async void RefreshList(object? sender, IUserService userService)
+    {
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private async void RefreshAsync()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+
+    public void Dispose()
+    {
+        l.LocaleRefreshRequested -= RefreshAsync;
+        _globalUserService.SessionRemoved -= RefreshList;
+        _globalUserService.SessionAdded -= RefreshList;
+    }
+}

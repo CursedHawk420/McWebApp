@@ -11,6 +11,7 @@
 @inject NavigationManager _navManager
 @inject IRefreshService _refreshService
 @inject ILocalizer l
+@inject IConnectedUsersService _connectedUsersService
 
 @implements IDisposable
 
@@ -54,6 +55,7 @@
             _snack.Add(l[result.UserMessage], Severity.Success);
             _navManager.NavigateTo("Minecraft/Account/Statistics");
             _refreshService.CallServiceRefresh();
+            _connectedUsersService.CallAdminViewRefresh();
         }
         else
         {

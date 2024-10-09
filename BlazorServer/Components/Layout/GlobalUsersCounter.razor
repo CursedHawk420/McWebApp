@@ -1,0 +1,17 @@
+﻿@implements IDisposable
+@inject IConnectedUsersService _globalUserService
+@inject IUserService _userService
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        _globalUserService.AddSession(_userService);
+    }
+
+    public void Dispose()
+    {
+        _globalUserService.RemoveSession(_userService);
+
+    }
+}
