@@ -2,20 +2,23 @@
 
 @inject IHttpContextAccessor _httpContextAccessor
 @inject IAntiforgery _antiforgery
+@inject NavigationManager _navManager
 
 
 <input type="hidden" name="__RequestVerificationToken" value="@GetAntiforgeryToken()">
 
 @code {
-    
-public string GetAntiforgeryToken()
-{
-    var httpContext = _httpContextAccessor.HttpContext;
-    if (httpContext == null)
+
+    public string GetAntiforgeryToken()
     {
-        throw new InvalidOperationException("HttpContext is not available.");
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext == null)
+        {
+            _navManager.Refresh(true);
+            return null;
+            //throw new InvalidOperationException("HttpContext is not available.");
+        }
+        var tokens = _antiforgery.GetAndStoreTokens(httpContext);
+        return tokens.RequestToken;
     }
-    var tokens = _antiforgery.GetAndStoreTokens(httpContext);
-    return tokens.RequestToken;
-}
 }

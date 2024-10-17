@@ -1,16 +1,128 @@
-﻿@inject ILocalizer l
+﻿@using OpenApi.Highgeek.LuckPermsApi.Model
+@inject ILocalizer l
 @inject UserManager<ApplicationUser> _userManager
 @inject MinecraftUserManager _mcUserManager
 @inject ISnackbar _snack
 @inject IConnectedUsersService _connectedUsersService
+@inject IRedisUpdateService _redisUpdateService
+@inject LuckPermsService _luckService
 
+@if (Loaded)
+{
+    <div class="row">
+        <div class="col-9">
+            <span>
+                @foreach (var item in Economy)
+                {
+                    <MudText Typo="Typo.subtitle2">@((MarkupString)(l[item.Key] + " : " + item.Value.ToString()))</MudText>
+                }
+            </span>
+            <table class="table1">
+                <tr>
+                    <td>
+                        @("UUID: ")
+                    </td>
+                    <td>
+                        @LpUser.UniqueId.ToString()
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @("Primary Group: ")
+                    </td>
+                    <td>
+                        @LpUser.Metadata.PrimaryGroup
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @("Groups: ")
+                    </td>
+                    <td>
+                        @foreach (var group in LpUser.ParentGroups)
+                        {
+                            @(group + "; ")
+                        }
+                    </td>
+                </tr>
+            </table>
 
-<MudImage Src="@("https://api.highgeek.eu/api/skins/playerhead/" + ApplicationUser.mcNickname)"></MudImage>
-<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DisconnectMcAccount">Disconnect mc account</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DisconnectMcAccount">Disconnect mc account</MudButton>
+        </div>
+        <div class="col-3">
+            <div class="d-flex justify-content-end">
+                <MudImage Src="@("https://api.highgeek.eu/api/skins/playerhead/" + ApplicationUser.mcNickname)"></MudImage>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <span>Loading...</span>
+}
 @code {
     [Parameter]
     public ApplicationUser ApplicationUser { get; set; }
 
+    public User LpUser { get; set; }
+
+    private bool Loaded = false;
+
+
+    Dictionary<string, float> Economy = new Dictionary<string, float>();
+
+    protected override async void OnInitialized()
+    {
+        l.LocaleRefreshRequested += RefreshAsync;
+        _connectedUsersService.AdminViewRefreshRequested += RefreshAsync;
+        _redisUpdateService.PlayersEconomyChanged += HandleEconomyChange;
+
+        await InitData();
+    }
+
+    private async Task InitData()
+    {
+        await InitEconomy();
+        await InitLuckPerms();
+        Loaded = true;
+        RefreshAsync();
+    }
+
+    private async Task InitLuckPerms()
+    {
+        LpUser = await _luckService.GetUserAsync(ApplicationUser.mcUUID);
+    }
+
+    private async Task InitEconomy()
+    {
+        foreach (var uuid in await RedisService.GetKeysList("economy:players:" + ApplicationUser.mcNickname + ":*"))
+        {
+            float integer = float.Parse(await RedisService.GetFromRedisAsync(uuid));
+            string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+            Economy.Add(id, integer);
+        }
+    }
+
+    public async void HandleEconomyChange(object? sender, string uuid)
+    {
+        if (uuid.Contains(ApplicationUser.mcNickname))
+        {
+            string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+            if (Economy.ContainsKey(id))
+            {
+                Economy.Remove(id);
+            }
+            try
+            {
+                Economy.Add(id, float.Parse(await RedisService.GetFromRedisAsync(uuid)));
+            }
+            catch (Exception ex)
+            {
+                ex.WriteExceptionToRedis();
+            }
+            RefreshAsync();
+        }
+    }
 
     private async Task DisconnectMcAccount()
     {
@@ -39,12 +151,6 @@
     }
 
 
-    protected override void OnInitialized()
-    {
-        l.LocaleRefreshRequested += RefreshAsync;
-        _connectedUsersService.AdminViewRefreshRequested += RefreshAsync;
-    }
-
     private async void RefreshAsync()
     {
         // InvokeAsync is inherited, it syncs the call back to the render thread
@@ -59,5 +165,6 @@
     {
         l.LocaleRefreshRequested -= RefreshAsync;
         _connectedUsersService.AdminViewRefreshRequested -= RefreshAsync;
+        _redisUpdateService.PlayersEconomyChanged -= HandleEconomyChange;
     }
 }

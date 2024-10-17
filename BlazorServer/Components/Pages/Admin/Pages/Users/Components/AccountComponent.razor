@@ -4,7 +4,11 @@
 @inject ISnackbar _snack
 @inject IConnectedUsersService _connectedUsersService
 
-<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteUserAsync">Delete user</MudButton>
+<div class="row">
+    <div class="col">
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteUserAsync">Delete user</MudButton>
+    </div>
+</div>
 @code {
     [Parameter]
     public ApplicationUser ApplicationUser { get; set; }
