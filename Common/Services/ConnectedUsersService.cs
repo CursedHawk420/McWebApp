@@ -87,7 +87,14 @@ namespace Highgeek.McWebApp.Common.Services
         {
             string data = RedisService.GetFromRedis("appchannel:mcwebapp:sessionlist");
             List<Session> sessions = new List<Session>(JsonConvert.DeserializeObject<List<Session>>(data));
-            sessions.Add(new Session(user.ServiceId, user.ApplicationUser.UserName, user.ApplicationUser.Email, TenantId));
+            string username = "";
+            string email = "";
+            if (user.ApplicationUser != null)
+            {
+                username = user.ApplicationUser.UserName;
+                email = user.ApplicationUser.Email;
+            }
+            sessions.Add(new Session(user.ServiceId, username, email, TenantId));
 
             await RedisService.SetInRedis("appchannel:mcwebapp:sessionlist", JsonConvert.SerializeObject(sessions));
         }
