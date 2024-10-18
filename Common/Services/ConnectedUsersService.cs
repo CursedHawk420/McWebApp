@@ -25,8 +25,13 @@ namespace Highgeek.McWebApp.Common.Services
     }
     public class ConnectedUsersService : IConnectedUsersService
     {
+        public ConnectedUsersService()
+        {
+            Users = new List<IUserService>();
+        }
 
-        public List<IUserService> Users { get; set; } = new();
+
+        public List<IUserService> Users { get; set; }
 
         public IList<IUserService> FindSessionsByUser(ApplicationUser user)
         {
