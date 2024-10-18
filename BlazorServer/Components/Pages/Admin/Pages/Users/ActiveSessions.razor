@@ -8,11 +8,19 @@
 <PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-ActiveSessions"])</PageTitle>
 
 <h3>@l["nav-admin-ActiveSessions"]</h3>
+<MudPaper>
+    @foreach (var service in _globalUserService.Users)
+    {
+        <p>@((service.ServiceId + " ") + (service.ApplicationUser is not null ? service.ApplicationUser.Email : l["offline"]))</p>
+    }
+</MudPaper>
 
-@foreach (var service in _globalUserService.Users)
-{
-    <p>@((service.ServiceId + " ") + (service.ApplicationUser is not null ? service.ApplicationUser.Email : l["offline"]))</p>
-}
+<MudPaper>
+    @foreach (var session in _globalUserService.GlobalSessions)
+    {
+        <p>@((session.Id + " ") + (session.Email is not null ? session.Email : l["offline"]) + " " + session.TenantID)</p>
+    }
+</MudPaper>
 
 @code {
 
@@ -21,6 +29,7 @@
         l.LocaleRefreshRequested += RefreshAsync;
         _globalUserService.SessionRemoved += RefreshList;
         _globalUserService.SessionAdded += RefreshList;
+        _globalUserService.AdminViewRefreshRequested += RefreshAsync;
     }
 
     private async void RefreshList(object? sender, IUserService userService)
@@ -46,5 +55,6 @@
         l.LocaleRefreshRequested -= RefreshAsync;
         _globalUserService.SessionRemoved -= RefreshList;
         _globalUserService.SessionAdded -= RefreshList;
+        _globalUserService.AdminViewRefreshRequested -= RefreshAsync;
     }
 }

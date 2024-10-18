@@ -45,6 +45,8 @@ else
 {
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
 
+    Environment.SetEnvironmentVariable("TENANT_ID", "dev");
+
     builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
 }
 

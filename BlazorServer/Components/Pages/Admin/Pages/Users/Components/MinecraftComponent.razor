@@ -126,7 +126,6 @@ else
 
     private async Task DisconnectMcAccount()
     {
-        var list = _connectedUsersService.FindSessionsByUser(ApplicationUser);
 
         var status = await _mcUserManager.DisconnectMinecraftAccount(ApplicationUser);
         if (!status.Success)
@@ -137,16 +136,13 @@ else
         {
             _snack.Add(l[status.UserMessage], Severity.Success);
         }
+        DateTime dateTime = DateTime.UtcNow;
 
-        if (list.Count > 0)
-        {
-            foreach (var userservice in list)
-            {
-                await userservice.DisconnectGameAccount();
-                userservice._refreshService.CallServiceRefresh();
-            }
-        }
-        _connectedUsersService.CallAdminViewRefresh();
+        string date = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFF");
+
+        await RedisService.SetInRedis("appchannel:mcwebapp:disconnectmcuser:" + date, ApplicationUser.Id);
+
+        //await _connectedUsersService.DisconnectMcAccount(ApplicationUser);
         RefreshAsync();
     }
 

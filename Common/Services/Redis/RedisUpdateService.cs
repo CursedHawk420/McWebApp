@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Highgeek.McWebApp.Common.Helpers;
+using MimeKit.Encodings;
 
 namespace Highgeek.McWebApp.Common.Services.Redis
 {
@@ -29,6 +30,10 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> PlayersEconomyChanged;
 
         public event EventHandler<string> LuckpermsChanged;
+
+        public event EventHandler<string> McAccountDisconnectUpdate;
+
+        public event EventHandler<string> SessionListUpdate;
 
 
         event Action LocaleChangeRequested;
@@ -55,6 +60,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> LuckpermsChanged;
         public event EventHandler<string> PlayersListChanged;
         public event EventHandler<string> PlayersEconomyChanged;
+        public event EventHandler<string> McAccountDisconnectUpdate;
+        public event EventHandler<string> SessionListUpdate;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -110,12 +117,31 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 case "economy":
                     await PlayerEconomyEvent(Uuid);
                     return;
+                case "appchannel":
+                    await AppChannelMessageEvent(Uuid);
+                    return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
                     return;
             }
 
         }
+
+        public async Task AppChannelMessageEvent(string uuid)
+        {
+            if (uuid.Contains("mcwebapp"))
+            {
+                if (uuid.Contains("disconnectmcuser"))
+                {
+                    McAccountDisconnectUpdate?.Invoke(this, await RedisService.GetFromRedisAsync(uuid));
+                }
+                if (uuid.Contains("sessionlist"))
+                {
+                    SessionListUpdate?.Invoke(this, await RedisService.GetFromRedisAsync(uuid));
+                }
+            }
+        }
+
 
         public async Task PlayerEconomyEvent(string uuid)
         {

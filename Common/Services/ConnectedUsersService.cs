@@ -1,14 +1,19 @@
 ﻿using Highgeek.McWebApp.Common.Models;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Newtonsoft.Json;
 
 namespace Highgeek.McWebApp.Common.Services
 {
     public interface IConnectedUsersService
     {
+        public string TenantId { get; set; }
 
         public List<IUserService> Users { get; set; }
 
-        public IList<IUserService> FindSessionsByUser(ApplicationUser user);
+        public List<Session> GlobalSessions { get; set; }
+
+        public IList<IUserService> FindSessionsByUser(string userid);
+        public void DisconnectMcAccount(object? sender,string userid);
 
         public event EventHandler<IUserService> SessionAdded;
         public void CallSessionAdded(IUserService userService);
@@ -25,29 +30,86 @@ namespace Highgeek.McWebApp.Common.Services
     }
     public class ConnectedUsersService : IConnectedUsersService
     {
-        public ConnectedUsersService()
+        private readonly IRedisUpdateService _redisUpdateService;
+
+        public ConnectedUsersService(IRedisUpdateService redisUpdateService)
         {
+            _redisUpdateService = redisUpdateService;
             Users = new List<IUserService>();
+            GlobalSessions = new List<Session>();
+
+            TenantId = Environment.GetEnvironmentVariable("TENANT_ID");
+
+            _redisUpdateService.McAccountDisconnectUpdate += DisconnectMcAccount;
+            _redisUpdateService.SessionListUpdate += UpdateSessionsFromRedis;
         }
 
+        public string TenantId { get; set; }
+
+        public List<Session> GlobalSessions { get; set; }
 
         public List<IUserService> Users { get; set; }
 
-        public IList<IUserService> FindSessionsByUser(ApplicationUser user)
+        public IList<IUserService> FindSessionsByUser(string userid)
         {
-            return Users.FindAll(x => x.ApplicationUser.Id == user.Id);
+            return Users.FindAll(x => x.ApplicationUser.Id == userid);
         }
 
-        public void AddSession(IUserService user)
+        public async void DisconnectMcAccount(object? sender, string userid)
         {
+            var list = FindSessionsByUser(userid);
+            if (list.Count > 0)
+            {
+                foreach (var userservice in list)
+                {
+                    await userservice.DisconnectGameAccount();
+                    userservice._refreshService.CallServiceRefresh();
+                }
+            }
+            CallAdminViewRefresh();
+        }
+
+        public async void AddSession(IUserService user)
+        {
+            await AddSessiontoRedis(user);
             Users.Add(user);
             this.CallSessionAdded(user);
         }
 
-        public void RemoveSession(IUserService user)
+        public async void RemoveSession(IUserService user)
         {
+            await RemoveSessionFromRedis(user);
             Users.Remove(user);
             this.CallSessionRemoved(user);
+        }
+
+        public async Task AddSessiontoRedis(IUserService user)
+        {
+            string data = RedisService.GetFromRedis("appchannel:mcwebapp:sessionlist");
+            List<Session> sessions = new List<Session>(JsonConvert.DeserializeObject<List<Session>>(data));
+            sessions.Add(new Session(user.ServiceId, user.ApplicationUser.UserName, user.ApplicationUser.Email, TenantId));
+
+            await RedisService.SetInRedis("appchannel:mcwebapp:sessionlist", JsonConvert.SerializeObject(sessions));
+        }
+
+        public async Task RemoveSessionFromRedis(IUserService user)
+        {
+            string data = RedisService.GetFromRedis("appchannel:mcwebapp:sessionlist");
+            var json = JsonConvert.DeserializeObject<List<Session>>(data);
+
+
+            var itemToRemove = json.SingleOrDefault(r => r.Id == user.ServiceId);
+            json.Remove(itemToRemove);
+
+            await RedisService.SetInRedis("appchannel:mcwebapp:sessionlist", JsonConvert.SerializeObject(json));
+        }
+
+
+        public async void UpdateSessionsFromRedis(object? sender, string sessionJson)
+        {
+            string data = RedisService.GetFromRedis("appchannel:mcwebapp:sessionlist");
+            GlobalSessions = JsonConvert.DeserializeObject<List<Session>>(data);
+            CallAdminViewRefresh();
         }
 
 
@@ -68,4 +130,21 @@ namespace Highgeek.McWebApp.Common.Services
             AdminViewRefreshRequested?.Invoke();
         }
     }
+
+    public class Session
+    {
+        public Session(string id, string? UserName, string? Email, string tenantID)
+        {
+            this.UserName = UserName;
+            this.Email = Email;
+            this.Id = id;
+            TenantID = tenantID;
+        }
+
+        public string Id { get; set; }
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
+        public string TenantID { get; set; }
+    }
+
 }
