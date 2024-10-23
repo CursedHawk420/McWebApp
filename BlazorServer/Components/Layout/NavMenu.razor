@@ -1,7 +1,4 @@
-﻿@implements IDisposable
-@inject ILocalizer l
-
-@rendermode InteractiveServer
+﻿@inherits LanguageBase
 
 @using Microsoft.AspNetCore.Identity
 
@@ -170,7 +167,7 @@
         _refreshService.CallMainNavMenuClose();
     }
 
-    public void Dispose()
+    public override void Dispose(bool disposing)
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
         _refreshService.PageRefreshRequested -= Refresh;
