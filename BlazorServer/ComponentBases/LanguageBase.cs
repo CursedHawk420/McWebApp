@@ -1,4 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Services;
+using Markdig;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using OpenApi.Highgeek.LuckPermsApi.Model;
@@ -11,6 +12,8 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
         public ILocalizer l {  get; set; }
 
         public bool _disposed = false;
+
+        public MarkdownPipeline markdownPipeline;
 
         protected override void OnInitialized()
         {
@@ -26,6 +29,15 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
             });
         }
 
+        public MarkupString GetMarkdown(string wordKey)
+        {
+            if (markdownPipeline is null)
+            {
+                markdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            }
+            return (MarkupString)Markdown.ToHtml(l[wordKey], markdownPipeline);
+        }
+
 
         void IDisposable.Dispose()
         {
@@ -33,6 +45,7 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
             if (!_disposed)
             {
                 Dispose(true);
+                l.LocaleRefreshRequested -= RefreshLanguageAsync;
             }
             // Suppress finalization.
             GC.SuppressFinalize(this);
@@ -40,10 +53,7 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
 
         public virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                l.LocaleRefreshRequested -= RefreshLanguageAsync;
-            }
+
         }
     }
 }
