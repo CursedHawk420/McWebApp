@@ -1,0 +1,156 @@
+﻿@page "/Admin/Manage/Language"
+
+@inherits LanguageBase
+
+@using McWebApp.Common.Models.Language
+
+<PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-LanguageEditor"])</PageTitle>
+<h3>@l["nav-admin-LanguageEditor"]</h3>
+
+@if (loaded)
+{
+    <MudTable Items="@NewKey" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh></MudTh>
+            <MudTh>Key</MudTh>
+            <MudTh>En</MudTh>
+            <MudTh>Cs</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>
+            </MudTd>
+            <MudTd DataLabel="Key">
+                <MudTextField Lines="(int)context.Key.LinesCount()" OnKeyUp="TextFieldOnKeyDownAddKey" @bind-Value="context.Key" @ref="textFieldKey"></MudTextField>
+            </MudTd>
+            <MudTd DataLabel="En">
+                <MudTextField Lines="(int)context.En.LinesCount()" OnKeyUp="TextFieldOnKeyDownAddKey" @bind-Value="context.En" @ref="textFieldEn"></MudTextField>
+            </MudTd>
+            <MudTd DataLabel="Cs">
+                <MudTextField Lines="(int)context.Cs.LinesCount()" OnKeyUp="TextFieldOnKeyDownAddKey" @bind-Value="context.Cs" @ref="textFieldCs"></MudTextField>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <MudTable Items="@LanguageModel.LanguageKeys.AsEnumerable().Reverse()" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>Key</MudTh>
+            <MudTh>En</MudTh>
+            <MudTh>Cs</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Key">@context.Key</MudTd>
+            <MudTd DataLabel="En">
+                <MudTextField Lines="(int)context.En.LinesCount()" OnKeyUp="TextFieldOnKeyDown" @bind-Value="context.En"></MudTextField>
+            </MudTd>
+            <MudTd DataLabel="Cs">
+                <MudTextField Lines="(int)context.Cs.LinesCount()" OnKeyUp="TextFieldOnKeyDown" @bind-Value="context.Cs"></MudTextField>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteItem(context))">Delete</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+}
+
+
+
+@code {
+    LanguageModel LanguageModel;
+
+    MudTextField<string> textFieldKey;
+    MudTextField<string> textFieldEn;
+    MudTextField<string> textFieldCs;
+
+    IList<LanguageKey> NewKey = new List<LanguageKey>();
+
+    bool loaded;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        LanguageModel = LanguageModel.FromJson(RedisService.GetFromRedis("settings:mcwebapp:language"));
+
+        NewKey.Add(GetNewKey());
+
+        /*foreach(var item in LanguageModel.LanguageKeys)
+            {
+            item.Cs
+        }*/
+
+        loaded = true;
+        RefreshAsync();
+    }
+
+    public async Task UpdateLanguageInRedis()
+    {
+        if (LanguageModel.LanguageKeys.Last().Key.IsNullOrEmpty())
+        {
+            LanguageModel.LanguageKeys.Remove(LanguageModel.LanguageKeys.Last());
+        }
+        await RedisService.SetInRedis("settings:mcwebapp:language", LanguageModel.ToJson());
+    }
+
+    public async void DeleteItem(LanguageKey key)
+    {
+        LanguageModel.LanguageKeys.Remove(key);
+        await UpdateLanguageInRedis();
+    }
+
+
+    async void TextFieldOnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key is "Enter" or "NumppadEnter")
+        {
+            await UpdateLanguageInRedis();
+            RefreshAsync();
+        }
+    }
+
+    async void TextFieldOnKeyDownAddKey(KeyboardEventArgs args)
+    {
+        if (args.Key is "Enter" or "NumppadEnter")
+        {
+            textFieldKey.TextUpdateSuppression = false;
+            textFieldEn.TextUpdateSuppression = false;
+            textFieldCs.TextUpdateSuppression = false;
+            LanguageModel.LanguageKeys.Add(NewKey.First());
+            NewKey.Clear();
+            NewKey.Add(GetNewKey());
+            
+
+            await UpdateLanguageInRedis();
+
+            await InvokeAsync(StateHasChanged);
+
+            await Task.Run(async () =>
+            {
+                await Task.Delay(150);
+                textFieldKey.TextUpdateSuppression = true;
+                textFieldEn.TextUpdateSuppression = true;
+                textFieldCs.TextUpdateSuppression = true;
+            });
+        }
+    }
+
+    public async void RefreshAsync()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private LanguageKey GetNewKey()
+    {
+        var last = new LanguageKey();
+        last.En = "";
+        last.Cs = "";
+        last.Key = "";
+        return last;
+    }
+
+}

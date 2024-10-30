@@ -17,6 +17,7 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
 
         protected override void OnInitialized()
         {
+            base.OnInitialized();
             l.LocaleRefreshRequested += RefreshLanguageAsync;
         }
 

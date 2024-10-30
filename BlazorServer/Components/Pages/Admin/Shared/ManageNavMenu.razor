@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@inherits LanguageBase
 @inject IUserService _userService
 @inject IRefreshService _refreshService
-@inject ILocalizer l
 
 @implements IAsyncDisposable
 
@@ -12,6 +12,9 @@
     <li class="nav-item">
         <NavLink class="nav-link" href="Admin/Manage/ActiveSessions">@l["nav-admin-ActiveSessions"]</NavLink>
     </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Admin/Manage/Language">@l["nav-admin-LanguageEditor"]</NavLink>
+    </li>
 </ul>
 
 
@@ -21,7 +24,6 @@
     protected override async Task OnInitializedAsync()
     {
         _refreshService.PageRefreshRequested += Refresh;
-        l.LocaleRefreshRequested += RefreshAsync;
 
         Refresh();
     }

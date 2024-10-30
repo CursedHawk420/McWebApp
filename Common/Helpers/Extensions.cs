@@ -74,5 +74,19 @@ namespace Highgeek.McWebApp.Common.Helpers
         {
             await RedisService.SetInRedis("errors:mcwebapp:" + Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + ":statusmodels:" + statusModel.Time + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV"), statusModel.ToJson());
         }
+
+
+
+        public static long LinesCount(this string s)
+        {
+            long count = 0;
+            int position = 0;
+            while ((position = s.IndexOf('\n', position)) != -1)
+            {
+                count++;
+                position++;         // Skip this occurrence!
+            }
+            return count;
+        }
     }
 }

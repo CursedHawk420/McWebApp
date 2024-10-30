@@ -130,15 +130,15 @@
 @code {
     private string? currentUrl;
 
-    protected override async void OnInitialized()
+    protected override void OnInitialized()
     {
+        base.OnInitialized();
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
         _refreshService.PageRefreshRequested += Refresh;
-        l.LocaleRefreshRequested += RefreshAsync;
         Refresh();
     }
-    
+
 
     private async void RefreshAsync()
     {
@@ -169,9 +169,11 @@
 
     public override void Dispose(bool disposing)
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-        _refreshService.PageRefreshRequested -= Refresh;
-        l.LocaleRefreshRequested -= RefreshAsync;
+        if (disposing)
+        {
+            NavigationManager.LocationChanged -= OnLocationChanged;
+            _refreshService.PageRefreshRequested -= Refresh;
+        }
     }
 }
 
