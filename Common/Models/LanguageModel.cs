@@ -21,10 +21,10 @@ namespace Highgeek.McWebApp.Common.Models.Language
         public string? Key { get; set; }
 
         [JsonProperty("cs")]
-        public string? Cs { get; set; }
+        public string Cs { get; set; }
 
         [JsonProperty("en")]
-        public string? En { get; set; }
+        public string En { get; set; }
     }
 
     public partial class LanguageModel

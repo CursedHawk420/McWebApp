@@ -15,18 +15,22 @@
             <MudTh>Key</MudTh>
             <MudTh>En</MudTh>
             <MudTh>Cs</MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd>
             </MudTd>
             <MudTd DataLabel="Key">
-                <MudTextField Lines="(int)context.Key.LinesCount()" OnKeyUp="TextFieldOnKeyDownAddKey" @bind-Value="context.Key" @ref="textFieldKey"></MudTextField>
+                <MudTextField Lines="@((int)context.En.LinesCount() >= 2 ? (int)context.En.LinesCount() : 2 )" @bind-Value="context.Key"></MudTextField>
             </MudTd>
             <MudTd DataLabel="En">
-                <MudTextField Lines="(int)context.En.LinesCount()" OnKeyUp="TextFieldOnKeyDownAddKey" @bind-Value="context.En" @ref="textFieldEn"></MudTextField>
+                <MudTextField Lines="@((int)context.En.LinesCount() >= 2 ? (int)context.En.LinesCount() : 2 )" @bind-Value="context.En"></MudTextField>
             </MudTd>
             <MudTd DataLabel="Cs">
-                <MudTextField Lines="(int)context.Cs.LinesCount()" OnKeyUp="TextFieldOnKeyDownAddKey" @bind-Value="context.Cs" @ref="textFieldCs"></MudTextField>
+                <MudTextField Lines="@((int)context.En.LinesCount() >= 2 ? (int)context.En.LinesCount() : 2 )" @bind-Value="context!.Cs"></MudTextField>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Success" OnClick="@(() => AddItem(context))">Add</MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -37,14 +41,18 @@
             <MudTh>En</MudTh>
             <MudTh>Cs</MudTh>
             <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Key">@context.Key</MudTd>
             <MudTd DataLabel="En">
-                <MudTextField Lines="(int)context.En.LinesCount()" OnKeyUp="TextFieldOnKeyDown" @bind-Value="context.En"></MudTextField>
+                <MudTextField Lines="@((int)context.En.LinesCount() >= 2 ? (int)context.En.LinesCount() : 2 )" @bind-Value="context.En"></MudTextField>
             </MudTd>
             <MudTd DataLabel="Cs">
-                <MudTextField Lines="(int)context.Cs.LinesCount()" OnKeyUp="TextFieldOnKeyDown" @bind-Value="context.Cs"></MudTextField>
+                <MudTextField Lines="@((int)context.En.LinesCount() >= 2 ? (int)context.En.LinesCount() : 2 )" @bind-Value="context.Cs"></MudTextField>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Warning" Color="Color.Warning" OnClick="@(() => UpdateItems(context))">Update</MudButton>
             </MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteItem(context))">Delete</MudButton>
@@ -58,10 +66,6 @@
 
 @code {
     LanguageModel LanguageModel;
-
-    MudTextField<string> textFieldKey;
-    MudTextField<string> textFieldEn;
-    MudTextField<string> textFieldCs;
 
     IList<LanguageKey> NewKey = new List<LanguageKey>();
 
@@ -92,48 +96,34 @@
         }
         await RedisService.SetInRedis("settings:mcwebapp:language", LanguageModel.ToJson());
     }
-
+    
     public async void DeleteItem(LanguageKey key)
     {
         LanguageModel.LanguageKeys.Remove(key);
         await UpdateLanguageInRedis();
     }
-
-
-    async void TextFieldOnKeyDown(KeyboardEventArgs args)
+    public async void AddItem(LanguageKey key)
     {
-        if (args.Key is "Enter" or "NumppadEnter")
-        {
-            await UpdateLanguageInRedis();
-            RefreshAsync();
-        }
+        LanguageModel.LanguageKeys.Add(NewKey.First());
+        NewKey.Clear();
+        NewKey.Add(GetNewKey());
+
+
+        await UpdateLanguageInRedis();
+
+        await InvokeAsync(StateHasChanged);
     }
 
-    async void TextFieldOnKeyDownAddKey(KeyboardEventArgs args)
+    public async void UpdateItems(LanguageKey key)
     {
-        if (args.Key is "Enter" or "NumppadEnter")
-        {
-            textFieldKey.TextUpdateSuppression = false;
-            textFieldEn.TextUpdateSuppression = false;
-            textFieldCs.TextUpdateSuppression = false;
-            LanguageModel.LanguageKeys.Add(NewKey.First());
-            NewKey.Clear();
-            NewKey.Add(GetNewKey());
-            
-
-            await UpdateLanguageInRedis();
-
-            await InvokeAsync(StateHasChanged);
-
-            await Task.Run(async () =>
-            {
-                await Task.Delay(150);
-                textFieldKey.TextUpdateSuppression = true;
-                textFieldEn.TextUpdateSuppression = true;
-                textFieldCs.TextUpdateSuppression = true;
-            });
-        }
+        await UpdateLanguageInRedis();
+        RefreshAsync();
     }
+
+
+
+
+
 
     public async void RefreshAsync()
     {

@@ -83,11 +83,31 @@ namespace Highgeek.McWebApp.Common.Services
             switch (locale)
             {
                 case "cs":
-                    return LanguageCzech[key];
+                    try
+                    {
+                        return LanguageCzech[key];
+                    }catch(Exception ex)
+                    {
+                        return "TranslationNotFound \"" + key + "\"";
+                    }
                 case "en":
-                    return LanguageEnglish[key];
+                    try
+                    {
+                        return LanguageEnglish[key];
+                    }
+                    catch (Exception ex)
+                    {
+                        return "TranslationNotFound \"" + key + "\"";
+                    }
                 default:
-                    return LanguageCzech[key];
+                    try
+                    {
+                        return LanguageCzech[key];
+                    }
+                    catch (Exception ex)
+                    {
+                        return "TranslationNotFound \"" + key + "\"";
+                    }
             }
         }
     }
