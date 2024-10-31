@@ -1,5 +1,7 @@
 @page "/Minecraft/Account/Register"
 
+@inherits LanguageBase
+
 @layout MinecraftManageLayout
 
 @using System.Text.RegularExpressions
@@ -10,10 +12,8 @@
 @inject ISnackbar _snack
 @inject NavigationManager _navManager
 @inject IRefreshService _refreshService
-@inject ILocalizer l
 @inject IConnectedUsersService _connectedUsersService
 
-@implements IDisposable
 
 @attribute [PermissionsAuthorize("disconnectedaccount")]
 
@@ -42,12 +42,6 @@
 
 
 @code {
-    //TODO Dispose
-    protected override void OnInitialized()
-    {
-        l.LocaleRefreshRequested += RefreshAsync;
-    }
-
     private async Task OnValidSubmitAsync(){
         StatusModel result = await _mcUserManager.RegisterMcUser(Input.Nickname, Input.Password, _userService.ApplicationUser);
         if (result.Success)
@@ -76,19 +70,5 @@
         [Required]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
-    }
-
-    private async void RefreshAsync()
-    {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
-    }
-
-    public void Dispose()
-    {
-        l.LocaleRefreshRequested -= RefreshAsync;
     }
 }

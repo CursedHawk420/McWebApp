@@ -1,29 +1,10 @@
 ﻿@page "/Admin/Manage/Some"
-@inject ILocalizer l
-@implements IDisposable
+@inherits LanguageBase
 
 <PageTitle>@(l["Tutorials"] + " / " + l["AllTheMods"])</PageTitle>
 
 <h3>@l["AllTheMods"]</h3>
 
 @code {
-    protected override void OnInitialized()
-    {
-        l.LocaleRefreshRequested += RefreshAsync;
-    }
 
-    private async void RefreshAsync()
-    {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
-    }
-
-
-    public void Dispose()
-    {
-        l.LocaleRefreshRequested -= RefreshAsync;
-    }
 }

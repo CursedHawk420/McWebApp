@@ -1,7 +1,8 @@
-﻿@inject IUserService _userService
+﻿@inherits LanguageBase
+
+@inject IUserService _userService
 @inject IRefreshService _refreshService
-@inject ILocalizer l
-@implements IDisposable
+
 
     @if(!Economy.IsNullOrEmpty())
     {
@@ -22,17 +23,17 @@
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
         if(!_userService.Economy.IsNullOrEmpty()){
             Economy = _userService.Economy;
         }
         _refreshService.EcoRefreshRequested += RefreshAsync;
         _refreshService.PageRefreshRequested += RefreshAsync;
-        l.LocaleRefreshRequested += RefreshAsync;
     }
 
-    public async void RefreshAsync()
+    public override async void RefreshAsync()
     {
-            // InvokeAsync is inherited, it syncs the call back to the render thread
+        // InvokeAsync is inherited, it syncs the call back to the render thread
         await InvokeAsync(() =>
         {
             if(!_userService.Economy.IsNullOrEmpty()){
@@ -43,11 +44,13 @@
     }
 
 
-    public void Dispose()
+    public override void Dispose(bool disposing)
     {
-        _refreshService.EcoRefreshRequested -= StateHasChanged;
-        _refreshService.PageRefreshRequested -= RefreshAsync;
-        l.LocaleRefreshRequested -= RefreshAsync;
+        if (disposing)
+        {
+            _refreshService.EcoRefreshRequested -= StateHasChanged;
+            _refreshService.PageRefreshRequested -= RefreshAsync;
+        }
     }
 
 }

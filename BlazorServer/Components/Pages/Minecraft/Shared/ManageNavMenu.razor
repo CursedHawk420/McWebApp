@@ -1,26 +1,25 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@inherits LanguageBase
+
+@using Microsoft.AspNetCore.Identity
 @inject IUserService _userService
 @inject IRefreshService _refreshService
-@inject ILocalizer _localizer
-
-@implements IAsyncDisposable
 
 <ul class="nav nav-pills flex-column">
     <AuthorizeView Policy="connectedaccount">
         <NotAuthorized>
             <li class="nav-item">
-                <NavLink class="nav-link" href="/Minecraft/Account/Register" Match="NavLinkMatch.All">@_localizer["McNavMenuConnectAccount"]</NavLink>
+                <NavLink class="nav-link" href="/Minecraft/Account/Register" Match="NavLinkMatch.All">@l["McNavMenuConnectAccount"]</NavLink>
             </li>
         </NotAuthorized>
         <Authorized>
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Statistics">@_localizer["McNavMenuStats"]</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Statistics">@l["McNavMenuStats"]</NavLink>
             </li>
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Inventory">@_localizer["McNavMenuInventory"]</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Inventory">@l["McNavMenuInventory"]</NavLink>
             </li>
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Skin">@_localizer["McNavMenuSkin"]</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Skin">@l["McNavMenuSkin"]</NavLink>
             </li>
             <!--
             <li class="nav-item">
@@ -30,7 +29,7 @@
                 <NavLink class="nav-link" href="Minecraft/Account/Talismans">Talismans</NavLink>
             </li>-->
             <li class="nav-item">
-                <NavLink class="nav-link" href="Minecraft/Account/Settings">@_localizer["McNavMenuSettings"]</NavLink>
+                <NavLink class="nav-link" href="Minecraft/Account/Settings">@l["McNavMenuSettings"]</NavLink>
             </li>
         </Authorized>
     </AuthorizeView>
@@ -39,34 +38,17 @@
 @code {
     //TODO Dispose
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _refreshService.PageRefreshRequested += Refresh;
-        _localizer.LocaleRefreshRequested += RefreshAsync;
-
-        Refresh();
+        base.OnInitialized();
+        _refreshService.PageRefreshRequested += RefreshAsync;
     }
 
-
-    private async void RefreshAsync()
+    public override void Dispose(bool disposing)
     {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
+        if (disposing)
         {
-            StateHasChanged();
-        });
-    }
-    public async void Refresh()
-    {
-        await InvokeAsync(async () =>
-        {
-            StateHasChanged();
-        });
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        _refreshService.PageRefreshRequested -= Refresh;
-        _localizer.LocaleRefreshRequested -= StateHasChanged;
+            _refreshService.PageRefreshRequested -= RefreshAsync;
+        }
     }
 }

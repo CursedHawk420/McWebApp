@@ -18,10 +18,10 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            l.LocaleRefreshRequested += RefreshLanguageAsync;
+            l.LocaleRefreshRequested += RefreshAsync;
         }
 
-        public async void RefreshLanguageAsync()
+        public virtual async void RefreshAsync()
         {
             // InvokeAsync is inherited, it syncs the call back to the render thread
             await InvokeAsync(() =>
@@ -46,7 +46,7 @@ namespace Highgeek.McWebApp.BlazorServer.ComponentBases
             if (!_disposed)
             {
                 Dispose(true);
-                l.LocaleRefreshRequested -= RefreshLanguageAsync;
+                l.LocaleRefreshRequested -= RefreshAsync;
             }
             // Suppress finalization.
             GC.SuppressFinalize(this);

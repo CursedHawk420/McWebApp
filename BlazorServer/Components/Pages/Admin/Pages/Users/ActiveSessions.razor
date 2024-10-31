@@ -1,8 +1,8 @@
 ﻿@page "/Admin/Manage/ActiveSessions"
 
+@inherits LanguageBase
+
 @using Highgeek.McWebApp.BlazorServer.Components.Pages.Admin.Pages.Users.Components
-@implements IDisposable
-@inject ILocalizer l
 @inject IConnectedUsersService _globalUserService
 
 <PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-ActiveSessions"])</PageTitle>
@@ -26,7 +26,7 @@
 
     protected override void OnInitialized()
     {
-        l.LocaleRefreshRequested += RefreshAsync;
+        base.OnInitialized();
         _globalUserService.SessionRemoved += RefreshList;
         _globalUserService.SessionAdded += RefreshList;
         _globalUserService.AdminViewRefreshRequested += RefreshAsync;
@@ -40,21 +40,14 @@
         });
     }
 
-    private async void RefreshAsync()
+
+    public override void Dispose(bool disposing)
     {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
+        if (disposing)
         {
-            StateHasChanged();
-        });
-    }
-
-
-    public void Dispose()
-    {
-        l.LocaleRefreshRequested -= RefreshAsync;
-        _globalUserService.SessionRemoved -= RefreshList;
-        _globalUserService.SessionAdded -= RefreshList;
-        _globalUserService.AdminViewRefreshRequested -= RefreshAsync;
+            _globalUserService.SessionRemoved -= RefreshList;
+            _globalUserService.SessionAdded -= RefreshList;
+            _globalUserService.AdminViewRefreshRequested -= RefreshAsync;
+        }
     }
 }

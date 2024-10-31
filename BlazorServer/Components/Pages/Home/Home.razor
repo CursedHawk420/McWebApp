@@ -1,6 +1,5 @@
 ﻿@page "/"
-@implements IDisposable
-@inject ILocalizer _localizer
+@inherits LanguageBase
 <!--
 <MainCarouselComponent />
 -->
@@ -9,7 +8,7 @@
 
 <div class="container" style="height:100%;">
     <div class="row">
-        <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">@_localizer["WelcomeMessage"]</MudText>
+        <MudText Class="col" Style="margin:10px" Align="@Align.Center" Typo="Typo.h3">@l["WelcomeMessage"]</MudText>
     </div>
 
 
@@ -19,8 +18,8 @@
             {
                 <MudCarouselItem Transition="transition" Color="@Color.Transparent" Style="">
                     <MudImage Src="@item.Imageurl" Alt="Swedish Farm House" Style="width:100%;" Class="" />
-                    <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)_localizer[item.Header])</MudText>
-                    <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)_localizer[item.Content])</MudText>
+                    <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)l[item.Header])</MudText>
+                    <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)l[item.Content])</MudText>
                 </MudCarouselItem>
             }
         </MudCarousel>
@@ -110,17 +109,8 @@
     //MudText WelcomeMessage;
     protected override void OnInitialized()
     {
-        _localizer.LocaleRefreshRequested += RefreshAsync;
+        base.OnInitialized();
         GetCarouselContents();
-    }
-
-    private async void RefreshAsync()
-    {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
     }
 
     public void GetCarouselContents()
@@ -131,11 +121,12 @@
         carousel.RemoveAll(s => s.Visible == false);
     }
 
-    public void Dispose()
+    public override void Dispose(bool disposing)
     {
-        _localizer.LocaleRefreshRequested -= StateHasChanged;
-        carousel = null;
-
-        _cmsContext.Dispose();
+        if (disposing)
+        {
+            carousel = null;
+            _cmsContext.Dispose();
+        }
     }
 }

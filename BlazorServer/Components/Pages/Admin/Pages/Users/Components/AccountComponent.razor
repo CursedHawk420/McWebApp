@@ -1,4 +1,5 @@
-﻿@inject ILocalizer l
+﻿@inherits LanguageBase
+
 @inject UserManager<ApplicationUser> _userManager
 @inject MinecraftUserManager _mcUserManager
 @inject ISnackbar _snack
@@ -41,23 +42,16 @@
 
     protected override void OnInitialized()
     {
-        l.LocaleRefreshRequested += RefreshAsync;
+        base.OnInitialized();
         _connectedUsersService.AdminViewRefreshRequested += RefreshAsync;
     }
 
-    private async void RefreshAsync()
+
+    public override void Dispose(bool disposing)
     {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
+        if (disposing)
         {
-            StateHasChanged();
-        });
-    }
-
-
-    public void Dispose()
-    {
-        l.LocaleRefreshRequested -= RefreshAsync;
-        _connectedUsersService.AdminViewRefreshRequested -= RefreshAsync;
+            _connectedUsersService.AdminViewRefreshRequested -= RefreshAsync;
+        }
     }
 }

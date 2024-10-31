@@ -1,9 +1,8 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@inherits LanguageBase
+
+@using Microsoft.AspNetCore.Identity
 @inject IUserService _userService
 @inject IRefreshService _refreshService
-@inject ILocalizer l
-
-@implements IAsyncDisposable
 
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">
@@ -47,33 +46,19 @@
 </script>
 
 @code {
-    //TODO Dispose
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _refreshService.PageRefreshRequested += Refresh;
-        l.LocaleRefreshRequested += RefreshAsync;
-
-        Refresh();
-    }
-
-    public async void Refresh()
-    {
-        StateHasChanged();
+        base.OnInitialized();
+        _refreshService.PageRefreshRequested += RefreshAsync;
+        RefreshAsync();
     }
 
 
-    private async void RefreshAsync()
+    public override void Dispose(bool disposing)
     {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
+        if (disposing)
         {
-            StateHasChanged();
-        });
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        _refreshService.PageRefreshRequested -= Refresh;
+            _refreshService.PageRefreshRequested -= RefreshAsync;
+        }
     }
 }

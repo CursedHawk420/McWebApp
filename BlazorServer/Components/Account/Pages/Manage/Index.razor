@@ -1,5 +1,7 @@
 ﻿@page "/Account/Manage"
 
+@inherits LanguageBase
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using Highgeek.McWebApp.Common.Data
@@ -8,9 +10,6 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject ISnackbar _snack
-@inject ILocalizer l
-
-@implements IDisposable
 
 <PageTitle>@l["Profile"]</PageTitle>
 
@@ -55,7 +54,6 @@
         user = await UserAccessor.GetUserAsync(authenticationState.Result);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-        l.LocaleRefreshRequested += RefreshAsync;
 
         Input.PhoneNumber ??= phoneNumber;
     }
@@ -76,16 +74,6 @@
     }
 
 
-    private async void RefreshAsync()
-    {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
-    }
-
-
     private sealed class InputModel
     {
         [Phone]
@@ -93,8 +81,4 @@
         public string? PhoneNumber { get; set; }
     }
 
-    public void Dispose()
-    {
-        l.LocaleRefreshRequested -= RefreshAsync;
-    }
 }

@@ -3,8 +3,6 @@
 @inject IUserService _userService
 @inject IRefreshService _refreshService
 
-@implements IAsyncDisposable
-
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">
         <NavLink class="nav-link" href="Admin/Manage/Users">@l["nav-admin-users"]</NavLink>
@@ -19,32 +17,19 @@
 
 
 @code {
-    //TODO Dispose
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _refreshService.PageRefreshRequested += Refresh;
+        base.OnInitialized();
+        _refreshService.PageRefreshRequested += RefreshAsync;
 
-        Refresh();
+        RefreshAsync();
     }
 
-    public async void Refresh()
+    public override void Dispose(bool disposing)
     {
-        StateHasChanged();
-    }
-
-
-    private async void RefreshAsync()
-    {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
+        if (disposing)
         {
-            StateHasChanged();
-        });
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        _refreshService.PageRefreshRequested -= Refresh;
+            _refreshService.PageRefreshRequested -= RefreshAsync;
+        }
     }
 }

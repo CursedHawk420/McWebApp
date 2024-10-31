@@ -1,5 +1,7 @@
-﻿@using OpenApi.Highgeek.LuckPermsApi.Model
-@inject ILocalizer l
+﻿@inherits LanguageBase
+
+@using OpenApi.Highgeek.LuckPermsApi.Model
+
 @inject UserManager<ApplicationUser> _userManager
 @inject MinecraftUserManager _mcUserManager
 @inject ISnackbar _snack
@@ -73,7 +75,7 @@ else
 
     protected override async void OnInitialized()
     {
-        l.LocaleRefreshRequested += RefreshAsync;
+        base.OnInitialized();
         _connectedUsersService.AdminViewRefreshRequested += RefreshAsync;
         _redisUpdateService.PlayersEconomyChanged += HandleEconomyChange;
 
@@ -147,20 +149,12 @@ else
     }
 
 
-    private async void RefreshAsync()
+    public override void Dispose(bool disposing)
     {
-        // InvokeAsync is inherited, it syncs the call back to the render thread
-        await InvokeAsync(() =>
+        if (disposing)
         {
-            StateHasChanged();
-        });
-    }
-
-
-    public void Dispose()
-    {
-        l.LocaleRefreshRequested -= RefreshAsync;
-        _connectedUsersService.AdminViewRefreshRequested -= RefreshAsync;
-        _redisUpdateService.PlayersEconomyChanged -= HandleEconomyChange;
+            _connectedUsersService.AdminViewRefreshRequested -= RefreshAsync;
+            _redisUpdateService.PlayersEconomyChanged -= HandleEconomyChange;
+        }
     }
 }
