@@ -1,4 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Helpers;
+using NRedisStack.RedisStackCommands;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,11 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public static async Task DelFromRedis(string uuid)
         {
             await Database.KeyDeleteAsync(uuid);
+        }
+
+        public static string GetJson(string uuid)
+        {
+            return Database.JSON().Get(uuid).ToString();
         }
     }
 }

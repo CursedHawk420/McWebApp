@@ -1,6 +1,63 @@
 @page "/Minecraft/Account/Statistics"
 
+@inherits LanguageBase
+
+@inject IUserService _userService
+@inject IRedisUpdateService _redisUpdateService
 @attribute [PermissionsAuthorize("connectedaccount")]
 
-<PageTitle>Account Statistics</PageTitle>
+<PageTitle>@l["acc-stats"]</PageTitle>
+<h1>@l["acc-stats"]</h1>
+@if (loaded)
+{
+    @foreach (var item in ServersStats)
+    {
+        <h3>@l[item.Key]</h3>
+        <p>@item.Value</p>
+    }
+}
 
+@code{
+    Dictionary<string, string> ServersStats = new Dictionary<string, string>();
+
+    private bool loaded = false;
+
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _redisUpdateService.StatsUpdate += UpdateStats;
+        SetStats();
+    }
+
+    public async void SetStats()
+    {
+        var keys = await RedisService.GetKeysList("players:stats:" + _userService.MinecraftUser.NickName + ":*");
+        ServersStats.Clear();
+        foreach (var key in keys)
+        {
+            var item = RedisService.GetJson(key);
+            var name = key.Substring(key.LastIndexOf(':') + 1, key.Length - key.LastIndexOf(':') - 1);
+            ServersStats.TryAdd(name, item);
+        }
+        loaded = true;
+
+        RefreshAsync();
+    }
+
+    public async void UpdateStats(object? sender, string uuid)
+    {
+        if (uuid.Contains(_userService.MinecraftUser.NickName))
+        {
+            SetStats();
+        }
+    }
+
+    public override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _redisUpdateService.StatsUpdate -= UpdateStats;
+        }
+    }
+}

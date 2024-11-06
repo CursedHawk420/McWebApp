@@ -67,7 +67,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             {
                 var key = GetKey(channel);
                 //_logger.LogInformation("Key: " + key + " channel: " + channel + " message: " + message);
-                if (key == "set")
+                if (key.Contains("set"))
                 {
                     //_logger.LogInformation("RedisListenerAsync triggers VinvUpdatedEventArgs with uuid: " + message);
 

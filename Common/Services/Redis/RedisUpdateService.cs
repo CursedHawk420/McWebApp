@@ -35,6 +35,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<string> SessionListUpdate;
 
+        public event EventHandler<string> StatsUpdate;
+
 
         event Action LocaleChangeRequested;
         void CallLocaleChange();
@@ -62,6 +64,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> PlayersEconomyChanged;
         public event EventHandler<string> McAccountDisconnectUpdate;
         public event EventHandler<string> SessionListUpdate;
+        public event EventHandler<string> StatsUpdate;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -174,6 +177,17 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 try
                 {
                     PlayersSettingsChanged?.Invoke(this, uuid);
+                }
+                catch (Exception ex)
+                {
+                    ex.WriteExceptionToRedis();
+                    return;
+                }
+            }else if(uuid.Contains("stats"))
+            {
+                try
+                {
+                    StatsUpdate?.Invoke(this, uuid);
                 }
                 catch (Exception ex)
                 {
