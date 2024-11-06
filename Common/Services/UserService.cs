@@ -44,6 +44,8 @@ namespace Highgeek.McWebApp.Common.Services
 
         //public Task<Dictionary<string, float>> GetEconomyModel();
         public Dictionary<string, float> Economy { get; set; }
+        public Task<StatusModel> SetPremiumAccount();
+        public Task<StatusModel> UnsetPremiumAccount();
 
     }
     public class UserService : IDisposable, IUserService
@@ -309,6 +311,17 @@ namespace Highgeek.McWebApp.Common.Services
                     }
                 }
             }
+        }
+
+        public async Task<StatusModel> SetPremiumAccount()
+        {
+            return await _mcUserManager.SetPremiumAccount(MinecraftUser.NickName);
+        }
+
+
+        public async Task<StatusModel> UnsetPremiumAccount()
+        {
+            return await _mcUserManager.UnsetPremiumAccount(MinecraftUser.NickName);
         }
 
         private bool _disposed = false;

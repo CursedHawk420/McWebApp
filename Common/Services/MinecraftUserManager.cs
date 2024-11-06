@@ -66,7 +66,7 @@ namespace Highgeek.McWebApp.Common.Services
         {
             return await GetMcserverMaindbContext().WebMinecraftusers.FirstOrDefaultAsync(s => s.NickName == name);
         }
-        public bool CheckPassword(string mcpassword, string mcusername, Authme authmeEntry)
+        public static bool CheckPassword(string mcpassword, string mcusername, Authme authmeEntry)
         {
             return BCrypt.Net.BCrypt.Verify(mcpassword, authmeEntry.Password);
         }
@@ -105,6 +105,7 @@ namespace Highgeek.McWebApp.Common.Services
             if (CheckPassword(password, mcusername, authmeEntry))
             {
                 MinecraftUser minecraftUser;
+
                 if (minecraftaccountlinked == null)
                 {
                     minecraftUser = new MinecraftUser();
@@ -113,6 +114,7 @@ namespace Highgeek.McWebApp.Common.Services
                 {
                     minecraftUser = minecraftaccountlinked;
                 }
+
                 minecraftUser.Uuid = luckpermsPlayerEntry.Uuid;
                 minecraftUser.NickName = authmeEntry.Realname;
                 minecraftUser.ApplicationUserId = applicationUser.Id;
@@ -120,8 +122,6 @@ namespace Highgeek.McWebApp.Common.Services
                 minecraftUser.ApplicationUserEmail = applicationUser.Email;
                 minecraftUser.LpUserGroup = luckpermsPlayerEntry.PrimaryGroup;
                 minecraftUser.EcoId = GetUserEcoId(luckpermsPlayerEntry.Uuid);
-
-
 
                 if (premium.Premium1 == true)
                 {
@@ -135,14 +135,16 @@ namespace Highgeek.McWebApp.Common.Services
                     minecraftUser.IsPremium = false;
                     _skinmanager.DefaultSkin(minecraftUser, applicationUser,null);
                 }
+
                 applicationUser.mcUUID = luckpermsPlayerEntry.Uuid;
                 applicationUser.mcNickname = authmeEntry.Realname;
                 await _userManager.UpdateAsync(applicationUser);
-                //await _userManager.AddToRoleAsync(applicationUser, "MC");
+
                 if (minecraftaccountlinked == null)
                 {
                     await _mcMainDbContext.AddAsync(minecraftUser);
                 }
+
                 await _mcMainDbContext.SaveChangesAsync();
                 _logger.LogInformation("[MinecraftUserManager] Uživatel (" + applicationUser.Email + ") si přopojil herní účet (" + mcusername + ")");
                 return new StatusModel("minecraftusermanager-register-succes-01");
@@ -153,6 +155,7 @@ namespace Highgeek.McWebApp.Common.Services
                 return new StatusModel("minecraftusermanager-register-error-01", "wrong password (DB0302)");
             }
         }
+
         public string ParseUUID(string uuid)
         {
             uuid = uuid.Insert(8, "-");
@@ -161,10 +164,12 @@ namespace Highgeek.McWebApp.Common.Services
             uuid = uuid.Insert(23, "-");
             return uuid.ToString();
         }
+
         public async Task ChangeIngamePassword()
         {
 
         }
+
         public async Task<StatusModel> DisconnectMinecraftAccount(ApplicationUser applicationUser)
         {
             if (applicationUser.mcNickname == null)
@@ -181,15 +186,6 @@ namespace Highgeek.McWebApp.Common.Services
             return new StatusModel("minecraftusermanager-unregister-succes-01");
         }
 
-        public async Task GetIngameRoles()
-        {
-
-        }
-        public async Task ChangeIngameRoles()
-        {
-
-        }
-
         public async Task<string> GetPlayerNameFromUuid(string uuid)
         {
             var result = await _mcMainDbContext.LuckpermsPlayers.FirstOrDefaultAsync(s => s.Uuid == uuid);
@@ -202,24 +198,6 @@ namespace Highgeek.McWebApp.Common.Services
                 return result.Username;
             }
         }
-
-        public async Task<bool> CheckOnlinePlayer(string playername)
-        {
-            var player = await _mcDataDbContext.MpdbEconomies.FirstOrDefaultAsync(s => s.PlayerName == playername);
-            if (player.SyncComplete == "false")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public async Task<List<MpdbEconomy>> GetOnlinePlayerList()
-        {
-            return await _mcDataDbContext.MpdbEconomies.Where(s => s.SyncComplete == "false").ToListAsync();
-        }
-
 
         public async Task<byte[]> GetSkinHeadImage(string playerName)
         {
@@ -274,7 +252,7 @@ namespace Highgeek.McWebApp.Common.Services
             }
         }
 
-        public async Task<string> SetPremiumAccount(string playerName)
+        public async Task<StatusModel> SetPremiumAccount(string playerName)
         {
             MinecraftPremiumResponse minecraftPremiumResponse;
             using (WebClient wc = new WebClient())
@@ -289,28 +267,30 @@ namespace Highgeek.McWebApp.Common.Services
                 }
                 catch (WebException ex) when (ex.Response is HttpWebResponse wr && wr.StatusCode == HttpStatusCode.NotFound)
                 {
-                    return "Účet není zaregistrovaný u Mojangu!";
+                    return new StatusModel("minecraftusermanager-setpremium-error-01", false);
                 }
-                
             }
         }
-        public async Task<string> SetPremiumAccountinDatabase(string playerName, string uuid)
+
+        public async Task<StatusModel> SetPremiumAccountinDatabase(string playerName, string uuid)
         {
             var premium = await _mcMainDbContext.Premia.FirstOrDefaultAsync(s => s.Name == playerName);
             premium.Uuid = uuid;
             premium.Premium1 = true;
             await _mcMainDbContext.SaveChangesAsync();
-            return "Premium login aktivován.";
+            return new StatusModel("minecraftusermanager-setpremium-succes-01");
         }
-        public async Task<string> UnsetPremiumAccount(string playerName)
+
+        public async Task<StatusModel> UnsetPremiumAccount(string playerName)
         {
             var premium = await _mcMainDbContext.Premia.FirstOrDefaultAsync(s => s.Name == playerName);
             premium.Premium1 = false;
             premium.Uuid = null;
             await _mcMainDbContext.SaveChangesAsync();
-            return "Premium login deaktivován.";
+            return new StatusModel("minecraftusermanager-unsetpremium-succes-01");
         }
-        public string UuidFuy(string uuid)
+
+        public static string UuidFuy(string uuid)
         {
             uuid = uuid.Remove(8, 1);
             uuid = uuid.Remove(12, 1);
@@ -318,13 +298,15 @@ namespace Highgeek.McWebApp.Common.Services
             uuid = uuid.Remove(20, 1);
             return uuid.ToString();
         }
-        public byte[] GetUserEcoId(string uuid)
+
+        public static byte[] GetUserEcoId(string uuid)
         {
             uuid = UuidFuy(uuid);
             byte[] id = UUID.FromString(uuid);
             return id;
 
         }
+
         public async Task SetEcoIdForExistingUser(string uuid)
         {
             byte[] ecoid = GetUserEcoId(uuid);

@@ -166,29 +166,17 @@ else
             //_userService.ApplicationUser = user;
             await _userService.UserServiceInitAsync(user);
             //await _invService.Init();
-            Refresh();
+            RefreshAsync();
         }
         else
         {
             _userService.Loaded = true;
-            Refresh();
+            RefreshAsync();
         }
     }
 
-    private void Refresh()
-    {
-        try
-        {
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            ex.WriteExceptionToRedis();
-            _logger.LogWarning("MainLayout Refresh() error: " + ex.Message);
-        }
-    }
     
-    private async void RefreshAsync()
+    public async void RefreshAsync()
     {
             // InvokeAsync is inherited, it syncs the call back to the render thread
             await InvokeAsync(() =>
@@ -304,7 +292,7 @@ else
                 // For example: Close file handles, database connections, etc.
 
                 _refreshService.InventoryViewRefreshRequested -= RefreshInventory;
-                _refreshService.PageRefreshRequested -= Refresh;
+                _refreshService.PageRefreshRequested -= RefreshAsync;
                 //_refreshService.ApplicationUserRefreshRequested -= UserInit;
                 _refreshService.MainNavMenuClosehRequested -= DrawerClose;
                 _redisUpdateService.InventoryChanged -= c_InventoryUpdated;

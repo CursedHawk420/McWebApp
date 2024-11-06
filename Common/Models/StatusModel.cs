@@ -29,6 +29,12 @@ namespace Highgeek.McWebApp.Common.Models
             this.Success = true;
         }
 
+        public StatusModel(string userMessage, bool succes)
+        {
+            this.UserMessage = userMessage;
+            this.Success = succes;
+        }
+
         public StatusModel(string userMessage)
         {
             this.UserMessage = userMessage;

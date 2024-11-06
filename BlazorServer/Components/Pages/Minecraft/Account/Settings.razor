@@ -15,12 +15,50 @@
 <PageTitle>@l["GameAccountSettings"]</PageTitle>
 
 <h1>@l["GameAccountSettings"]</h1>
+<div style="padding-top:1rem;padding-bottom:1rem;">
+    <MudSwitch Label="@l[ _checked+"-set-premium-account"]" LabelPosition="LabelPosition.End" T="bool" ValueChanged="ValueChange" Value="_checked" ThumbIcon="@Icons.Material.Filled.WorkspacePremium" ThumbIconColor="@(_checked==true ? Color.Success : Color.Error)"></MudSwitch>
+</div>
 
 <button @onclick="DisconnectAccount" class="w-100 btn btn-lg btn-danger">@l["DisconnectMcAccount"]</button>
 
 @code{
+    private bool _checked;
 
-    private async Task DisconnectAccount(){
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _checked = _userService.MinecraftUser.IsPremium;
+    }
+
+    private async void ValueChange()
+    {
+        _checked = !_checked;
+        _userService.MinecraftUser.IsPremium = !_userService.MinecraftUser.IsPremium;
+
+        if (_checked)
+        {
+            var result = await _userService.SetPremiumAccount();
+            if (result.Success)
+            {
+                _snack.Add(l[result.UserMessage], Severity.Success);
+            }
+            else
+            {
+                _snack.Add(l[result.UserMessage], Severity.Error);
+            }
+        }
+        else
+        {
+            var result = await _userService.UnsetPremiumAccount();
+            if (result.Success)
+            {
+                _snack.Add(l[result.UserMessage], Severity.Success);
+            }
+        }
+    }
+
+    private async Task DisconnectAccount()
+    {
         StatusModel result = await _mcUserManager.DisconnectMinecraftAccount(_userService.ApplicationUser);
         await _userService.DisconnectGameAccount();
         _snack.Add(l[result.UserMessage], Severity.Success);
@@ -35,5 +73,4 @@
             
         }
     }
-
 }
