@@ -1,15 +1,21 @@
 @page "/Minecraft/Account/Statistics"
 
+@using Newtonsoft.Json
+
 @inherits LanguageBase
 
 @inject IUserService _userService
 @inject IRedisUpdateService _redisUpdateService
+@inject IJSRuntime _js
+
 @attribute [PermissionsAuthorize("connectedaccount")]
 
 <PageTitle>@l["acc-stats"]</PageTitle>
 <h1>@l["acc-stats"]</h1>
 @if (loaded)
 {
+    <h3>Overall</h3>
+    <p>@MergedJson</p>
     @foreach (var item in ServersStats)
     {
         <h3>@l[item.Key]</h3>
@@ -18,6 +24,7 @@
 }
 
 @code{
+    string MergedJson;
     Dictionary<string, string> ServersStats = new Dictionary<string, string>();
 
     private bool loaded = false;
@@ -41,6 +48,38 @@
             ServersStats.TryAdd(name, item);
         }
         loaded = true;
+
+
+
+        //dictionary merge
+        var toProccess = new List<Dictionary<string, Dictionary<string, int>>>();
+        var proccessed = new Dictionary<string, Dictionary<string, int>>();
+
+        foreach (var item in ServersStats)
+        {
+            toProccess.Add(JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(item.Value));
+        }
+
+
+        foreach (var item in toProccess)
+        {
+            foreach (var items in item)
+            {
+                var currkey = items.Key;
+                proccessed.TryAdd(currkey, new Dictionary<string, int>());
+                var currDict = proccessed[currkey];
+                foreach(var it in items.Value)
+                {
+                    var good = currDict.TryAdd(it.Key, it.Value);
+                    if (!good)
+                    {
+
+                        proccessed[currkey][it.Key] = currDict[it.Key] + it.Value;
+                    }
+                }
+            }
+        }
+        MergedJson = JsonConvert.SerializeObject(proccessed);
 
         RefreshAsync();
     }
