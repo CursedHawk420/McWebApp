@@ -1,0 +1,25 @@
+﻿@inherits LanguageBase
+
+<div class="col-md-1" style="padding-bottom:2rem; margin-right:7rem">
+    <div>
+        <h5>@l["stats-" + Stats.Key]</h5>
+    </div>
+    <table width="100%">
+        @foreach (var t in Stats.Value)
+        {
+            <tr>
+                <td>
+                    <MudImage Width="32" Height="32" Src="@("https://api.highgeek.eu/api/images/items/name/" + t.Key.ToLower())"></MudImage>
+                </td>
+                <td style="text-align: right;">
+                    @t.Value
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+@code {
+
+    [Parameter]
+    public KeyValuePair<string, Dictionary<string, int>> Stats { get; set; }
+}

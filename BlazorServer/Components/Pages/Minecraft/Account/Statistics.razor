@@ -10,62 +10,38 @@
 @attribute [PermissionsAuthorize("connectedaccount")]
 
 <PageTitle>@l["acc-stats"]</PageTitle>
-<div style="margin-top:0.5rem; font-family:Minecraft; font-size:9pt" class="col-md-10">
+<div style="margin-top:0.5rem; font-family:Minecraft; font-size:9pt" class="col-md-9">
     <h1>@l["acc-stats"]</h1>
     @if (loaded)
     {
-        @foreach (var item in Values.Reverse())
-        {
-            <div class="row" style="padding-bottom:2rem">
-                <h3>@l[item.Key]</h3>
-                @foreach (var it in item.Value)
-                {
-                    @if (it.Key == "GENERAL" || it.Key == "KILL_ENTITY" || it.Key == "ENTITY_KILLED_BY")
-                    {
-                        <div class="col-md-1" style="padding-bottom:2rem; margin-right:1.2rem">
-                            <div>
-                                <h5>@l["stats-" + it.Key]</h5>
-                            </div>
-                            <table width="100%">
-                                @foreach (var t in it.Value)
+        <MudCarousel Style="height:70vh; width:100%;overflow-y:auto;" ShowArrows="@true" ShowBullets="@true" EnableSwipeGesture="true" AutoCycle="false" TData="object">
+            @foreach (var item in Values.Reverse())
+            {
+                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Transparent">
+                    <div class="row" style="padding-bottom:2rem">
+                        <h3>@l[item.Key]</h3>
+                        <div class="row">
+                            @foreach (var it in item.Value)
+                            {
+                                @if (it.Key == "GENERAL" || it.Key == "KILL_ENTITY" || it.Key == "ENTITY_KILLED_BY")
                                 {
-                                    <tr>
-                                        <td>
-                                            @t.Key
-                                        </td>
-                                        <td style="text-align: right;">
-                                            @t.Value
-                                        </td>
-                                    </tr>
+                                    <StatsGeneralComponent Stats="it" />
                                 }
-                            </table>
+                            }
                         </div>
-                    }
-                    else
-                    {
-
-                        <div class="col-md-1" style="padding-bottom:2rem; margin-right:1.2rem">
-                            <div>
-                                <h5>@l["stats-" + it.Key]</h5>
-                            </div>
-                            <table width="100%">
-                                @foreach (var t in it.Value)
+                        <div class="row">
+                            @foreach (var it in item.Value)
+                            {
+                                @if (it.Key != "GENERAL" && it.Key != "KILL_ENTITY" && it.Key != "ENTITY_KILLED_BY")
                                 {
-                                    <tr>
-                                        <td>
-                                            <MudImage Width="32" Height="32" Src="@("https://api.highgeek.eu/api/images/items/name/" + t.Key.ToLower())"></MudImage>
-                                        </td>
-                                        <td style="text-align: right;">
-                                            @t.Value
-                                        </td>
-                                    </tr>
+                                    <StatsItemComponent Stats="it" />
                                 }
-                            </table>
+                            }
                         </div>
-                    }
-                }
-            </div>
-        }
+                    </div>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
     }
 </div>
 

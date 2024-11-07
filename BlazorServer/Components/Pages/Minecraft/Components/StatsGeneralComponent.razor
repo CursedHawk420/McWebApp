@@ -1,0 +1,25 @@
+﻿@inherits LanguageBase
+
+
+<div class="col-md-1" style="padding-bottom:2rem; margin-right:7rem">
+    <div>
+        <h5>@l["stats-" + Stats.Key]</h5>
+    </div>
+    <table width="100%">
+        @foreach (var t in Stats.Value)
+        {
+            <tr>
+                <td>
+                    @t.Key
+                </td>
+                <td style="text-align: right;">
+                    @t.Value
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+@code {
+    [Parameter]
+    public KeyValuePair<string, Dictionary<string, int>> Stats { get; set; }
+}
