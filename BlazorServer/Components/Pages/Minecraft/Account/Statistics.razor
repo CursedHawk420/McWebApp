@@ -6,26 +6,74 @@
 
 @inject IUserService _userService
 @inject IRedisUpdateService _redisUpdateService
-@inject IJSRuntime _js
 
 @attribute [PermissionsAuthorize("connectedaccount")]
 
 <PageTitle>@l["acc-stats"]</PageTitle>
-<h1>@l["acc-stats"]</h1>
-@if (loaded)
-{
-    <h3>Overall</h3>
-    <p>@MergedJson</p>
-    @foreach (var item in ServersStats)
+<div style="margin-top:0.5rem; font-family:Minecraft; font-size:9pt" class="col-md-10">
+    <h1>@l["acc-stats"]</h1>
+    @if (loaded)
     {
-        <h3>@l[item.Key]</h3>
-        <p>@item.Value</p>
-    }
-}
+        @foreach (var item in Values.Reverse())
+        {
+            <div class="row" style="padding-bottom:2rem">
+                <h3>@l[item.Key]</h3>
+                @foreach (var it in item.Value)
+                {
+                    @if (it.Key == "GENERAL" || it.Key == "KILL_ENTITY" || it.Key == "ENTITY_KILLED_BY")
+                    {
+                        <div class="col-md-1" style="padding-bottom:2rem; margin-right:1.2rem">
+                            <div>
+                                <h5>@l["stats-" + it.Key]</h5>
+                            </div>
+                            <table width="100%">
+                                @foreach (var t in it.Value)
+                                {
+                                    <tr>
+                                        <td>
+                                            @t.Key
+                                        </td>
+                                        <td style="text-align: right;">
+                                            @t.Value
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
 
-@code{
+                        <div class="col-md-1" style="padding-bottom:2rem; margin-right:1.2rem">
+                            <div>
+                                <h5>@l["stats-" + it.Key]</h5>
+                            </div>
+                            <table width="100%">
+                                @foreach (var t in it.Value)
+                                {
+                                    <tr>
+                                        <td>
+                                            <MudImage Width="32" Height="32" Src="@("https://api.highgeek.eu/api/images/items/name/" + t.Key.ToLower())"></MudImage>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            @t.Value
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
     string MergedJson;
     Dictionary<string, string> ServersStats = new Dictionary<string, string>();
+
+    Dictionary<string, Dictionary<string, Dictionary<string, int>>> Values = new Dictionary<string, Dictionary<string, Dictionary<string, int>>>();
 
     private bool loaded = false;
 
@@ -47,7 +95,6 @@
             var name = key.Substring(key.LastIndexOf(':') + 1, key.Length - key.LastIndexOf(':') - 1);
             ServersStats.TryAdd(name, item);
         }
-        loaded = true;
 
 
 
@@ -57,7 +104,12 @@
 
         foreach (var item in ServersStats)
         {
-            toProccess.Add(JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(item.Value));
+            if (item.Key != "auth")
+            {
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(item.Value);
+                Values.Add(item.Key, dict);
+                toProccess.Add(dict);
+            }
         }
 
 
@@ -68,7 +120,7 @@
                 var currkey = items.Key;
                 proccessed.TryAdd(currkey, new Dictionary<string, int>());
                 var currDict = proccessed[currkey];
-                foreach(var it in items.Value)
+                foreach (var it in items.Value)
                 {
                     var good = currDict.TryAdd(it.Key, it.Value);
                     if (!good)
@@ -79,8 +131,12 @@
                 }
             }
         }
+
+        Values.Add("allserversstats", proccessed);
+
         MergedJson = JsonConvert.SerializeObject(proccessed);
 
+        loaded = true;
         RefreshAsync();
     }
 
@@ -97,6 +153,18 @@
         if (disposing)
         {
             _redisUpdateService.StatsUpdate -= UpdateStats;
+        }
+    }
+
+    public class StatType
+    {
+        public string Name { get; set; }
+        public string Type { get; set; }
+
+        public StatType(string name, string type)
+        {
+            this.Type = type;
+            this.Name = name;
         }
     }
 }

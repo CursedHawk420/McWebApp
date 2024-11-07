@@ -14,13 +14,16 @@
 
 <PageTitle>@l["GameAccountSettings"]</PageTitle>
 
+<div style="margin-top:0.5rem" class="col-md-6">
 <h1>@l["GameAccountSettings"]</h1>
+
 <div style="padding-top:1rem;padding-bottom:1rem;">
     <MudSwitch Label="@l[ _checked+"-set-premium-account"]" LabelPosition="LabelPosition.End" T="bool" ValueChanged="ValueChange" Value="_checked" ThumbIcon="@Icons.Material.Filled.WorkspacePremium" ThumbIconColor="@(_checked==true ? Color.Success : Color.Error)"></MudSwitch>
 </div>
 
 <button @onclick="DisconnectAccount" class="w-100 btn btn-lg btn-danger">@l["DisconnectMcAccount"]</button>
 
+</div>
 @code{
     private bool _checked;
 
