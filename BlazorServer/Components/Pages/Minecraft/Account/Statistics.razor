@@ -65,6 +65,7 @@
     {
         var keys = await RedisService.GetKeysList("players:stats:" + _userService.MinecraftUser.NickName + ":*");
         ServersStats.Clear();
+        Values.Clear();
         foreach (var key in keys)
         {
             var item = RedisService.GetJson(key);
