@@ -65,7 +65,6 @@
     {
         var keys = await RedisService.GetKeysList("players:stats:" + _userService.MinecraftUser.NickName + ":*");
         ServersStats.Clear();
-        Values.Clear();
         foreach (var key in keys)
         {
             var item = RedisService.GetJson(key);
@@ -78,13 +77,13 @@
         //dictionary merge
         var toProccess = new List<Dictionary<string, Dictionary<string, int>>>();
         var proccessed = new Dictionary<string, Dictionary<string, int>>();
-
+        Values = new Dictionary<string, Dictionary<string, Dictionary<string, int>>>();
         foreach (var item in ServersStats)
         {
             if (item.Key != "auth")
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(item.Value);
-                Values.Add(item.Key, dict);
+                Values.TryAdd(item.Key, dict);
                 toProccess.Add(dict);
             }
         }
@@ -109,7 +108,7 @@
             }
         }
 
-        Values.Add("allserversstats", proccessed);
+        Values.TryAdd("allserversstats", proccessed);
 
         MergedJson = JsonConvert.SerializeObject(proccessed);
 
