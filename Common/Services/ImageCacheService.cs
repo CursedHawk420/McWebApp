@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Threading.Channels;
 using static Highgeek.McWebApp.Common.Services.ImageDetection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace Highgeek.McWebApp.Common.Services
 {
@@ -22,6 +23,48 @@ namespace Highgeek.McWebApp.Common.Services
         {
             _cmsContext = cmsContext;
             _logger = logger;
+        }
+
+        public async Task<StatusModel> SaveImageFile(byte[] file, string name, bool rewrite)
+        {
+
+            ImageCache? image = await _cmsContext.ImageCache.FirstOrDefaultAsync(s => s.Name == name);
+
+            if(image is not null)
+            {
+                if (!rewrite)
+                {
+                    return new StatusModel("imagecache-imagealreadyexists");
+                }
+                else
+                {
+                    image.Image = file;
+                    image.Imageurl = "https://api.highgeek.eu/api/images/items/name/" + name;
+                    image.Date = DateTime.Now.ToString();
+                    _cmsContext.Update(image);
+                    await _cmsContext.SaveChangesAsync();
+                    return new StatusModel("imagecache-imagerewritesuccess");
+                }
+            }
+            else
+            {
+                image = new ImageCache();
+                ImageFormat format = ImageDetection.GetImageFormat(file);
+
+                if (format != ImageFormat.UNKNOWN)
+                {
+                    image.Format = format.ToString();
+                    image.Uuid = Guid.NewGuid().ToString();
+                    image.Name = name;
+                    image.Image = file;
+                    image.Imageurl = "https://api.highgeek.eu/api/images/items/name/" + name;
+                    image.Date = DateTime.Now.ToString();
+                    await _cmsContext.AddAsync(image);
+                    await _cmsContext.SaveChangesAsync();
+                    return new StatusModel("imagecache-imagewritesuccess");
+                }
+                return new StatusModel("imagecache-imagewritefailed", false);
+            }
         }
 
         public async Task<ImageCache> GetImageFromDatabase(string name)

@@ -1,0 +1,76 @@
+﻿@page "/Admin/Manage/Images/Items"
+
+@inherits LanguageBase
+
+@inject ImageCacheService _imageService
+@inject ISnackbar _snack
+
+
+<h3>ItemImageUploader</h3>
+
+<MudTextField T="string" @bind-Text="name"></MudTextField>
+<MudFileUpload T="IBrowserFile" FilesChanged="SetFile" Accept=".png, .jpg" MaximumFileCount="1">
+    <ActivatorContent>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+            Upload Files
+        </MudButton>
+    </ActivatorContent>    
+    <SelectedTemplate>
+        @if (context != null)
+        {
+            <MudText>@context.Name</MudText>
+        }
+        else
+        {
+            <MudText>No File</MudText>
+        }
+    </SelectedTemplate>
+</MudFileUpload>
+
+<MudSwitch T="bool" @bind-Value="rewrite">Rewrite: @rewrite</MudSwitch>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UploadFiles">Upload File</MudButton>
+
+<Highgeek.McWebApp.BlazorServer.Components.Pages.Admin.Pages.Images.Components.ItemGalleryComponent/>
+
+@code {
+    string name;
+    bool rewrite = false;
+
+    IBrowserFile file;
+
+    private void SetFile(IBrowserFile toSet)
+    {
+        file = toSet;
+    }
+
+    private async Task UploadFiles()
+    {
+        var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        await using var fs = new FileStream(path, FileMode.Create);
+
+        await file.OpenReadStream(file.Size).CopyToAsync(fs);
+        var bytes = new byte[file.Size];
+
+        fs.Position = 0;
+
+        await fs.ReadAsync(bytes);
+
+        fs.Close();
+
+        File.Delete(path);
+
+        var status = await _imageService.SaveImageFile(bytes, name, rewrite);
+
+        if (status.Success)
+        {
+            _snack.Add(l[status.UserMessage], Severity.Success);
+        }
+        else
+        {
+            _snack.Add(l[status.UserMessage], Severity.Error);
+        }
+    }
+}

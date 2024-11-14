@@ -143,6 +143,7 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddSingleton<IRedisUpdateService, RedisUpdateService>();
 builder.Services.AddSingleton<IServerListService, ServerListService>();
+builder.Services.AddScoped<ImageCacheService>();
 
 builder.Services.AddSingleton<RedisListenerService>();
 builder.Services.AddHostedService(

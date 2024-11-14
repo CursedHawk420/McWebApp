@@ -1,0 +1,42 @@
+﻿@inherits LanguageBase
+
+@inject McWebApp1CmsContext _cmsContext
+
+<h3>ItemGallery</h3>
+@if (loaded)
+{
+    <table>
+        @foreach (var item in imageCaches)
+        {
+            <tr>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    <MudImage Height="32" Width="32" Src="@string.Format("data:image/jpeg;base64,{0}", Convert.ToBase64String(item.Image))"></MudImage>
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+@code {
+    bool loaded = false;
+
+    List<ImageCache> imageCaches = new List<ImageCache>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        imageCaches = _cmsContext.ImageCache.ToList();
+
+
+        loaded = true;
+        RefreshAsync();
+    }
+
+    public override void Dispose(bool disposing)
+    {
+        imageCaches.Clear();
+    }
+}
