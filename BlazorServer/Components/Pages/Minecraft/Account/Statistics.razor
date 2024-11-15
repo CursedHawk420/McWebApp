@@ -16,7 +16,7 @@
     @if (loaded)
     {
         <MudCarousel Style="height:70vh; width:100%;overflow-y:auto;" ShowArrows="@true" ShowBullets="@true" EnableSwipeGesture="true" AutoCycle="false" TData="object">
-            @foreach (var item in Values.OrderBy(p => p.Key))
+            @foreach (var item in Values.ToArray().OrderBy(p => p.Key))
             {
                 <MudCarouselItem Transition="Transition.Slide" Color="@Color.Transparent">
                     <div class="row" style="padding-bottom:2rem">
@@ -55,20 +55,20 @@
 
     private bool loaded = false;
 
-    protected override async void OnInitialized()
+    protected override void OnInitialized()
     {
         base.OnInitialized();
 
         _redisUpdateService.StatsUpdate += UpdateStats;
         if (!locked)
         {
-            locked = true;
             SetStats();
         }
     }
 
     public async void SetStats()
     {
+        locked = true;
         try
         {
             var keys = await RedisService.GetKeysList("players:stats:" + _userService.MinecraftUser.NickName + ":*");
@@ -134,7 +134,10 @@
     {
         if (uuid.Contains(_userService.MinecraftUser.NickName))
         {
-            SetStats();
+            if (!locked)
+            {
+                SetStats();
+            }
         }
     }
 
