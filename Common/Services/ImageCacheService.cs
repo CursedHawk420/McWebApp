@@ -19,9 +19,9 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly McWebApp1CmsContext _cmsContext;
         private readonly ILogger<ImageCacheService> _logger;
 
-        public ImageCacheService(McWebApp1CmsContext cmsContext, ILogger<ImageCacheService> logger)
+        public ImageCacheService(ILogger<ImageCacheService> logger)
         {
-            _cmsContext = cmsContext;
+            _cmsContext = new McWebApp1CmsContext();
             _logger = logger;
         }
 

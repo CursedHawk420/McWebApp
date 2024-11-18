@@ -65,7 +65,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<UsersDbContext>();
 
 builder.Services.AddSingleton<LuckPermsService>();
-builder.Services.AddScoped<ImageCacheService>();
+builder.Services.AddSingleton<ImageCacheService>();
 builder.Services.AddScoped<MinecraftUserManager>();
 
 builder.Services.AddScoped<EcoParser>();
