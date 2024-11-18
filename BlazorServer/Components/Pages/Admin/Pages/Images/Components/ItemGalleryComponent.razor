@@ -13,7 +13,7 @@
                     @item.Name
                 </td>
                 <td>
-                    <MudImage Height="32" Width="32" Src="@string.Format("data:image/jpeg;base64,{0}", Convert.ToBase64String(item.Image))"></MudImage>
+                    <MudImage Height="32" Width="32" Src="@("https://api.highgeek.eu/api/images/items/name/" + item.Name)"></MudImage>
                 </td>
             </tr>
         }
