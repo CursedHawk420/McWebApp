@@ -6,7 +6,34 @@
 @inject IConnectedUsersService _connectedUsersService
 
 <div class="row">
-    <div class="col">
+    <div class="col-9">
+        <table class="table1">
+            <tr>
+                <td>
+                    @("ID: ")
+                </td>
+                <td>
+                    @ApplicationUser.Id
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @("Mail: ")
+                </td>
+                <td>
+                    @ApplicationUser.Email
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @("Mail confirmed: ")
+                </td>
+                <td>
+                    @ApplicationUser.EmailConfirmed
+                </td>
+            </tr>
+        </table>
+
         <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteUserAsync">Delete user</MudButton>
     </div>
 </div>

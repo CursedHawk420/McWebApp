@@ -1,12 +1,12 @@
 ﻿@page "/Admin/Manage/Users"
 @using Highgeek.McWebApp.BlazorServer.Components.Pages.Admin.Pages.Users.Components
-@implements IDisposable
-@inject ILocalizer l
 @inject IUserService _userService
 @inject IRefreshService _refreshService
 @inject UserManager<ApplicationUser> _userManager
 @inject MinecraftUserManager _mcUserManager
 @inject IConnectedUsersService _connectedUsersService
+
+@inherits LanguageBase
 
 <PageTitle>@(l["nav-admin"] + " / " + l["nav-admin-users"])</PageTitle>
 
@@ -47,11 +47,17 @@
                                 </MudCardHeader>
                                 <MudCardContent Class="pa-0">
                                     <div class="container" style="padding-bottom:2rem">
+                                        <MudPaper Style="background-color:#313131; padding:1rem">
+                                            <h4>Web</h4>
+                                            <AccountComponent ApplicationUser="context.ApplicationUser"></AccountComponent>
+                                        </MudPaper>
                                         @if (context.ApplicationUser.mcUUID is not null)
                                         {
-                                            <MinecraftComponent ApplicationUser="context.ApplicationUser"></MinecraftComponent>
+                                            <MudPaper Style="background-color:#313131; padding:1rem; margin-top:1rem;">
+                                                    <h4 style="padding-top:0.5rem">Minecraft</h4>
+                                                    <MinecraftComponent ApplicationUser="context.ApplicationUser"></MinecraftComponent>
+                                            </MudPaper>
                                         }
-                                        <AccountComponent ApplicationUser="context.ApplicationUser"></AccountComponent>
                                     </div>
                                 </MudCardContent>
                             </MudCard>
@@ -70,7 +76,7 @@
 
     protected override void OnInitialized()
     {
-        l.LocaleRefreshRequested += RefreshAsync;
+        base.OnInitialized();
         _refreshService.PageRefreshRequested += RefreshAsync;
         _connectedUsersService.AdminViewRefreshRequested += UsersInitDelay;
 
@@ -123,11 +129,13 @@
     }
 
 
-    public void Dispose()
+    public override void Dispose(bool disposing)
     {
-        l.LocaleRefreshRequested -= RefreshAsync;
-        _refreshService.PageRefreshRequested -= RefreshAsync;
-        _connectedUsersService.AdminViewRefreshRequested -= UsersInitDelay;
+        if (disposing)
+        {
+            _refreshService.PageRefreshRequested -= RefreshAsync;
+            _connectedUsersService.AdminViewRefreshRequested -= UsersInitDelay;
+        }
     }
 
 
