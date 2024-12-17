@@ -74,13 +74,13 @@ namespace Highgeek.McWebApp.Api.Services.Discord
             return new McserverMaindbContext();
         }
 
-        public async void LoadSettings(object sender, string uuid)
+        public async void LoadSettings(object? sender, string uuid)
         {
             _logger.LogInformation($"Trying to load settigns");
             if (uuid.IsNullOrEmpty() || uuid.StartsWith("settings:server:chat:channels"))
             {
                 channelSettings.Clear();
-                _logger.LogInformation($"Loading channel settings from redis.");
+                _logger.LogDebug($"Loading channel settings from redis.");
                 foreach (var key in RedisService.GetKeysList("settings:server:chat:channels:*").Result)
                 {
                     channelSettings.Add(ChannelSettingsAdapter.FromJson(RedisService.GetFromRedisAsync(key).Result));
@@ -89,13 +89,13 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
             if (uuid.IsNullOrEmpty() || uuid.Equals("settings:mcwebapp:discord:channels"))
             {
-                _logger.LogInformation($"Loading discord channel settings pairs from redis.");
+                _logger.LogDebug($"Loading discord channel settings pairs from redis.");
                 DiscordPairing discordPairsList = DiscordPairing.FromJson(await RedisService.GetFromRedisAsync("settings:mcwebapp:discord:channels"));
                 channelPairs = discordPairsList.DiscordPairs.ToList();
             }
             if (uuid.IsNullOrEmpty() || uuid.Equals("settings:mcwebapp:discord:roles"))
             {
-                _logger.LogInformation($"Loading discord roles settings pairs from redis.");
+                _logger.LogDebug($"Loading discord roles settings pairs from redis.");
 
                 DiscordPairing discordPairsList = DiscordPairing.FromJson(RedisService.GetFromRedisAsync("settings:mcwebapp:discord:roles").Result);
                 rolePairs = discordPairsList.DiscordPairs.ToList();
@@ -155,7 +155,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
         private Task Log(LogMessage message)
         {
-            _logger.LogInformation($"DiscordBackgroundService LogMessage: " + message.Message);
+            _logger.LogDebug($"DiscordBackgroundService LogMessage: " + message.Message);
             return Task.CompletedTask;
         }
 
@@ -296,7 +296,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
 
         //discord bot sends message from other sources
-        public async void SendChatMessageToDiscord(object sender, RedisChatEntryAdapter chatEntryAdapter)
+        public async void SendChatMessageToDiscord(object? sender, RedisChatEntryAdapter chatEntryAdapter)
         {
             if (!cacheMessages)
             {
@@ -381,12 +381,12 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
             var webhookClient = new DiscordWebhookClient(webhook);
 
-            string random = new UUID().ToString();
+            string random = new Guid().ToString();
             string avatarUrl = "https://api.highgeek.eu/api/skins/playerhead/" + chatEntry.Username + "?" + random;
 
             var messageId = await webhookClient.SendMessageAsync(text: chatEntry.Message, avatarUrl: avatarUrl, username: chatEntry.Nickname);
 
-            _logger.LogInformation($"DiscordSocketListener ExecuteWebhook: \n" + messageId.ToString());
+            _logger.LogDebug($"DiscordSocketListener ExecuteWebhook: \n" + messageId.ToString());
 
         }
 
@@ -412,7 +412,7 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
 
 
-        public async void LegacyPreChatEvent(object sender, RedisChatEntryAdapter chatEntry)
+        public async void LegacyPreChatEvent(object? sender, RedisChatEntryAdapter chatEntry)
         {
             var LuckUser = await _luckPermsService.GetUserAsync(await _luckPermsService.GetUserUuidAsync(chatEntry.Username));
             if (LuckUser is not null)

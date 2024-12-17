@@ -126,6 +126,7 @@ builder.Services.AddScoped<TimeZoneService>();
 builder.Services.AddScoped<ICookieService, CookieService>();
 
 builder.Services.AddSingleton<ILanguageProvider, LanguageProvider>();
+builder.Services.AddSingleton<IPlanService, PlanService>();
 
 builder.Services.AddScoped<ILocalizer, Localizer>();
 

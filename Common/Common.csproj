@@ -79,4 +79,10 @@
 		</Reference>
 	</ItemGroup>
 
+
+
+	<ItemGroup>
+	  <Folder Include="Models\mcserver_plandb\" />
+	</ItemGroup>
+
 </Project>

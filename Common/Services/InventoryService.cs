@@ -120,9 +120,9 @@ namespace Highgeek.McWebApp.Common.Services
             {
                 string uuid = prefix + ":" + _userService.MinecraftUser.NickName + ":" + inventory.InventoryUuid + ":" + i;
                 string json = await RedisService.GetFromRedisAsync(uuid);
-                _logger.LogInformation("Loaded item from redis: " + json);
+                _logger.LogDebug("Loaded item from redis: " + json);
                 GameItem item = new GameItem(json, uuid);
-                _logger.LogInformation("ItemParser parsed item: " + item.Name);
+                _logger.LogDebug("ItemParser parsed item: " + item.Name);
                 items.Add(item);
             }
 
