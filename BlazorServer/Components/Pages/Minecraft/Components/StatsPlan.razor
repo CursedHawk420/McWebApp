@@ -3,8 +3,6 @@
 @inject IPlanService _plan
 @inject IUserService _userService
 
-<h3>@l["planstats"]</h3>
-
 @if (loaded)
 {
     @foreach (var i in PlanUser.PlanSessions)
@@ -14,6 +12,9 @@
 }
 
 @code {
+    [Parameter]
+    public string? PlayerName { get; set; }
+
     bool loaded = false;
 
     public PlanUser? PlanUser { get; set; }
@@ -24,9 +25,13 @@
         Load();
     }
 
-    private async void Load()
+    private void Load()
     {
-        PlanUser = _plan.GetPlanPlayer(_userService.ApplicationUser.mcUUID);
+        if (PlayerName.IsNullOrEmpty())
+        {
+            PlayerName = _userService.ApplicationUser.mcUUID;
+        }
+        PlanUser = _plan.GetPlanPlayer(PlayerName);
         
         loaded = true;
         RefreshAsync();

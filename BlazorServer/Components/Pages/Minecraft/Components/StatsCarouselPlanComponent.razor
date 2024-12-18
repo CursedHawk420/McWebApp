@@ -1,0 +1,56 @@
+﻿@inherits LanguageBase
+@inject IPlanService _plan
+@inject LuckPermsService _luckService
+@inject TimeZoneService _time
+
+@if (loaded)
+{
+    <div class="col-md-2" style="padding-bottom:2rem; margin-right:7rem">
+        <div>
+            <h5>@l["stats-plangeneralinfo"]</h5>
+        </div>
+        <table width="100%">
+            <tr>
+                <td>
+                    @l["REGISTERED"]
+                </td>
+                <td style="text-align: right;">
+                    @_time.GetLocalDateTime(DateTimeOffset.FromUnixTimeMilliseconds(planUserInfo.Registered)).Result.ToString("g")
+                </td>
+            </tr>
+        </table>
+    </div>
+}
+
+
+
+@code {
+    [Parameter]
+    public string ServerName { get; set; }
+
+    [Parameter]
+    public string PlayerName { get; set; }
+
+    private PlanUserInfo planUserInfo;
+
+    private bool loaded = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Load();
+    }
+
+    private async void Load()
+    {
+        _plan.GetPlanPlayer(await _luckService.GetUserUuidAsync(PlayerName));
+
+        planUserInfo = _plan.PlanUser.PlanUserInfos.FirstOrDefault(x => x.Server.Name == ServerName);
+        if(planUserInfo != null)
+        {
+            loaded = true;
+            RefreshAsync();
+        }
+    }
+}

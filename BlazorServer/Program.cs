@@ -59,6 +59,7 @@ var connectionStringCms = ConfigProvider.GetConnectionString("PostgresCmsConnect
 var connectionStringMC = ConfigProvider.GetConnectionString("MysqlMCServerConnection");
 var connectionStringMC_data = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
 var connectionStringMC_eco = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_ecodb");
+var connectionStringMC_plan = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_plandb");
 
 //users dbcontext Postgress
 builder.Services.AddDbContext<UsersDbContext>(options => options.UseNpgsql(connectionStringUsers), ServiceLifetime.Scoped);
@@ -69,6 +70,7 @@ builder.Services.AddDbContext<McWebApp1CmsContext>(options => options.UseNpgsql(
 builder.Services.AddDbContext<McserverMaindbContext>(options => options.UseMySql(connectionStringMC, MariaDbServerVersion.AutoDetect(connectionStringMC), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverDatadbContext>(options => options.UseMySql(connectionStringMC_data, MariaDbServerVersion.AutoDetect(connectionStringMC_data), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverEcoDataContext>(options => options.UseMySql(connectionStringMC_eco, MariaDbServerVersion.AutoDetect(connectionStringMC_eco), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
+builder.Services.AddDbContext<McserverPlandbContext>(options => options.UseMySql(connectionStringMC_plan, MariaDbServerVersion.AutoDetect(connectionStringMC_plan), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 
 builder.Services.AddHttpContextAccessor();
 // Add services to the container.
@@ -126,7 +128,7 @@ builder.Services.AddScoped<TimeZoneService>();
 builder.Services.AddScoped<ICookieService, CookieService>();
 
 builder.Services.AddSingleton<ILanguageProvider, LanguageProvider>();
-builder.Services.AddSingleton<IPlanService, PlanService>();
+builder.Services.AddScoped<IPlanService, PlanService>();
 
 builder.Services.AddScoped<ILocalizer, Localizer>();
 
