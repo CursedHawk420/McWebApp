@@ -1,0 +1,47 @@
+﻿@page "/Admin/Manage/UsersStats"
+@using Highgeek.McWebApp.BlazorServer.Components.Pages.Minecraft.Components
+
+@inherits LanguageBase
+
+<h3>UsersStats</h3>
+@if (loaded)
+{
+
+    <MudExpansionPanels>
+        @foreach (var user in Users)
+        {
+            <MudExpansionPanel Text="@user" MaxHeight="1000" >
+                <StatisticsComponent PlayerName="@user"/>
+            </MudExpansionPanel>
+        }
+    </MudExpansionPanels>
+
+}
+@code {
+    IList<string> Users { get; set; } = new List<string>();
+    IList<string> StatKeys { get; set; }
+
+    private bool loaded = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Load();
+    }
+
+    private async void Load()
+    {
+        StatKeys = await RedisService.GetKeysList("players:stats:*");
+
+        foreach(var i in StatKeys)
+        {
+            string username = i.Split(':')[2];
+            if (!Users.Contains(username))
+            {
+                Users.Add(username);
+            }
+        }
+        loaded = true;
+        RefreshAsync();
+    }
+}

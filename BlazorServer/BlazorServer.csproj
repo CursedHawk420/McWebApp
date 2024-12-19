@@ -79,5 +79,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Components\Admin\" />
+	  <Folder Include="Components\Pages\Admin\Pages\Stats\Components\" />
 	</ItemGroup>
 </Project>
