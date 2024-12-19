@@ -1,7 +1,9 @@
 ﻿@page "/Minecraft/Account/Statistics"
 
 @inject IUserService _userService
+@inherits LanguageBase
 
+<PageTitle>@l["acc-stats"]</PageTitle>
 <div style="margin-top:0.5rem; font-family:Minecraft; font-size:9pt" class="col-md-9">
 <StatisticsComponent PlayerName="@_userService.ApplicationUser.mcNickname"></StatisticsComponent>
 
