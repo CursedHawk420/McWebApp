@@ -19,7 +19,7 @@
 # and the Docker itself: https://opensource.com/resources/what-docker
 
 default:
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:9.0
 
 stages:
   - build
