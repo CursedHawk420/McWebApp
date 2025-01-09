@@ -17,7 +17,7 @@
             @foreach (var item in carousel)
             {
                 <MudCarouselItem Transition="transition" Color="@Color.Transparent" Style="">
-                    <MudImage Src="@item.Imageurl" Alt="Swedish Farm House" Style="width:100%;" Class="" />
+                    <MudImage Src="@item.Imageurl" Alt="@(l[item.Header] + " image")" Style="width:100%;" Class="" />
                     <MudText Align="@Align.Center" Typo="Typo.h4">@((MarkupString)l[item.Header])</MudText>
                     <MudText Align="@Align.Center" Typo="Typo.subtitle1">@((MarkupString)l[item.Content])</MudText>
                 </MudCarouselItem>
