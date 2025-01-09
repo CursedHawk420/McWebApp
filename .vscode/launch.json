@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "buildBlazorServer",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/BlazorServer/bin/Debug/net8.0/BlazorServer.dll",
+            "program": "${workspaceFolder}/BlazorServer/bin/Debug/net9.0/BlazorServer.dll",
             "args": [],
             //"cwd": "${workspaceFolder}/BlazorServer",
             "stopAtEntry": false,
@@ -34,7 +34,7 @@
             "request": "launch",
             "preLaunchTask": "buildApi",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Api/bin/Debug/net8.0/Api.dll",
+            "program": "${workspaceFolder}/Api/bin/Debug/net9.0/Api.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Api",
             "stopAtEntry": false,
