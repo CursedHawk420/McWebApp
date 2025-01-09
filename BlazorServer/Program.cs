@@ -267,7 +267,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseStaticFiles();
+//app.UseStaticFiles();
+app.MapStaticAssets();
+
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
