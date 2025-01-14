@@ -27,6 +27,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry;
 using Prometheus;
+using Highgeek.McWebApp.Common.Models.Minecraft;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -129,6 +130,8 @@ builder.Services.AddScoped<ICookieService, CookieService>();
 
 builder.Services.AddSingleton<ILanguageProvider, LanguageProvider>();
 builder.Services.AddScoped<IPlanService, PlanService>();
+builder.Services.AddSingleton<IAuctionService, AuctionService>();
+builder.Services.AddScoped<AuctionItem>();
 
 builder.Services.AddScoped<ILocalizer, Localizer>();
 

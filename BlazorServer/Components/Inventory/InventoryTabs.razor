@@ -9,27 +9,27 @@
     @if (_invService.InvData != null)
     {
         <div class="row">
-        <div class="col-md-6">
-        @if (vinvData.Count > 1)
-        {
+            <div class="col-md-6">
+                @if (vinvData.Count > 1)
+                {
 
                     <MudSelect T="VirtualInventory" @bind-Value="@selectedVinv" ToStringFunc="@converter" Label="Select your inventory" Variant="Variant.Outlined" Class="" SelectedValuesChanged=SelectedChanged>
-                @foreach (var inv in vinvData)
-                {
-                    <MudSelectItem Value="@inv" />
-                }
+                        @foreach (var inv in vinvData)
+                        {
+                            <MudSelectItem Value="@inv" />
+                        }
                     </MudSelect>
                 }
             </div>
             <div class="col-md-6">
-        @if (winvData.Count > 1)
-        {
+                @if (winvData.Count > 1)
+                {
 
                     <MudSelect T="VirtualInventory" @bind-Value="@selectedWinv" ToStringFunc="@converter" Label="Select your web inventory" Variant="Variant.Outlined" Class="" SelectedValuesChanged=SelectedChanged>
-                @foreach (var inv in winvData)
-                {
-                    <MudSelectItem Value="@inv" />
-                }
+                        @foreach (var inv in winvData)
+                        {
+                            <MudSelectItem Value="@inv" />
+                        }
                     </MudSelect>
                 }
             </div>
@@ -37,7 +37,7 @@
 
         @if (selectedVinv != null)
         {
-            <InventoryComponent selectedVinv="selectedVinv"  @ref="inventoryComponent" />
+            <InventoryComponent selectedVinv="selectedVinv" @ref="inventoryComponent" />
         }
 
     }

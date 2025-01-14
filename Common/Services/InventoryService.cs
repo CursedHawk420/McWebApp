@@ -31,6 +31,7 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly IRedisUpdateService _redisUpdateService;
         private readonly IUserService _userService;
         private readonly IRefreshService _refreshService;
+        private readonly IAuctionService _auctionService;
 
         public InventoriesList InvData { get; set; }
 
@@ -40,12 +41,13 @@ namespace Highgeek.McWebApp.Common.Services
 
         public List<GameItem?> AllItems { get; set; }
 
-        public InventoryService(ILogger<InventoryService> logger, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
+        public InventoryService(ILogger<InventoryService> logger, IUserService userService, IRedisUpdateService redisUpdateService, IRefreshService refreshService, IAuctionService auctionService)
         {
             _logger = logger;
             _userService = userService;
             _redisUpdateService = redisUpdateService;
             _refreshService = refreshService;
+            _auctionService = auctionService;
 
             AllItems = new List<GameItem?>();
 
@@ -99,6 +101,7 @@ namespace Highgeek.McWebApp.Common.Services
                         _logger.LogWarning("InventoryService.Init() failed!: \nMessage: " + ex.Message);
                     }
                 }
+                AllItems.AddRange(_auctionService.Items);
                 //_refreshService.CallInventoryViewRefresh();
 
             }

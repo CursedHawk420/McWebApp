@@ -1,0 +1,78 @@
+﻿@inherits LanguageBase
+
+@inject IAuctionService _auctionService
+@inject IRedisUpdateService _redisUpdateService
+
+@if (loadingComplete)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="@invclass">
+                <div class="inv-container">
+                    <div style="background-image:url('@vinvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
+                        @if (true)
+                        {
+                            @for (int r = 0; r < vinvrows; r++)
+                            {
+                                <div class="d-flex dropinv ">
+                                    @for (int c = 0; c < 9; c++)
+                                    {
+                                        <MudDropZone T="GameItem" Identifier="@(GetIdentifier())" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                        i++;
+                                    }
+                                </div>
+                            }
+                            this.i = 0;
+                        }
+                    </div>
+                    <MudText class="inv-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    [CascadingParameter]
+    public Highgeek.McWebApp.BlazorServer.Components.Layout.MainLayout MainLayout { get; set; }
+
+    private string invclass = "biginv";
+
+    bool loadingComplete = true;
+    //todo: velikost invů
+    private int vinvslots = 27;
+
+    private int vinvrows = 3;
+
+    private int i = 0;
+
+    private string vinvsize = "https://images.highgeek.eu/singlechest.png";
+
+
+    MudTooltip tooltip;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _redisUpdateService.AuctionItemChangeAction += RefreshInventory;
+    }
+
+    private string GetIdentifier()
+    {
+        if (i < _auctionService.Items.Count)
+        {
+            return _auctionService.Items[i].Identifier;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private void RefreshInventory()
+    {
+        RefreshAsync();
+        MainLayout.MainDropContainer.Refresh();
+    }
+
+
+}

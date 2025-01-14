@@ -1,9 +1,11 @@
 ﻿using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
+using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
 using SharpNBT;
 using SharpNBT.SNBT;
 using System.Globalization;
+using System.Net.Sockets;
 
 namespace Highgeek.McWebApp.Common.Models.Minecraft
 {
@@ -31,7 +33,17 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 
         public static string AIRITEM = "{\r\n    \"id\": \"minecraft:air\"\r\n}";
 
+        public GameItem()
+        {
+
+        }
+
         public GameItem (string json, string originUuid)
+        {
+            InitGameItem(json, originUuid);
+        }
+
+        public void InitGameItem(string json, string originUuid)
         {
             this.Json = json;
             this.OriginUuid = originUuid;
@@ -60,16 +72,18 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             CustomName = GetCustomName();
             DisplayName = GetDisplayName();
 
-            if(Id == "minecraft:player_head"){
-                try{
+            if (Id == "minecraft:player_head")
+            {
+                try
+                {
                     TrySetMinecraftProfile();
-                }catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     ex.WriteExceptionToRedis();
                 }
             }
         }
-
 
         public void TrySetMinecraftProfile(){
             if(Components.ContainsKey("minecraft:profile")){
@@ -198,6 +212,18 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
             String = textInfo.ToTitleCase(String);
             return String;
+        }
+
+    }
+    static class ExtensionMethods
+    {
+        public static AuctionItem ToAuctionItem(this GameItem source, string owner, long? price, IRedisUpdateService redisUpdateService)
+        {
+            AuctionItem auctionItem = new AuctionItem(source);
+            auctionItem.Owner = owner;
+            auctionItem.Price = price;
+            auctionItem._redisUpdateService = redisUpdateService;
+            return auctionItem;
         }
     }
 }

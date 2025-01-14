@@ -37,6 +37,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<string> StatsUpdate;
 
+        public event EventHandler<string> AuctionItemChange;
+
 
         event Action LocaleChangeRequested;
         void CallLocaleChange();
@@ -46,6 +48,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         event Action ServerListRefreshRequested;
         void CallServerListRefresh();
+
+        event Action AuctionItemChangeAction;
+        void CallAuctionItemChangeAction();
     }
 
     public class RedisUpdateService : IRedisUpdateService
@@ -65,6 +70,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> McAccountDisconnectUpdate;
         public event EventHandler<string> SessionListUpdate;
         public event EventHandler<string> StatsUpdate;
+        public event EventHandler<string> AuctionItemChange;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -123,11 +129,19 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 case "appchannel":
                     await AppChannelMessageEvent(Uuid);
                     return;
+                case "auction":
+                    await AuctionItemEvent(Uuid);
+                    return;
                 default:
                     OtherRedisSetChange?.Invoke(this, Uuid);
                     return;
             }
 
+        }
+
+        public async Task AuctionItemEvent(string uuid)
+        {
+            AuctionItemChange?.Invoke(this, uuid);
         }
 
         public async Task AppChannelMessageEvent(string uuid)
@@ -267,6 +281,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public void CallLanguageProviderRefresh()
         {
             LanguageProviderRefreshRequested?.Invoke();
+        }
+
+
+        public event Action AuctionItemChangeAction;
+        public void CallAuctionItemChangeAction()
+        {
+            AuctionItemChangeAction?.Invoke();
         }
     }
 }
