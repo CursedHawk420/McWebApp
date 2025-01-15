@@ -1,4 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Helpers;
+using Highgeek.McWebApp.Common.Models.Adapters.Auction;
 using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
@@ -219,11 +220,7 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
     {
         public static AuctionItem ToAuctionItem(this GameItem source, string owner, long? price, IRedisUpdateService redisUpdateService)
         {
-            AuctionItem auctionItem = new AuctionItem(source);
-            auctionItem.Owner = owner;
-            auctionItem.Price = price;
-            auctionItem._redisUpdateService = redisUpdateService;
-            return auctionItem;
+            return new AuctionItem(source, owner, price, redisUpdateService);
         }
     }
 }

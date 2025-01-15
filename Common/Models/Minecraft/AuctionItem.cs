@@ -1,6 +1,7 @@
 ﻿using Highgeek.McWebApp.Common.Models.Adapters.Auction;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
+using NetTopologySuite.Densify;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,22 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 
         private bool disposedValue;
 
-        public AuctionItem(GameItem gameItem)
+        public AuctionItem(GameItem gameItem, string owner, long? price, IRedisUpdateService redisUpdateService)
         {
             InitInhertedProperties(gameItem);
+            Owner = owner;
+            Price = price;
+            _redisUpdateService = redisUpdateService;
+
+            var item = new AuctionItemAdapter();
+            item.Owner = Owner;
+            item.Price = Price;
+            item.Datetime = DateTime.UtcNow.ToString();
+            item.GameItem = Json;
+            OriginUuid = Guid.NewGuid().ToString();
+            Identifier = OriginUuid;
+
+            RedisService.SetInRedis("auction:" + OriginUuid, item.ToJson());
         }
         public AuctionItem(IRedisUpdateService redisUpdateService)
         {
