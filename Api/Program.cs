@@ -17,6 +17,8 @@ using OpenTelemetry.Trace;
 using OpenTelemetry;
 using Prometheus;
 using Highgeek.McWebApp.Common;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 
 
@@ -24,15 +26,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 Environment.SetEnvironmentVariable("HIGHGEEK_APPNAME", "dotnet_api");
 
+var connectionStringHangfire = "";
+
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
     builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+    connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
 }
 else
 {
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
     builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+    connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireDevConnection");
 }
 
 
@@ -63,6 +69,19 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<UsersDbContext>();
+
+
+builder.Services.AddHangfire(config =>
+    config.UsePostgreSqlStorage(c =>
+        c.UseNpgsqlConnection(connectionStringHangfire)));
+
+//string[] queues = new[] { "one", "two" };
+builder.Services.AddHangfireServer(options =>
+{
+    options.ServerName = Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV");
+    options.WorkerCount = 20;
+    //options.Queues = queues;
+});
 
 builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddScoped<ImageCacheService>();

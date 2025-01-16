@@ -37,12 +37,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 Environment.SetEnvironmentVariable("HIGHGEEK_APPNAME", "dotnet_blazorserver");
-
+var connectionStringHangfire = "";
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
 
     builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
+    connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
 }
 else
 {
@@ -51,6 +53,8 @@ else
     Environment.SetEnvironmentVariable("TENANT_ID", "dev");
 
     builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
+    connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireDevConnection");
 }
 
 builder.AddServiceDefaults();
@@ -58,7 +62,6 @@ builder.AddServiceDefaults();
 var connectionStringUsers = ConfigProvider.GetConnectionString("PostgresUsersConnection");
 var connectionStringKeys = ConfigProvider.GetConnectionString("PostgresKeysConnection");
 var connectionStringCms = ConfigProvider.GetConnectionString("PostgresCmsConnection");
-var connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
 
 var connectionStringMC = ConfigProvider.GetConnectionString("MysqlMCServerConnection");
 var connectionStringMC_data = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
@@ -290,6 +293,7 @@ app.UseHangfireDashboard(options: new DashboardOptions
     IgnoreAntiforgeryToken = true,
     Authorization = new[] { new HangfirePerms("group.sa") }
 });
+JobStorage.Current.GetConnection().RemoveTimedOutServers(new TimeSpan(0, 0, 15));
 
 //app.UseStaticFiles();
 app.MapStaticAssets();
