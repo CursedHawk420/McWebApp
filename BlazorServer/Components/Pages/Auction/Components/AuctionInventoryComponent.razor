@@ -54,6 +54,7 @@
     {
         base.OnInitialized();
         _redisUpdateService.AuctionItemChangeAction += RefreshInventory;
+        _redisUpdateService.AuctionItemAddAction += RefreshInventory;
     }
 
     private string GetIdentifier()
@@ -69,6 +70,12 @@
     }
 
     private void RefreshInventory()
+    {
+        RefreshAsync();
+        MainLayout.MainDropContainer.Refresh();
+    }
+
+    private void RefreshInventory(object? sender, AuctionItem auctionItem)
     {
         RefreshAsync();
         MainLayout.MainDropContainer.Refresh();

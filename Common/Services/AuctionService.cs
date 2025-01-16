@@ -26,15 +26,27 @@ namespace Highgeek.McWebApp.Common.Services
             _redisUpdateService = redisUpdateService;
             Items = new List<AuctionItem>();
 
+            _redisUpdateService.AuctionItemChange += AddToAuction;
+
             foreach (var uuid in RedisService.GetKeysList(keysprefix+"*").Result)
             {
                 Items.Add(BuildAuctionItem(uuid));
             }
         }
+        public async void AddToAuction(object? sender, string uuid)
+        {
+            var item = Items.FirstOrDefault(x => x.OriginUuid == uuid);
+            if (item == null)
+            {
+                var it = BuildAuctionItem(uuid);
+                Items.Add(it);
+                _redisUpdateService.CallAuctionItemAddAction(it);
+            }
+        }
 
         public async Task AddToAuction(string owner, long? price, GameItem gameItem)
         {
-            Items.Add(gameItem.ToAuctionItem(owner,price,_redisUpdateService));
+            gameItem.ToAuctionItem(owner, price, _redisUpdateService);
         }
 
         public AuctionItem BuildAuctionItem(string uuid)

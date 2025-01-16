@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Highgeek.McWebApp.Common.Helpers;
 using MimeKit.Encodings;
+using Highgeek.McWebApp.Common.Models.Minecraft;
 
 namespace Highgeek.McWebApp.Common.Services.Redis
 {
@@ -38,6 +39,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> StatsUpdate;
 
         public event EventHandler<string> AuctionItemChange;
+
+        event EventHandler<AuctionItem> AuctionItemAddAction;
+        void CallAuctionItemAddAction(AuctionItem auctionItem);
 
 
         event Action LocaleChangeRequested;
@@ -288,6 +292,12 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public void CallAuctionItemChangeAction()
         {
             AuctionItemChangeAction?.Invoke();
+        }
+
+        public event EventHandler<AuctionItem> AuctionItemAddAction;
+        public void CallAuctionItemAddAction(AuctionItem auctionItem)
+        {
+            AuctionItemAddAction?.Invoke(this, auctionItem);
         }
     }
 }

@@ -54,6 +54,12 @@ namespace Highgeek.McWebApp.Common.Services
             //_iRedisUpdateService = _serviceProvider.GetService<IRedisUpdateService>();
             //_iRedisUpdateService.InventoryChanged += c_InventoryUpdated;
             _refreshService.InventoryServiceRefreshRequested += RefreshInventoryService;
+            _redisUpdateService.AuctionItemAddAction += AddAuctionItem;
+        }
+
+        public async void AddAuctionItem(object? sender, AuctionItem item)
+        {
+            AllItems.Add(item);
         }
 
         public async void RefreshInventoryService()

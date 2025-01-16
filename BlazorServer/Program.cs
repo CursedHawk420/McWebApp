@@ -28,6 +28,8 @@ using OpenTelemetry.Trace;
 using OpenTelemetry;
 using Prometheus;
 using Highgeek.McWebApp.Common.Models.Minecraft;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +58,7 @@ builder.AddServiceDefaults();
 var connectionStringUsers = ConfigProvider.GetConnectionString("PostgresUsersConnection");
 var connectionStringKeys = ConfigProvider.GetConnectionString("PostgresKeysConnection");
 var connectionStringCms = ConfigProvider.GetConnectionString("PostgresCmsConnection");
+var connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
 
 var connectionStringMC = ConfigProvider.GetConnectionString("MysqlMCServerConnection");
 var connectionStringMC_data = ConfigProvider.GetConnectionString("MysqlMCServerConnection_mcserver_datadb");
@@ -89,6 +92,18 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("group.sa", policy => policy.Requirements.Add(new PermissionsAuthorizeAttribute("group.sa")));
     options.AddPolicy("group.default", policy => policy.Requirements.Add(new PermissionsAuthorizeAttribute("group.default")));
     options.AddPolicy("connectedaccount", policy => policy.Requirements.Add(new PermissionsAuthorizeAttribute("connectedaccount")));
+});
+
+builder.Services.AddHangfire(config =>
+    config.UsePostgreSqlStorage(c =>
+        c.UseNpgsqlConnection(connectionStringHangfire)));
+
+//string[] queues = new[] { "one", "two" };
+builder.Services.AddHangfireServer(options => 
+{
+    options.ServerName = Environment.GetEnvironmentVariable("TENANT_ID");
+    options.WorkerCount = 5;
+    //options.Queues = queues;
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, PermissionsAuthorizationHandler>();
@@ -232,8 +247,8 @@ builder.Services.AddMudServices(config =>
 builder.Services.UseHttpClientMetrics();
 
 
-
 var app = builder.Build();
+
 
 app.MapDefaultEndpoints();
 
@@ -269,6 +284,12 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard(options: new DashboardOptions
+{
+    IgnoreAntiforgeryToken = true,
+    Authorization = new[] { new HangfirePerms("group.sa") }
+});
 
 //app.UseStaticFiles();
 app.MapStaticAssets();
