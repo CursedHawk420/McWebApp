@@ -256,7 +256,32 @@ namespace Highgeek.McWebApp.Common.Services
         {
             foreach (var key in await RedisService.GetKeysList("settings:server:chat:channels:*"))
             {
-                AvaiableChannels.Add(ChannelSettingsAdapter.FromJson(await RedisService.GetFromRedisAsync(key)));
+                var channel = ChannelSettingsAdapter.FromJson(await RedisService.GetFromRedisAsync(key));
+                if(channel.SpeakPermission is not null)
+                {
+                    if (LpUser.Nodes.Any(d => d.Key == channel.SpeakPermission))
+                    {
+                        channel.CanSpeak = true;
+                    }else
+                    {
+                        channel.CanSpeak = false;
+                    }
+                }
+                else
+                {
+                    channel.CanSpeak = true;
+                }
+                if (channel.Permission is null)
+                {
+                    AvaiableChannels.Add(channel);
+                }
+                else
+                {
+                    if(LpUser.Nodes.Any(d => d.Key == channel.Permission))
+                    {
+                        AvaiableChannels.Add(channel);
+                    }
+                }
             }
         }
 

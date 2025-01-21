@@ -51,17 +51,21 @@
         </MudPaper>
         <MudPaper Class="flex flex-col shrink-0 w-full bg-primary-gradient text-primary-content shadow-md z-1 cursor-pointer" Style="height: 50px; background-color:#1B5E20">
             <div class="row" style="padding-top:0.5rem">
-                <div class="col-9" >
+                <div class="col-9">
                     <MudTextField @ref="RefEntryField" @bind-Value="@textInput" Variant="Variant.Text" OnKeyDown="TextFieldOnKeyDown" Disabled="disableChatInput" Immediate="true" Style="margin-left:1rem; " />
                 </div>
                 <div class="col-3">
                     <MudSelect T="ChannelSettingsAdapter" @ref="channelSelector" @bind-Value="_userService.ChannelOut" SelectedValuesChanged="OutChannelChanged" ToStringFunc="converter" Style=" margin-left:-1.5rem; " Class="mud-select-input-mcfont ">
-                @foreach (var channel in _userService.AvaiableChannels)
-                {
-                            <MudSelectItem Style="font-family:'Minecraft';" T="ChannelSettingsAdapter" Value="channel">
-                                <MudText Style="font-family: 'Minecraft';">@channel.FancyName</MudText>
-                            </MudSelectItem>
-                }
+                        @foreach (var channel in _userService.AvaiableChannels)
+                        {
+                            @if (channel.CanSpeak)
+                            {
+
+                                <MudSelectItem Style="font-family:'Minecraft';" T="ChannelSettingsAdapter" Value="channel">
+                                    <MudText Style="font-family: 'Minecraft';">@channel.FancyName</MudText>
+                                </MudSelectItem>
+                            }
+                        }
                     </MudSelect>
                 </div>
             </div>

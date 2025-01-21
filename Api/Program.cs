@@ -78,7 +78,7 @@ builder.Services.AddHangfire(config =>
 //string[] queues = new[] { "one", "two" };
 builder.Services.AddHangfireServer(options =>
 {
-    options.ServerName = Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV");
+    options.ServerName = Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV");
     options.WorkerCount = 20;
     //options.Queues = queues;
 });

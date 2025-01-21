@@ -28,6 +28,15 @@ namespace Highgeek.McWebApp.Common.Helpers.Channels
 
         [JsonProperty("isDefault")]
         public bool IsDefault { get; set; }
+
+        [JsonProperty("permission")]
+        public string? Permission { get; set; }
+
+        [JsonProperty("speakPermission")]
+        public string? SpeakPermission { get; set; }
+
+        [JsonIgnore]
+        public bool CanSpeak { get; set; }
     }
 
     public partial class ChannelSettingsAdapter
@@ -44,6 +53,7 @@ namespace Highgeek.McWebApp.Common.Helpers.Channels
     {
         public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
+            NullValueHandling = NullValueHandling.Ignore,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
             DateParseHandling = DateParseHandling.None,
             Converters =
