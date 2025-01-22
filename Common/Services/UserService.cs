@@ -261,7 +261,7 @@ namespace Highgeek.McWebApp.Common.Services
                 var channel = ChannelSettingsAdapter.FromJson(await RedisService.GetFromRedisAsync(key));
                 if(channel.SpeakPermission is not null)
                 {
-                    if (LpUser.Nodes.Any(d => d.Key == channel.SpeakPermission))
+                    if (HasPermission(channel.SpeakPermission))
                     {
                         channel.CanSpeak = true;
                     }else
@@ -279,7 +279,7 @@ namespace Highgeek.McWebApp.Common.Services
                 }
                 else
                 {
-                    if(LpUser.Nodes.Any(d => d.Key == channel.Permission))
+                    if(HasPermission(channel.Permission))
                     {
                         AvaiableChannels.Add(channel);
                     }
