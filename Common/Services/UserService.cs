@@ -47,6 +47,8 @@ namespace Highgeek.McWebApp.Common.Services
         public Task<StatusModel> SetPremiumAccount();
         public Task<StatusModel> UnsetPremiumAccount();
 
+        public bool HasPermission(string perm);
+
     }
     public class UserService : IDisposable, IUserService
     {
@@ -347,6 +349,11 @@ namespace Highgeek.McWebApp.Common.Services
         public async Task<StatusModel> UnsetPremiumAccount()
         {
             return await _mcUserManager.UnsetPremiumAccount(MinecraftUser.NickName);
+        }
+
+        public bool HasPermission(string perm)
+        {
+            return _luckPermsService.HasPermissionAsync(perm, MinecraftUser.Uuid).Result;
         }
 
         private bool _disposed = false;

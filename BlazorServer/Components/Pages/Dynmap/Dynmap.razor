@@ -48,7 +48,7 @@
         //todo determine admin rights
         if (_userService.HasConnectedAccount)
         {
-            if (_userService.LpUser.Nodes.Any(d => d.Key == "highgeek.dynamp.controls"))
+            if (_userService.HasPermission("highgeek.dynmap.controls"))
             {
                 return;
             }
