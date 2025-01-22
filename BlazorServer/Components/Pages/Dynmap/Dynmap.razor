@@ -1,32 +1,66 @@
 ﻿@page "/Dynmap"
+@using Newtonsoft.Json
 @inject IJSRuntime _js
 @inject IUserService _userService
+@inherits LanguageBase
 <PageTitle>Dynmap</PageTitle>
+
 <h3>Dynmap</h3>
+@if(loaded){
 
+    <MudSelect T="Map" @bind-Value="map" ToStringFunc="@converter" Label="@l["selectmap"]" Variant="Variant.Outlined" Clearable>
+        @foreach (var map in Maps)
+        {
+            <MudSelectItem Value="@map" />
+        }
+    </MudSelect>
 
-
-<div class=" fill-map">
-    <div id="map">
-        <iframe name="iframedynmap1" id="iframedynmap1" src="https://highgeek.eu/map/#survivalpriv_world:-60:0:21:1500:0:0:0:0:perspective" onload="@DynmapAppendCss" title="Dynmap">
-        </iframe>
+    <div class=" fill-map">
+        <div id="map">
+            <iframe name="iframedynmap1" id="iframedynmap1" src="@map.Link" onload="@DynmapAppendCss" title="Dynmap">
+            </iframe>
+        </div>
     </div>
-</div>
+}
 
 
 
 @code {
+    public Map map;
+
+    public IList<Map> Maps { get; set; }
+
+    private bool loaded = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        string maps = RedisService.GetFromRedis("settings:mcwebapp:maps");
+        Maps = JsonConvert.DeserializeObject<List<Map>>(maps);
+        map = Maps.FirstOrDefault();
+        loaded = true;
+    }
+
+
 
     public void DynmapAppendCss()
     {
         //todo determine admin rights
         if (_userService.HasConnectedAccount)
         {
-            if (_userService.LpUser.ParentGroups.Contains("og"))
+            if (_userService.LpUser.Nodes.Any(d => d.Key == "highgeek.dynamp.controls"))
             {
                 return;
             }
         }
         _js.InvokeVoidAsync("dynmapAppendCssRemoveControls");
+    }
+
+    Func<Map, string> converter = m => m?.Name;
+
+    public class Map
+    {
+        public string Name { get; set; }
+        public string Link { get; set; }
     }
 }
