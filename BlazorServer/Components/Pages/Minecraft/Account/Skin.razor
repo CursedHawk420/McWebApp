@@ -82,7 +82,6 @@
     private async Task TryRenderSkin(string value)
     {
         Url = value;
-        await Task.Delay(100);
         Uri uriResult;
         bool result = Uri.TryCreate(Url, UriKind.Absolute, out uriResult)
             && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
@@ -92,7 +91,7 @@
             mineskinResponse = _mineSkinApi.UrlSkin(Url);
             if(mineskinResponse is not null)
             {
-                ImageUrl = "https://visage.surgeplay.com/full/384/" + mineskinResponse.Data.Texture.Url.Remove(0, 38);
+                ImageUrl = "https://visage.surgeplay.com/full/384/" + mineskinResponse.Data.Texture.Url.Remove(0, 39);
                 ImageSet = true;
                 StateHasChanged();
             }

@@ -108,7 +108,7 @@ namespace Highgeek.McWebApp.Common.Services
             {
                 return new StatusModel("skinmanager-error-01", "response is null");
             }
-            string headid = response.Data.Texture.Url.Remove(0, 38);
+            string headid = response.Data.Texture.Url.Remove(0, 39);
             string skinurl = "https://mc-heads.net/skin/" + headid;
             string headurl = "https://mc-heads.net/avatar/" + headid;
             var minecraftUser = await _mcMainDbContext.WebMinecraftusers.FirstOrDefaultAsync(s => s.Uuid == applicationUser.mcUUID);
