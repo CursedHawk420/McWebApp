@@ -548,19 +548,19 @@ namespace Highgeek.McWebApp.Api.Services.Discord
 
         public async Task LinkAccount(IUser discordUser, DiscordCode discordCode)
         {
-            var xconomy = await _mcMainContext.Xconomies.FirstOrDefaultAsync(x => x.Uid == discordCode.Uuid);
+            var player = await _mcMainContext.VirtualInventories.FirstOrDefaultAsync(x => x.PlayerUuid == discordCode.Uuid);
             DiscordAccount discordAccount = new DiscordAccount();
             discordAccount.Discord = discordUser.Id.ToString();
             discordAccount.Uuid = discordCode.Uuid.ToString();
-            discordAccount.Playername = xconomy.Player;
+            discordAccount.Playername = player.PlayerName;
 
 
             await _mcMainContext.DiscordAccounts.AddAsync(discordAccount);
             await _mcMainContext.SaveChangesAsync();
 
-            PlayerServerSettings playerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedisAsync("players:settings:" + xconomy.Player));
+            PlayerServerSettings playerServerSettings = JsonConvert.DeserializeObject<PlayerServerSettings>(await RedisService.GetFromRedisAsync("players:settings:" + player.PlayerName));
             playerServerSettings.hasConnectedDiscord = true;
-            await RedisService.SetInRedis("players:settings:" + xconomy.Player, JsonConvert.SerializeObject(playerServerSettings));
+            await RedisService.SetInRedis("players:settings:" + player.PlayerName, JsonConvert.SerializeObject(playerServerSettings));
             await UpdateDiscordRoles(discordAccount);
         }
     }

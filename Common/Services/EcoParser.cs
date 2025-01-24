@@ -53,7 +53,7 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly SkinManager _skinmanager;
         private readonly PteroManager _pteroManager;
         private readonly UsersDbContext _usersdb;
-        private readonly McserverEcoDataContext _ecodb;
+        private readonly McserverEcodbContext _ecodb;
         private readonly ILogger<MinecraftUserManager> _logger;
         public EcoParser(
             UserManager<ApplicationUser> userManager,
@@ -63,7 +63,7 @@ namespace Highgeek.McWebApp.Common.Services
             McserverDatadbContext DataDbContext,
             PteroManager pteroManager,
             UsersDbContext usersdb,
-            McserverEcoDataContext ecodb,
+            McserverEcodbContext ecodb,
             ILogger<MinecraftUserManager> logger)
         {
             _userManager = userManager;

@@ -2,7 +2,6 @@
 using Highgeek.McWebApp.Common.Models;
 using Microsoft.AspNetCore.Identity;
 using Highgeek.McWebApp.Common.Models.mcserver_datadb;
-using Highgeek.McWebApp.Common.Models.mcserver_ecodata;
 using Highgeek.McWebApp.Common.Models.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,7 @@ namespace Highgeek.McWebApp.Common.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly McserverMaindbContext _mcMainDbContext;
         private readonly McserverDatadbContext _mcDataDbContext;
-        private readonly McserverEcoDataContext _mcEcoDbContext;
+        private readonly McserverEcodbContext _mcEcoDbContext;
         private readonly MineskinApiCommunication _mineskinApi;
         private readonly SkinManager _skinmanager;
         private readonly PteroManager _pteroManager;
@@ -37,7 +36,7 @@ namespace Highgeek.McWebApp.Common.Services
             MineskinApiCommunication mineskinApiCommunication,
             SkinManager skinManager,
             McserverDatadbContext DataDbContext,
-            McserverEcoDataContext EcoDbContext,
+            McserverEcodbContext EcoDbContext,
             PteroManager pteroManager, 
             UsersDbContext usersdb, 
             ILogger<MinecraftUserManager> logger)
