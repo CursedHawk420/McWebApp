@@ -61,7 +61,7 @@ builder.Services.AddDbContext<McWebApp1CmsContext>(options => options.UseNpgsql(
 
 builder.Services.AddDbContext<McserverMaindbContext>(options => options.UseMySql(connectionStringMC, MariaDbServerVersion.AutoDetect(connectionStringMC), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverDatadbContext>(options => options.UseMySql(connectionStringMC_data, MariaDbServerVersion.AutoDetect(connectionStringMC_data), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
-builder.Services.AddDbContext<McserverEcoDataContext>(options => options.UseMySql(connectionStringMC_eco, MariaDbServerVersion.AutoDetect(connectionStringMC_eco), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
+builder.Services.AddDbContext<McserverEcodbContext>(options => options.UseMySql(connectionStringMC_eco, MariaDbServerVersion.AutoDetect(connectionStringMC_eco), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverHusksyncContext>(options => options.UseMySql(connectionStringMC_husksync, MariaDbServerVersion.AutoDetect(connectionStringMC_husksync), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 
 
