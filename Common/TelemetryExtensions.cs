@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,9 @@ namespace Highgeek.McWebApp.Common
                 {
                     metrics.AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
-                        .AddRuntimeInstrumentation();
+                        .AddRuntimeInstrumentation()
+                        .AddEventCountersInstrumentation()
+                        .AddProcessInstrumentation(); // OpenTelemetry.Instrumentation.Process package
                 })
                 .WithTracing(tracing =>
                 {
@@ -58,7 +61,9 @@ namespace Highgeek.McWebApp.Common
                         // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                         .AddGrpcClientInstrumentation()
                         .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation();
+                        .AddEntityFrameworkCoreInstrumentation()
+                        .AddHangfireInstrumentation()
+                        .AddRedisInstrumentation();
                 });
 
             builder.AddOpenTelemetryExporters();
@@ -72,7 +77,9 @@ namespace Highgeek.McWebApp.Common
 
             if (useOtlpExporter)
             {
-                builder.Services.AddOpenTelemetry().UseOtlpExporter();
+                builder.Services.AddOpenTelemetry()
+                    .ConfigureResource(r => r.AddService(Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") + "-" + Environment.GetEnvironmentVariable("TENANT_ID"), serviceInstanceId: Environment.MachineName))
+                    .UseOtlpExporter();
             }
 
             // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
@@ -94,7 +101,7 @@ namespace Highgeek.McWebApp.Common
             return builder;
         }
 
-        public static WebApplication MapDefaultEndpoints(this WebApplication app)
+        public static WebApplication MapHealthEndpoints(this WebApplication app)
         {
             // Adding health checks endpoints to applications in non-development environments has security implications.
             // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.

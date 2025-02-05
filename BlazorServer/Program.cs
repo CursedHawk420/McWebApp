@@ -26,18 +26,16 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry;
-using Prometheus;
 using Highgeek.McWebApp.Common.Models.Minecraft;
 using Hangfire;
 using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.AddServiceDefaults();
-
-
 Environment.SetEnvironmentVariable("HIGHGEEK_APPNAME", "dotnet_blazorserver");
+
 var connectionStringHangfire = "";
+
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
@@ -48,9 +46,11 @@ if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
 }
 else
 {
-    Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
+    Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "McWebApp-blazor");
 
     Environment.SetEnvironmentVariable("TENANT_ID", "dev");
+
+    Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
 
     builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
 
@@ -102,9 +102,9 @@ builder.Services.AddHangfire(config =>
         c.UseNpgsqlConnection(connectionStringHangfire)));
 
 //string[] queues = new[] { "one", "two" };
-builder.Services.AddHangfireServer(options => 
+builder.Services.AddHangfireServer(options =>
 {
-    options.ServerName = Environment.GetEnvironmentVariable("TENANT_ID");
+    options.ServerName = Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + "-" + Environment.GetEnvironmentVariable("TENANT_ID");
     options.WorkerCount = 5;
     //options.Queues = queues;
 });
@@ -141,7 +141,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>{
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<TimeZoneService>();
 builder.Services.AddScoped<ICookieService, CookieService>();
@@ -196,6 +195,10 @@ if (builder.Environment.IsProduction())
         options.Level = CompressionLevel.Optimal;
     });
 }
+else
+{
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+}
 
 //user validation test
 builder.Services.Configure<SecurityStampValidatorOptions>(options =>
@@ -247,18 +250,11 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
-builder.Services.UseHttpClientMetrics();
-
-
 var app = builder.Build();
 
 
-app.MapDefaultEndpoints();
+app.MapHealthEndpoints();
 
-app.UseMetricServer();
-app.UseHttpMetrics();
-
-//app.MapDefaultEndpoints();
 if (app.Environment.IsProduction())
 {
     app.UseResponseCompression();

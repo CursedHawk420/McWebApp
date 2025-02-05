@@ -15,12 +15,9 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry;
-using Prometheus;
 using Highgeek.McWebApp.Common;
 using Hangfire;
 using Hangfire.PostgreSql;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,16 +28,23 @@ var connectionStringHangfire = "";
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
+
     builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
     connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
 }
 else
 {
+    Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "McWebApp-API");
+
+    Environment.SetEnvironmentVariable("TENANT_ID", "dev");
+
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
+
     builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
     connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireDevConnection");
 }
-
 
 builder.AddServiceDefaults();
 
@@ -78,7 +82,7 @@ builder.Services.AddHangfire(config =>
 //string[] queues = new[] { "one", "two" };
 builder.Services.AddHangfireServer(options =>
 {
-    options.ServerName = Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + "-" + Environment.GetEnvironmentVariable("HIGHGEEK_APPENV");
+    options.ServerName = Environment.GetEnvironmentVariable("HIGHGEEK_APPNAME") + "-" + Environment.GetEnvironmentVariable("TENANT_ID");
     options.WorkerCount = 20;
     //options.Queues = queues;
 });
@@ -136,10 +140,10 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
+app.MapHealthEndpoints();
 
-app.UseMetricServer();
-app.UseHttpMetrics();
+//app.UseMetricServer();
+//app.UseHttpMetrics();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
