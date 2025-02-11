@@ -29,6 +29,9 @@ using OpenTelemetry;
 using Highgeek.McWebApp.Common.Models.Minecraft;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Sidio.Sitemap.Core.Services;
+using Sidio.Sitemap.Blazor;
+using Sidio.Sitemap.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,7 +82,8 @@ builder.Services.AddDbContext<McserverDatadbContext>(options => options.UseMySql
 builder.Services.AddDbContext<McserverEcodbContext>(options => options.UseMySql(connectionStringMC_eco, MariaDbServerVersion.AutoDetect(connectionStringMC_eco), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<McserverPlandbContext>(options => options.UseMySql(connectionStringMC_plan, MariaDbServerVersion.AutoDetect(connectionStringMC_plan), providerOptions => providerOptions.EnableRetryOnFailure()), ServiceLifetime.Scoped);
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpContextAccessor()
+    .AddDefaultSitemapServices<HttpContextBaseUrlProvider>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -283,6 +287,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSitemap();
 
 app.UseHangfireDashboard(options: new DashboardOptions
 {

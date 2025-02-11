@@ -33,6 +33,7 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.1" />
 	  <PackageReference Include="AspNet.Security.OAuth.Discord" Version="9.0.0" />
+	  <PackageReference Include="Sidio.Sitemap.Blazor" Version="1.1.1" />
 	  <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   
