@@ -18,12 +18,12 @@
 
 <PageTitle>Register</PageTitle>
 <div class="row">
-    <h1 style="color:white">Register</h1>
+    <h1 class="whitetext">Register</h1>
     <div>
         <StatusMessage Message="@Message" />
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
-            <h2 style="color:white; padding-bottom:1rem;">Create a new account.</h2>
+            <h2 class="whitetext">Create a new account.</h2>
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="SomeOne" />
@@ -48,7 +48,7 @@
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
         <section>
-            <h3 style="color:white; padding-top: 1rem; margin-bottom:1rem;">Use another service to log in.</h3>
+            <h3 class="whitetext">Use another service to register.</h3>
             <ExternalLoginPicker />
         </section>
     </div>
@@ -67,6 +67,15 @@
 
     public async Task RegisterUser(EditContext editContext)
     {
+        if (UserManager.FindByEmailAsync(Input.Email) != null){
+            var errors =  new List<IdentityError>();
+            var error = new IdentityError();
+            error.Description = "Email already taken!";
+            error.Code = "420";
+            errors.Add(error);
+            identityErrors = errors;
+            return;
+        }
         var user = CreateUser();
 
         await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);

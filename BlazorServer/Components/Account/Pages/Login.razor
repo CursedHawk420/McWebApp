@@ -17,14 +17,14 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1 style ="color:white">Log in</h1>
+<h1 class="whitetext">Log in</h1>
 <div class="row">
     <div>
         <section>
             <StatusMessage Message="@errorMessage" />
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
-                <h2 style ="color:white; padding-bottom:1rem;">Use a local account to log in.</h2>
+                <h2 class="whitetext">Use a local account to log in.</h2>
 
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
@@ -47,20 +47,20 @@
                     <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
                 </div>
                 <div>
-                    <p>
-                        <a style ="color:white" href="Account/ForgotPassword">Forgot your password?</a>
+                    <p class="whitetext">
+                        <a href="Account/ForgotPassword">Forgot your password?</a>
                     </p>
-                    <p>
-                        <a style ="color:white" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                    <p class="whitetext">
+                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
                     </p>
-                    <p>
-                        <a style ="color:white" href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                    <p class="whitetext">
+                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
                     </p>
                 </div>
             </EditForm>
         </section>
     <section>
-        <h3 style ="color:white; padding-top: 1rem; margin-bottom:1rem;">Use another service to log in.</h3>
+            <h3 class="whitetext">Use another service to log in.</h3>
         <ExternalLoginPicker />
     </section>
     </div>

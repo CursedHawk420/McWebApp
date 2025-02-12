@@ -188,9 +188,9 @@ a{
     color:#0d6efd;
     text-decoration:underline
 }
-a:hover{
-    color:#0a58ca
-}
+    a:hover {
+        color: #1bae20
+    }
 a:not([href]):not([class]),a:not([href]):not([class]):hover{
     color:inherit;
     text-decoration:none
