@@ -1,9 +1,10 @@
-﻿<div id="components-reconnect-modal">
+﻿@inherits LanguageBase
+<div id="components-reconnect-modal">
 
     <div class="loader-container">
 
         <div>
-            Connection lost <br />
+            @l["RECONNECT_connectionLost"] <br />
             <span id="components-reconnect-current-attempt"></span> /
             <span id="components-reconnect-max-retries"></span>
         </div>
@@ -17,8 +18,8 @@
         </div>
 
         <div>
-            <a href="@ReloadPage">Refresh page</a><br />
-            <span><a href="#" id="close-reconnect-dialog">Hide this window</a></span>
+            <a onclick="updateUrl()" href="">@l["RECONNECT_refreshPage"]</a><br />
+            <span><a href="#" id="close-reconnect-dialog">@l["RECONNECT_closeWindow"]</a></span>
         </div>
 
     </div>
@@ -28,12 +29,11 @@
     document
     .getElementById('close-reconnect-dialog')
     .addEventListener('click', function(event) {
-        event.preventDefault();
-        document.getElementById('components-reconnect-modal').style.display = 'none';
+    event.preventDefault();
+    document.getElementById('components-reconnect-modal').style.display = 'none';
     });
-</script>
 
-@code
-{
-    [Parameter] public string ReloadPage { get; set; }
-}
+    function updateUrl() {
+        window.location.reload();
+    }
+</script>

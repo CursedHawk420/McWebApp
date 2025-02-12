@@ -6,12 +6,13 @@
     display: none;
     overflow: hidden;
     background-color: #000;
-    opacity: 0.85;
+    opacity: 0.70;
     text-align: center;
     transition: visibility 0s linear 1000ms;
 }
 
 .loader-container {
+    background-color: black;
     display: flex;
     justify-content: center;
     align-items: center;
