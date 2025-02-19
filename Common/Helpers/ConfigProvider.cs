@@ -17,13 +17,20 @@ namespace Highgeek.McWebApp.Common.Helpers
             {
                 configurationManager = new ConfigurationManager();
 
-                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+                if(Environment.GetEnvironmentVariable("TRACING") is not null)
                 {
-                    configurationManager.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+                    configurationManager.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json").AddEnvironmentVariables();
                 }
                 else
                 {
-                    configurationManager.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+                    {
+                        configurationManager.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+                    }
+                    else
+                    {
+                        configurationManager.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+                    }
                 }
             }
             return configurationManager;

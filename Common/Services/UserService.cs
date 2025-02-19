@@ -297,9 +297,11 @@ namespace Highgeek.McWebApp.Common.Services
         {
             foreach (var uuid in await RedisService.GetKeysList("economy:players:" + ApplicationUser.mcNickname + ":*"))
             {
-                float integer = float.Parse(await RedisService.GetFromRedisAsync(uuid));
-                string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
-                Economy.Add(id, integer);
+                if (float.TryParse(await RedisService.GetFromRedisAsync(uuid), out float inte))
+                {
+                    string id = uuid.Substring(uuid.LastIndexOf(":") + 1, uuid.Length - uuid.LastIndexOf(":") - 1);
+                    Economy.Add(id, inte);
+                }
             }
             _refreshService.CallEcoRefresh();
         }

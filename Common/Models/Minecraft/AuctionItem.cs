@@ -61,7 +61,10 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 
             this.Price = price;
             this.Owner = owner;
-            this.TimeAdded = DateTime.Parse(datetime);
+            if(DateTime.TryParse(datetime, out DateTime added))
+            {
+                this.TimeAdded = added;
+            }
         }
 
 

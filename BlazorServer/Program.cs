@@ -20,7 +20,9 @@ using Highgeek.McWebApp.Common.Services.Redis;
 using MudBlazor.Services;
 using MudBlazor;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Logging;
 using System.IO.Compression;
+using System;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -35,19 +37,16 @@ using Sidio.Sitemap.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var logger = LoggerFactory.Create(config =>
+{
+    config.AddConsole();
+}).CreateLogger("Program");
+
 Environment.SetEnvironmentVariable("HIGHGEEK_APPNAME", "dotnet_blazorserver");
 
 var connectionStringHangfire = "";
 
-if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-{
-    Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
-
-    builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
-
-    connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
-}
-else
+if (Environment.GetEnvironmentVariable("TRACING") is not null)
 {
     Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "McWebApp-blazor");
 
@@ -55,9 +54,35 @@ else
 
     Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
 
-    builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
+    builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
+    logger.LogWarning("Current domain is " + AppDomain.CurrentDomain.BaseDirectory);
 
     connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireDevConnection");
+}
+else
+{
+    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+    {
+        Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "prod");
+
+        builder.Configuration.SetBasePath("/appsettings/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
+        connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireConnection");
+    }
+    else
+    {
+        Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "McWebApp-blazor");
+
+        Environment.SetEnvironmentVariable("TENANT_ID", "dev");
+
+        Environment.SetEnvironmentVariable("HIGHGEEK_APPENV", "dev");
+
+        builder.Configuration.SetBasePath("/app/").AddJsonFile("appsettings.json").AddEnvironmentVariables();
+
+        connectionStringHangfire = ConfigProvider.GetConnectionString("PostgresHangfireDevConnection");
+    }
 }
 
 builder.AddServiceDefaults();
