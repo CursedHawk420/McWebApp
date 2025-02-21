@@ -28,9 +28,10 @@ namespace Highgeek.McWebApp.Common.Services
         public void CallAdminViewRefresh();
 
     }
-    public class ConnectedUsersService : IConnectedUsersService
+    public class ConnectedUsersService : IConnectedUsersService, IDisposable
     {
         private readonly IRedisUpdateService _redisUpdateService;
+        private bool disposedValue;
 
         public ConnectedUsersService(IRedisUpdateService redisUpdateService)
         {
@@ -135,6 +136,39 @@ namespace Highgeek.McWebApp.Common.Services
         public void CallAdminViewRefresh()
         {
             AdminViewRefreshRequested?.Invoke();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    foreach(var user in Users)
+                    {
+                        RemoveSession(user);
+                    }
+                    // TODO: Uvolněte spravovaný stav (spravované objekty).
+                }
+
+                // TODO: Uvolněte nespravované prostředky (nespravované objekty) a přepište finalizační metodu.
+                // TODO: Nastavte velká pole na hodnotu null.
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: Finalizační metodu přepište, jen pokud metoda Dispose(bool disposing) obsahuje kód pro uvolnění nespravovaných prostředků.
+        // ~ConnectedUsersService()
+        // {
+        //     // Neměňte tento kód. Kód pro vyčištění vložte do metody Dispose(bool disposing).
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Neměňte tento kód. Kód pro vyčištění vložte do metody Dispose(bool disposing).
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 

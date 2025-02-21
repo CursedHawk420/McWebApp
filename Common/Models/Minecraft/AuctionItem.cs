@@ -16,9 +16,11 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         public DateTime? TimeAdded { get; set; }
         public long? Price { get; set; }
 
-        public IRedisUpdateService _redisUpdateService;
+        public IRedisUpdateService? _redisUpdateService;
 
         private bool disposedValue;
+
+        public AuctionItem() { }
 
         public AuctionItem(GameItem gameItem, string owner, long? price, IRedisUpdateService redisUpdateService)
         {
