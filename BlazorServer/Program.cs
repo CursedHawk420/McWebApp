@@ -177,6 +177,7 @@ builder.Services.AddScoped<ICookieService, CookieService>();
 builder.Services.AddSingleton<ILanguageProvider, LanguageProvider>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddSingleton<IAuctionService, AuctionService>();
+builder.Services.AddScoped<IRedisItemsService, RedisItemsService>();
 
 builder.Services.AddScoped<ILocalizer, Localizer>();
 

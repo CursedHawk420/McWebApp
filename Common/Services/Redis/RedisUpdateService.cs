@@ -12,7 +12,11 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 {
     public interface IRedisUpdateService
     {
-        public void Send(string stringToAdd);
+        public void SendSet(string stringToAdd);
+
+        public void SendExpire(string stringToAdd);
+
+        public void SendDel(string stringToAdd);
 
         public event EventHandler<InventoryPositionInfo> InventoryChanged;
 
@@ -20,7 +24,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         public event EventHandler<RedisChatEntryAdapter> PreChatChanged;
 
-        public event EventHandler<string> OtherRedisSetChange;
+        public event EventHandler<string> KeySetEvent;
 
         public event EventHandler<string> SettingsChanged;
 
@@ -39,6 +43,10 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> StatsUpdate;
 
         public event EventHandler<string> AuctionItemChange;
+
+        public event EventHandler<string> KeyDelEvent;
+
+        public event EventHandler<string> KeyExpiredEvent;
 
         event EventHandler<AuctionItem> AuctionItemAddAction;
         void CallAuctionItemAddAction(AuctionItem auctionItem);
@@ -65,7 +73,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<InventoryPositionInfo> InventoryChanged;
         public event EventHandler<RedisChatEntryAdapter> ChatChanged;
         public event EventHandler<RedisChatEntryAdapter> PreChatChanged;
-        public event EventHandler<string> OtherRedisSetChange;
+        public event EventHandler<string> KeySetEvent;
         public event EventHandler<string> SettingsChanged;
         public event EventHandler<string> PlayersSettingsChanged;
         public event EventHandler<string> LuckpermsChanged;
@@ -75,6 +83,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         public event EventHandler<string> SessionListUpdate;
         public event EventHandler<string> StatsUpdate;
         public event EventHandler<string> AuctionItemChange;
+        public event EventHandler<string> KeyDelEvent;
+        public event EventHandler<string> KeyExpiredEvent;
 
         public RedisUpdateService(ILogger<RedisUpdateService> logger, LuckPermsService luckPermsService)
         {
@@ -84,7 +94,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         private string Uuid { get; set; }
 
-        public async void Send(string stringToAdd)
+        public async void SendSet(string stringToAdd)
         {
             Uuid = stringToAdd;
             string type;
@@ -137,10 +147,20 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     await AuctionItemEvent(Uuid);
                     return;
                 default:
-                    OtherRedisSetChange?.Invoke(this, Uuid);
+                    KeySetEvent?.Invoke(this, Uuid);
                     return;
             }
 
+        }
+
+        public void SendExpire(string stringToAdd)
+        {
+            KeyExpiredEvent?.Invoke(this, stringToAdd);
+        }
+
+        public void SendDel(string stringToAdd)
+        {
+            KeyDelEvent?.Invoke(this, stringToAdd);
         }
 
         public async Task AuctionItemEvent(string uuid)
