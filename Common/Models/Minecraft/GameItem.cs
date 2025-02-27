@@ -41,7 +41,7 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 
         }
 
-        public GameItem(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger) : base(uuid, payload, redisUpdateService, logger)
+        public GameItem(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService) : base(uuid, payload, redisUpdateService, logger, refreshService)
         {
             InitGameItem(payload, uuid);
         }

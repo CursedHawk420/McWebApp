@@ -1,4 +1,5 @@
 ﻿using Highgeek.McWebApp.Common.Models.Minecraft;
+using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,6 +21,7 @@ namespace Highgeek.McWebApp.Common.Models.Redis
     {
         public readonly IRedisUpdateService? _redisUpdateService;
         public readonly ILogger<RedisItemsService>? _logger;
+        public readonly IRefreshService _refreshService;
         private bool disposedValue;
 
         protected string _uuid;
@@ -67,11 +69,12 @@ namespace Highgeek.McWebApp.Common.Models.Redis
             this._uuid = uuid;
         }
 
-        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger)
+        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
         {
             _logger = logger;
             this._payload = RedisService.GetFromRedis(uuid);
             this._uuid = uuid;
+            _refreshService = refreshService;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
@@ -79,11 +82,12 @@ namespace Highgeek.McWebApp.Common.Models.Redis
             _redisUpdateService.InventoryChanged += KeySetEvent;
         }
 
-        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger)
+        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
         {
             _logger = logger;
             this._payload = payload;
             this._uuid = uuid;
+            _refreshService = refreshService;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
@@ -91,10 +95,11 @@ namespace Highgeek.McWebApp.Common.Models.Redis
             _redisUpdateService.InventoryChanged += KeySetEvent;
         }
 
-        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService)
+        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
             this._payload = RedisService.GetFromRedis(uuid);
             this._uuid = uuid;
+            _refreshService = refreshService;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
@@ -102,10 +107,11 @@ namespace Highgeek.McWebApp.Common.Models.Redis
             _redisUpdateService.InventoryChanged += KeySetEvent;
         }
 
-        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService)
+        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
         {
             this._payload = payload;
             this._uuid = uuid;
+            _refreshService = refreshService;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;

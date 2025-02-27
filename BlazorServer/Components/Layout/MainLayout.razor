@@ -70,82 +70,85 @@
                         <h1>Loading...</h1>
                     }
                 </MudLayout>
-
             </ChildContent>
             <ItemRenderer>
-                @switch (context)
+                @if (context.Payload != GameItem.AIRITEM)
                 {
-                    case AuctionItem auctionItem:
-                        <MudMenu Tag="auctionItem" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, auctionItem))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="height:33px;width:33px;">
-                            <ActivatorContent>
-                                <MudDynamicDropItem T="AuctionItem" Class=" justify-center align-center flex-grow-1" Style="height:33px;width:33px;">
-                                    <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
-                                        <ChildContent>
-                                            <div class="item-container">
-                                                <MudImage Src="@(auctionItem.PlayerHeadTextureId is not null ? ("https://mc-heads.net/head/" + auctionItem.PlayerHeadTextureId) : auctionItem.TextureUrl)" Style="height:33px;width:33px;" />
-                                                @if (auctionItem.Amount > 1)
+                    @switch (context)
+                    {
+                        case AuctionItem auctionItem:
+                            <MudMenu Tag="auctionItem" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, auctionItem))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="height:33px;width:33px;">
+                                <ActivatorContent>
+                                    <MudDynamicDropItem T="AuctionItem" Class=" justify-center align-center flex-grow-1" Style="height:33px;width:33px;">
+                                        <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
+                                            <ChildContent>
+                                                <div class="item-container">
+                                                    <MudImage Src="@(auctionItem.PlayerHeadTextureId is not null ? ("https://mc-heads.net/head/" + auctionItem.PlayerHeadTextureId) : auctionItem.TextureUrl)" Style="height:33px;width:33px;" />
+                                                    @if (auctionItem.Amount > 1)
+                                                    {
+                                                        <MudText Class="item-bottom-right-text" Style="font-family:'Minecraft'" Typo="Typo.caption">@auctionItem.Amount</MudText>
+                                                    }
+                                                </div>
+                                            </ChildContent>
+                                            <TooltipContent>
+                                                <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)auctionItem.DisplayName.HtmlText)</MudText>
+                                                <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)(((AuctionItem)auctionItem).Owner))</MudText>
+                                                @if (auctionItem.Enchantments != null)
                                                 {
-                                                    <MudText Class="item-bottom-right-text" Style="font-family:'Minecraft'" Typo="Typo.caption">@auctionItem.Amount</MudText>
+                                                    foreach (IntTag enchant in auctionItem.Enchantments.Values)
+                                                    {
+                                                        <MudText Style="font-family:'Minecraft';" Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1))@((MarkupString)" : ") @enchant.Value <br /></MudText>
+                                                    }
                                                 }
-                                            </div>
-                                        </ChildContent>
-                                        <TooltipContent>
-                                            <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)auctionItem.DisplayName.HtmlText)</MudText>
-                                            <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)(((AuctionItem)auctionItem).Owner))</MudText>
-                                            @if (auctionItem.Enchantments != null)
-                                            {
-                                                foreach (IntTag enchant in auctionItem.Enchantments.Values)
+                                            </TooltipContent>
+                                        </MudTooltip>
+                                    </MudDynamicDropItem>
+                                </ActivatorContent>
+                                <ChildContent>
+                                    <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, auctionItem))">DoSomethingWithItem</MudMenuItem>
+                                    <MudMenuItem @onclick="@((e) => SendToAuction(e, auctionItem))">Send To Auction</MudMenuItem>
+                                    <MudMenuItem>Usage</MudMenuItem>
+                                    <MudMenuItem>Close</MudMenuItem>
+                                </ChildContent>
+                            </MudMenu>
+                            break;
+                        case GameItem gameItem:
+                            <MudMenu Tag="gameItem" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, gameItem))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="height:33px;width:33px;">
+                                <ActivatorContent>
+                                    <MudDynamicDropItem T="GameItem" Class=" justify-center align-center flex-grow-1" Style="height:33px;width:33px;">
+                                        <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
+                                            <ChildContent>
+                                                <div class="item-container">
+                                                    <MudImage Src="@(gameItem.PlayerHeadTextureId is not null ? ("https://mc-heads.net/head/" + gameItem.PlayerHeadTextureId) : gameItem.TextureUrl)" Style="height:33px;width:33px;" />
+                                                    @if (gameItem.Amount > 1)
+                                                    {
+                                                        <MudText Class="item-bottom-right-text" Style="font-family:'Minecraft'" Typo="Typo.caption">@gameItem.Amount</MudText>
+                                                    }
+                                                </div>
+                                            </ChildContent>
+                                            <TooltipContent>
+                                                <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)gameItem.DisplayName.HtmlText)</MudText>
+                                                @if (gameItem.Enchantments != null)
                                                 {
-                                                    <MudText Style="font-family:'Minecraft';" Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1))@((MarkupString)" : ") @enchant.Value <br /></MudText>
+                                                    foreach (IntTag enchant in gameItem.Enchantments.Values)
+                                                    {
+                                                        <MudText Style="font-family:'Minecraft';" Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1))@((MarkupString)" : ") @enchant.Value <br /></MudText>
+                                                    }
                                                 }
-                                            }
-                                        </TooltipContent>
-                                    </MudTooltip>
-                                </MudDynamicDropItem>
-                            </ActivatorContent>
-                            <ChildContent>
-                                <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, auctionItem))">DoSomethingWithItem</MudMenuItem>
-                                <MudMenuItem @onclick="@((e) => SendToAuction(e, auctionItem))">Send To Auction</MudMenuItem>
-                                <MudMenuItem>Usage</MudMenuItem>
-                                <MudMenuItem>Close</MudMenuItem>
-                            </ChildContent>
-                        </MudMenu>
-                        break;
-                    case GameItem gameItem:
-                        <MudMenu Tag="gameItem" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, gameItem))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="height:33px;width:33px;">
-                            <ActivatorContent>
-                                <MudDynamicDropItem T="GameItem" Class=" justify-center align-center flex-grow-1" Style="height:33px;width:33px;">
-                                    <MudTooltip @ref="ItemToolTip" ShowOnHover="true">
-                                        <ChildContent>
-                                            <div class="item-container">
-                                                <MudImage Src="@(gameItem.PlayerHeadTextureId is not null ? ("https://mc-heads.net/head/" + gameItem.PlayerHeadTextureId) : gameItem.TextureUrl)" Style="height:33px;width:33px;" />
-                                                @if (gameItem.Amount > 1)
-                                                {
-                                                    <MudText Class="item-bottom-right-text" Style="font-family:'Minecraft'" Typo="Typo.caption">@gameItem.Amount</MudText>
-                                                }
-                                            </div>
-                                        </ChildContent>
-                                        <TooltipContent>
-                                            <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)gameItem.DisplayName.HtmlText)</MudText>
-                                            @if (gameItem.Enchantments != null)
-                                            {
-                                                foreach (IntTag enchant in gameItem.Enchantments.Values)
-                                                {
-                                                    <MudText Style="font-family:'Minecraft';" Typo="Typo.caption">@GameItem.WordsToUpper(enchant.Name.Substring(enchant.Name.IndexOf(":") + 1, enchant.Name.Length - enchant.Name.IndexOf(":") - 1))@((MarkupString)" : ") @enchant.Value <br /></MudText>
-                                                }
-                                            }
-                                        </TooltipContent>
-                                    </MudTooltip>
-                                </MudDynamicDropItem>
-                            </ActivatorContent>
-                            <ChildContent>
-                                <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, gameItem))">DoSomethingWithItem</MudMenuItem>
-                                <MudMenuItem @onclick="@((e) => SendToAuction(e, gameItem))">Send To Auction</MudMenuItem>
-                                <MudMenuItem>Usage</MudMenuItem>
-                                <MudMenuItem>Close</MudMenuItem>
-                            </ChildContent>
-                        </MudMenu>
-                        break;
+                                            </TooltipContent>
+                                        </MudTooltip>
+                                    </MudDynamicDropItem>
+                                </ActivatorContent>
+                                <ChildContent>
+                                    <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, gameItem))">DoSomethingWithItem</MudMenuItem>
+                                    <MudMenuItem @onclick="@((e) => SendToAuction(e, gameItem))">Send To Auction</MudMenuItem>
+                                    <MudMenuItem>Usage</MudMenuItem>
+                                    <MudMenuItem>Close</MudMenuItem>
+                                </ChildContent>
+                            </MudMenu>
+                            break;
+
+                    }
                 }
             </ItemRenderer>
         </MudDropContainer>
@@ -222,12 +225,16 @@ else
         });
     }
 
-    private void RefreshInventory()
+    private async void RefreshInventory()
     {
         try
         {
-            StateHasChanged();
-            MainDropContainer.Refresh();
+
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+                MainDropContainer.Refresh();
+            });
         }
         catch (Exception ex)
         {

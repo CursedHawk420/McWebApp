@@ -30,6 +30,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
     {
         private readonly IRedisUpdateService _redisUpdateService;
         private readonly ILogger<RedisItemsService> _logger;
+        private readonly IRefreshService _refreshService;
         private bool disposedValue;
 
         public string WinvIdentifier { get; set; }
@@ -38,19 +39,20 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         {
             get
             {
-                return Objects.Values.ToList();
+                return Objects.Values.ToArray();
             }
         }
         public IList<VirtualInventory> VirtualInventories { get; set; }
         private ApplicationUser ApplicationUser { get; set; }
 
-        public RedisItemsService(IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger)
+        public RedisItemsService(IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
         {
             _logger = logger;
             _redisUpdateService = redisUpdateService;
+            _refreshService = refreshService;
             Objects = new Dictionary<string, IRedisLivingObject>();
 
-            _redisUpdateService.KeySetEvent += AddToDict;
+            //_redisUpdateService.KeySetEvent += AddToDict;
             _redisUpdateService.InventoryChanged += AddToDict;
             _redisUpdateService.KeyDelEvent += DeleteFromDict;
             _redisUpdateService.KeyExpiredEvent += DeleteFromDict;
@@ -74,9 +76,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     string item = RedisService.GetFromRedis(uuid);
                     if (item != GameItem.AIRITEM)
                     {
-                        if (!Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger)))
+                        if (!Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService)))
                         {
-                            Objects[uuid] = new GameItem(uuid, item, _redisUpdateService, _logger);
+                            Objects[uuid] = new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService);
                         }
                     }
                 }
@@ -86,9 +88,9 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     string item = RedisService.GetFromRedis(uuid);
                     if (item != GameItem.AIRITEM)
                     {
-                        if (!Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger)))
+                        if (!Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService)))
                         {
-                            Objects[uuid] = new GameItem(uuid, item, _redisUpdateService, _logger);
+                            Objects[uuid] = new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService);
                         }
                     }
                 }
@@ -103,36 +105,27 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
         void AddToDict(object? sender, InventoryPositionInfo info)
         {
-            if (info.rawuuid.StartsWith("winv:" + ApplicationUser.mcNickname))
+            if (info.rawuuid.StartsWith("winv:" + ApplicationUser.mcNickname) || info.rawuuid.StartsWith("vinv:" + ApplicationUser.mcNickname))
             {
+                string item = RedisService.GetFromRedis(info.rawuuid);
                 if (!Objects.ContainsKey(info.rawuuid))
                 {
-                    string item = RedisService.GetFromRedis(info.rawuuid);
                     if (item != GameItem.AIRITEM)
                     {
-                        if (!Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService, _logger)))
-                        {
-                            Objects[info.rawuuid] = new GameItem(info.rawuuid, item, _redisUpdateService, _logger);
-                        }
+                        Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService, _logger, _refreshService));
                     }
                 }
-            }
-            if (info.rawuuid.StartsWith("vinv:" + ApplicationUser.mcNickname))
-            {
-                if (!Objects.ContainsKey(info.rawuuid))
+                else
                 {
-                    string item = RedisService.GetFromRedis(info.rawuuid);
                     if (item != GameItem.AIRITEM)
                     {
-                        if (!Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService, _logger)))
-                        {
-                            Objects[info.rawuuid] = new GameItem(info.rawuuid, item, _redisUpdateService, _logger);
-                        }
+                        Objects[info.rawuuid] = new GameItem(info.rawuuid, item, _redisUpdateService, _logger, _refreshService);
                     }
                 }
+                _refreshService.CallInventoryViewRefresh();
             }
         }
-
+        /*
         void AddToDict(object? sender, string uuid)
         {
             if (uuid.StartsWith("winv:CursedHawk420:"))
@@ -142,13 +135,14 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     Objects.Add(uuid, new GameItem(uuid, RedisService.GetFromRedis(uuid), _redisUpdateService, _logger));
                 }
             }
-        }
+        }*/
 
         void DeleteFromDict(object? sender, string uuid)
         {
             if (Objects.ContainsKey(uuid))
             {
                 Objects.Remove(uuid);
+                _refreshService.CallInventoryViewRefresh();
             }
         }
 
@@ -169,7 +163,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             {
                 if (disposing)
                 {
-                    _redisUpdateService.KeySetEvent -= AddToDict;
+                    //_redisUpdateService.KeySetEvent -= AddToDict;
                     _redisUpdateService.InventoryChanged -= AddToDict;
                     _redisUpdateService.KeyDelEvent -= DeleteFromDict;
                     _redisUpdateService.KeyExpiredEvent -= DeleteFromDict;

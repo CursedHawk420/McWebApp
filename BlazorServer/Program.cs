@@ -190,7 +190,7 @@ builder.Services.AddScoped<IRefreshService, RefreshService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameChatService, GameChatService>();
 
-builder.Services.AddScoped<IInventoryService, InventoryService>();
+//builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 builder.Services.AddSingleton<LuckPermsService>();
 builder.Services.AddSingleton<IRedisUpdateService, RedisUpdateService>();
