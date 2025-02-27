@@ -1,0 +1,43 @@
+﻿@inject IUserService _userService
+@inject ISnackbar _snack
+@inherits LanguageBase
+
+<MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Inventory2" OnClick="InvButtonClicked" Style="position: fixed; bottom:0; right:0; margin-bottom: 2.0rem; margin-right:6.0rem " />
+
+@if (IsInvOpen)
+{
+    <InventoryComponent/>
+}
+@code {
+    bool IsInvOpen = false;
+
+    public async void InvButtonClicked()
+    {
+        if (_userService.ApplicationUser is null)
+        {
+            _snack.Add(l["chatbutton-warning-01"], Severity.Warning);
+            return;
+        }
+        if (_userService.LpUser is null)
+        {
+            _snack.Add(l["chatbutton-warning-02"], Severity.Warning);
+            return;
+        }
+        if (IsInvOpen)
+        {
+            IsInvOpen = false;
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+            });
+        }
+        else
+        {
+            IsInvOpen = true;
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+            });
+        }
+    }
+}

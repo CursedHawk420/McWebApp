@@ -10,6 +10,9 @@
   <PropertyGroup>
     <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Components\Inventory\InventoryTabs.razor.legacy" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.40.0" />

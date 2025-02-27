@@ -1,8 +1,10 @@
 ﻿using Highgeek.McWebApp.Common.Helpers;
 using Highgeek.McWebApp.Common.Models.Adapters.Auction;
 using Highgeek.McWebApp.Common.Models.Minecraft.DisplayName;
+using Highgeek.McWebApp.Common.Models.Redis;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Microsoft.Extensions.Logging;
 using SharpNBT;
 using SharpNBT.SNBT;
 using System.Globalization;
@@ -10,7 +12,7 @@ using System.Net.Sockets;
 
 namespace Highgeek.McWebApp.Common.Models.Minecraft
 {
-    public class GameItem
+    public class GameItem : RedisLivingObject
     {
         public string? Name { get; set; }
         public string? Json { get; set; }
@@ -38,6 +40,24 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         {
 
         }
+
+        public GameItem(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger) : base(uuid, payload, redisUpdateService, logger)
+        {
+            InitGameItem(payload, uuid);
+        }
+
+        public override void OnRedisUpdate()
+        {
+            //_logger.LogInformation("Updated item: " + Payload);
+            InitGameItem(RedisService.GetFromRedis(Uuid), Uuid);
+        }
+
+        public override void OnRedisDelete()
+        {
+            Dispose();
+        }
+
+        //legacy mechanics
 
         public GameItem (string json, string originUuid)
         {

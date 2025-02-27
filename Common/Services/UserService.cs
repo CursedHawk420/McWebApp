@@ -70,6 +70,8 @@ namespace Highgeek.McWebApp.Common.Services
 
         private readonly NavigationManager _navigationManager;
 
+        private readonly IRedisItemsService _redisItemsService;
+
         public ApplicationUser? ApplicationUser { get; set; }
 
         public User? LpUser { get; set; }
@@ -92,7 +94,18 @@ namespace Highgeek.McWebApp.Common.Services
 
         public Dictionary<string, float> Economy { get; set; }
 
-        public UserService(MinecraftUserManager minecraftUserManager, UserManager<ApplicationUser> userManager, IRefreshService refreshService, LuckPermsService luckPermsService, IRedisUpdateService redisUpdateService, ILocalizer localizer, ICookieService cookieService, ILogger<UserService> logger, NavigationManager navigationManager)
+        public UserService(
+            MinecraftUserManager minecraftUserManager, 
+            UserManager<ApplicationUser> userManager, 
+            IRefreshService refreshService, 
+            LuckPermsService luckPermsService, 
+            IRedisUpdateService redisUpdateService, 
+            ILocalizer localizer, 
+            ICookieService cookieService, 
+            ILogger<UserService> logger, 
+            NavigationManager navigationManager,
+            IRedisItemsService redisItemsService
+            )
         {
             Loaded = false;
             HasConnectedAccount = false;
@@ -107,6 +120,7 @@ namespace Highgeek.McWebApp.Common.Services
             _cookieService = cookieService;
             _logger = logger;
             _navigationManager = navigationManager;
+            _redisItemsService = redisItemsService;
 
             ChannelOut = new ChannelSettingsAdapter();
             JoinedChannels = new List<ChannelSettingsAdapter>();
@@ -163,6 +177,7 @@ namespace Highgeek.McWebApp.Common.Services
             }*/
 
             await SetPlayerSettings();
+            await _redisItemsService.Init(ApplicationUser);
         }
 
         public async void ListenForLuckUpdate(object? sender, string uuid)

@@ -1,4 +1,4 @@
-﻿@inject IInventoryService _invService
+﻿@inject IRedisItemsService _invService
 @inject ILogger<InventoryTabs> _logger
 @inject IUserService _userService
 @inject IRefreshService _refreshService

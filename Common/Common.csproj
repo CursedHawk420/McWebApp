@@ -12,6 +12,10 @@
     <None Remove="Models\mcwebapp1_cms\export\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="Services\InventoryService.cs.legacy" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Hangfire.PostgreSql" Version="1.20.10" />
 		<PackageReference Include="Hangfire.EntityFrameworkCore" Version="0.7.0" />

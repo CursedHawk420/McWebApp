@@ -1,4 +1,5 @@
-﻿using Highgeek.McWebApp.Common.Services.Redis;
+﻿using Highgeek.McWebApp.Common.Models.Minecraft;
+using Highgeek.McWebApp.Common.Services.Redis;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,8 @@ namespace Highgeek.McWebApp.Common.Models.Redis
                 _uuid = value;
                 if (_redisUpdateService is not null)
                 {
+
+                    //RedisService.SetInRedis(oldUuid, GameItem.AIRITEM);
                     RedisService.DelFromRedis(oldUuid);
                     RedisService.SetInRedis(Uuid, Payload);
                 }
@@ -56,46 +59,73 @@ namespace Highgeek.McWebApp.Common.Models.Redis
             }
         }
 
-        public RedisLivingObject(){ Uuid = ""; Payload = ""; }
+        public RedisLivingObject(){ _payload = ""; _uuid = ""; }
 
         public RedisLivingObject(string uuid, string payload)
         {
-            this.Payload = payload;
-            this.Uuid = uuid;
+            this._payload = payload;
+            this._uuid = uuid;
         }
 
         public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger)
         {
             _logger = logger;
-            this.Payload = RedisService.GetFromRedis(uuid);
-            this.Uuid = uuid;
+            this._payload = RedisService.GetFromRedis(uuid);
+            this._uuid = uuid;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
             _redisUpdateService.KeySetEvent += KeySetEvent;
+            _redisUpdateService.InventoryChanged += KeySetEvent;
+        }
+
+        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger)
+        {
+            _logger = logger;
+            this._payload = payload;
+            this._uuid = uuid;
+            _redisUpdateService = redisUpdateService;
+            _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
+            _redisUpdateService.KeyDelEvent += KeyDelEvent;
+            _redisUpdateService.KeySetEvent += KeySetEvent;
+            _redisUpdateService.InventoryChanged += KeySetEvent;
         }
 
         public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService)
         {
-            this.Payload = RedisService.GetFromRedis(uuid);
-            this.Uuid = uuid;
+            this._payload = RedisService.GetFromRedis(uuid);
+            this._uuid = uuid;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
             _redisUpdateService.KeySetEvent += KeySetEvent;
+            _redisUpdateService.InventoryChanged += KeySetEvent;
         }
 
         public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService)
         {
-            this.Payload = payload;
-            this.Uuid = uuid;
+            this._payload = payload;
+            this._uuid = uuid;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
             _redisUpdateService.KeySetEvent += KeySetEvent;
+            _redisUpdateService.InventoryChanged += KeySetEvent;
         }
 
 
+
+
+        void KeySetEvent(object? sender, InventoryPositionInfo info)
+        {
+            if (info.rawuuid == this.Uuid)
+            {
+                string newPayload = RedisService.GetFromRedis(info.rawuuid);
+                _logger.LogInformation("Item: " + info.rawuuid);
+                this._payload = newPayload;
+                OnRedisUpdate();
+            }
+        }
 
         void KeySetEvent(object? sender, string uuid)
         {
@@ -145,6 +175,7 @@ namespace Highgeek.McWebApp.Common.Models.Redis
                         _redisUpdateService.KeyExpiredEvent -= KeyExpiredEvent;
                         _redisUpdateService.KeyDelEvent -= KeyDelEvent;
                         _redisUpdateService.KeySetEvent -= KeySetEvent;
+                        _redisUpdateService.InventoryChanged -= KeySetEvent;
                     }
                 }
 

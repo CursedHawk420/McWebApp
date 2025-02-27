@@ -1,0 +1,239 @@
+﻿@inject ILogger<InventoryComponent> _logger
+@inject IRedisUpdateService _redisUpdateService
+@inject IRedisItemsService _invService
+@inject IBrowserViewportService _browserViewportService
+@inject IRefreshService _refreshService
+@implements IDisposable
+<!--
+<style>
+    .smallinv {
+        transform: scale(0.85, 0.85);
+        -ms-transform: scale(0.85, 0.85); /* IE 9 */
+        -webkit-transform: scale(0.85, 0.85); /* Safari and Chrome */
+        -o-transform: scale(0.85, 0.85); /* Opera */
+        -moz-transform: scale(0.85, 0.85); /* Firefox */
+        margin-left: -8%;
+        margin-bottom: -2%;
+        justify-content: center;
+    }
+
+    .biginv {
+        transform: scale(1.2, 1.2);
+        -ms-transform: scale(1.2, 1.2); /* IE 9 */
+        -webkit-transform: scale(1.2, 1.2); /* Safari and Chrome */
+        -o-transform: scale(1.2, 1.2); /* Opera */
+        -moz-transform: scale(1.2, 1.2); /* Firefox */
+        margin-left: 9%;
+        margin-bottom: 3%;
+        margin-top: 5%;
+        float: left;
+    }
+</style>
+-->
+@if (loadingComplete)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="@invclass">
+                <MudText Style="font-family:'Minecraft'; margin-top:0.1%; margin-bottom:0.1%">@(selectedVinv == null ? "Nothing selected." : $"Ingame Inventory: {selectedVinv.InventoryName}")</MudText>
+                <div class="inv-container">
+                    <div style="background-image:url('@vinvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
+                        @if (true)
+                        {
+                            @for (int r = 0; r < vinvrows; r++)
+                            {
+                                <div class="d-flex dropinv ">
+                                    @for (int c = 0; c < 9; c++)
+                                    {
+                                        <MudDropZone T="GameItem" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                        i++;
+                                    }
+                                </div>
+                            }
+                            this.i = 0;
+                        }
+                    </div>
+                    <MudText class="inv-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="@invclass">
+                <MudText Style="font-family:'Minecraft'; margin-top:0.1%;margin-bottom:0.1%;">@(_invService.InvData.WInvData == null ? "Nothing selected." : $"Web Inventory: {_invService.InvData.WInvData.InventoryName}")</MudText>
+                <div class="inv-container">
+                    <div style="background-image:url('@winvsize'); width: 380px; background-size:100%;background-repeat:no-repeat ; border-top: 40px solid transparent; background-position:-15px -36px; border-left: 10px solid transparent; border-bottom: 20px solid transparent;">
+                        @if (true)
+                        {
+
+                            @for (int r = 0; r < winvrows; r++)
+                            {
+                                <div class="d-flex dropinv">
+                                    @for (int c = 0; c < 9; c++)
+                                    {
+                                        <MudDropZone T="GameItem" Identifier="@($"{_invService.WinvIdentifier}{ii.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                        ii++;
+                                    }
+                                </div>
+                            }
+                            this.ii = 0;
+                        }
+                    </div>
+                    <MudText class="inv-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    //zmena
+    [CascadingParameter]
+    public Highgeek.McWebApp.BlazorServer.Components.Layout.MainLayout MainLayout { get; set; }
+
+    [Parameter]
+    public VirtualInventory selectedVinv { get; set; }
+
+    private MudMenu mudMenu;
+
+
+    //todo: velikost invů
+    private int winvslots;
+    private int vinvslots;
+
+    private int winvrows;
+    private int vinvrows;
+
+    private int i = 0;
+    private int ii = 0;
+
+    private string winvsize;
+    private string vinvsize;
+
+    private string vinvrawuuid;
+
+    MudTooltip tooltip;
+
+    private bool loadingComplete = false;
+
+
+    //todo: implement scale method to change to smallinv
+    private string invclass = "biginv";
+
+    protected override async void OnInitialized()
+    {
+
+        //_redisUpdateService.InventoryChanged += c_InventoryUpdated;
+        _refreshService.InventoryViewRefreshRequested += Load;
+        if (_invService.InvData.WInvData is not null)
+        {
+            Load();
+        }
+    }
+
+    public async void Load()
+    {
+        vinvrawuuid = "vinv:" + selectedVinv.PlayerName + ":" + selectedVinv.InventoryUuid + ":";
+
+        await InvokeAsync(async () =>
+        {
+            vinvslots = selectedVinv.Size;
+            winvslots = _invService.InvData.WInvData.Size;
+            await DetermineInventorySize();
+
+            loadingComplete = true;
+            StateHasChanged();
+        });
+    }
+
+    public async Task DetermineInventorySize()
+    {
+        if (vinvslots > 27)
+        {
+            vinvsize = "https://images.highgeek.eu/doublechest.png";
+            vinvrows = 6;
+        }
+        else
+        {
+            vinvsize = "https://images.highgeek.eu/singlechest.png";
+            vinvrows = 3;
+        }
+
+        if (winvslots > 27)
+        {
+            winvsize = "https://images.highgeek.eu/doublechest.png";
+            winvrows = 6;
+        }
+        else
+        {
+            winvsize = "https://images.highgeek.eu/singlechest.png";
+            winvrows = 3;
+        }
+    }
+
+    private int _width = 0;
+    private int _height = 0;
+
+    private Guid _subscriptionId = Guid.NewGuid();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _browserViewportService.SubscribeAsync(_subscriptionId, Lambda, fireImmediately: true);
+        }
+        i = 0;
+        ii = 0;
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+    private async Task Lambda(BrowserViewportEventArgs args)
+    {
+        if (args.BrowserWindowSize.Width <= 575)
+        {
+            invclass = "smallinv";
+        }
+        else
+        {
+            invclass = "biginv";
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    private bool _disposed = false;
+
+    void IDisposable.Dispose()
+    {
+        // Dispose of unmanaged resources.
+        Dispose(true);
+        // Suppress finalization.
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // Dispose managed resources
+                // For example: Close file handles, database connections, etc.
+
+                _refreshService.InventoryViewRefreshRequested -= Load;
+                _browserViewportService.UnsubscribeAsync(_subscriptionId);
+            }
+
+            // Dispose unmanaged resources
+            // For example: Release memory allocated through unmanaged code
+
+            selectedVinv = null;
+            _disposed = true;
+        }
+    }
+
+    ~InventoryComponent()
+    {
+        Dispose(false); // Release unmanaged resources if the Dispose method wasn't called explicitly
+    }
+}

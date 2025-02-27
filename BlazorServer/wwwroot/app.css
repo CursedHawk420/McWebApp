@@ -59,8 +59,8 @@ h1:focus {
 
 .inv-top-left {
     position: absolute;
-    top: 8px;
-    left: 12px;
+    top: 2rem;
+    left: -0.5rem;
 }
 
 .item-bottom-right-text {
