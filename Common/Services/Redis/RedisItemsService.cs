@@ -78,9 +78,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     string item = RedisService.GetFromRedis(uuid);
                     if (item != GameItem.AIRITEM)
                     {
-                        if (!Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService)))
+                        try
                         {
-                            Objects[uuid] = new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService);
+                            Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService));
+                        }
+                        catch (Exception e)
+                        {
+
                         }
                     }
                 }
@@ -90,9 +94,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     string item = RedisService.GetFromRedis(uuid);
                     if (item != GameItem.AIRITEM)
                     {
-                        if (!Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService)))
+                        try
                         {
-                            Objects[uuid] = new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService);
+                            Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService));
+                        }
+                        catch(Exception e)
+                        {
+
                         }
                     }
                 }

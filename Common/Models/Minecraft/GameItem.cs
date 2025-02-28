@@ -41,7 +41,7 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             {
                 if(CustomName != null)
                 {
-                    Payload = value.Stringify(true);
+                    Payload = value.Stringify(true).Remove(0,1).Replace("\"minecraft:custom_name\":\"{\"extra\"", "\"minecraft:custom_name\":'{\"extra\"").Replace(",\"text\":\"\"}\",\"", ",\"text\":\"\"}',\"");
                 }
                 else
                 {
@@ -257,12 +257,6 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         public GameItem(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService) : base(uuid, payload, redisUpdateService, logger, refreshService)
         {
             InitGameItem(payload, uuid);
-        }
-
-        public override void OnRedisUpdate()
-        {
-            //_logger.LogInformation("Updated item: " + Payload);
-            InitGameItem(RedisService.GetFromRedis(Uuid), Uuid);
         }
 
         public override void OnRedisDelete()

@@ -142,7 +142,7 @@
                                 <ChildContent>
                                     <MudMenuItem @onclick="@((e) => DoSomethingWithItem(e, gameItem))">DoSomethingWithItem</MudMenuItem>
                                     <MudMenuItem @onclick="@((e) => SendToAuction(e, gameItem))">Send To Auction</MudMenuItem>
-                                    <MudMenuItem>Usage</MudMenuItem>
+                                    <MudMenuItem @onclick="@((e) => DeleteItem(e, gameItem))">Delete</MudMenuItem>
                                     <MudMenuItem>Close</MudMenuItem>
                                 </ChildContent>
                             </MudMenu>
@@ -216,6 +216,34 @@ else
     }
 
 
+    private async void DoubleClickOnMenuEvent(MouseEventArgs mouseEventArgs, GameItem item)
+    {
+        await MudMenus.FirstOrDefault(x => x.Tag == item).OpenMenuAsync(mouseEventArgs);
+    }
+
+    private async void DoSomethingWithItem(EventArgs eventArgs, GameItem gameItem)
+    {
+        _snack.Add((MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
+        _logger.LogWarning("Trying to do something with item: " + gameItem.Name);
+
+        var ench = gameItem.Enchantments;
+        ench.Add(new IntTag("minecraft:mending", 24));
+        gameItem.Enchantments = ench;
+    }
+
+    private async void SendToAuction(EventArgs eventArgs, GameItem gameItem)
+    {
+        _snack.Add("Sended to auction: " + (MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
+        _logger.LogWarning("Sending item to auction: " + gameItem.Name);
+        _auctionService.AddToAuction(_userService.MinecraftUser.NickName, 50, gameItem);
+
+    }
+
+    private async void DeleteItem(EventArgs eventArgs, GameItem gameItem)
+    {
+        await RedisService.DelFromRedis(gameItem.Uuid);
+    }
+
     public async void RefreshAsync()
     {
         // InvokeAsync is inherited, it syncs the call back to the render thread
@@ -266,29 +294,6 @@ else
     {
         _themeManager = value;
         StateHasChanged();
-    }
-
-    private async void DoubleClickOnMenuEvent(MouseEventArgs mouseEventArgs, GameItem item)
-    {
-        await MudMenus.FirstOrDefault(x => x.Tag == item).OpenMenuAsync(mouseEventArgs);
-    }
-
-    private async void DoSomethingWithItem(EventArgs eventArgs, GameItem gameItem)
-    {
-        _snack.Add((MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
-        _logger.LogWarning("Trying to do something with item: " + gameItem.Name);
-
-        var ench = gameItem.Enchantments;
-        ench.Add(new IntTag("minecraft:mending", 24));
-        gameItem.Enchantments = ench;
-    }
-
-    private async void SendToAuction(EventArgs eventArgs, GameItem gameItem)
-    {
-        _snack.Add("Sended to auction: " + (MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
-        _logger.LogWarning("Sending item to auction: " + gameItem.Name);
-        _auctionService.AddToAuction(_userService.MinecraftUser.NickName, 50, gameItem);
-
     }
 
     private bool _disposed = false;
