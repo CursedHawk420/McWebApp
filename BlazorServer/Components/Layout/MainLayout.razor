@@ -277,43 +277,11 @@ else
     {
         _snack.Add((MarkupString)gameItem.DisplayName.HtmlText, Severity.Success);
         _logger.LogWarning("Trying to do something with item: " + gameItem.Name);
-    }
 
-    /*
-    public async void c_InventoryUpdated(object? sender, InventoryPositionInfo info)
-    {
-        try
-        {
-            if (_invService.InvData.ListPosition.ContainsKey(info.uuid))
-            {
-                _logger.LogInformation("Updated inventory: " + info.uuid);
-                await InvokeAsync(async () =>
-                {
-                    // Set the local variable
-                    await _invService.listUpdater(info);
-                    //_logger.LogInformation("Updated inventory: " + Uuid + " Type: " + Type);
-                    // Tell Blazor to rewrite the DOM
-                    try
-                    {
-                        StateHasChanged();
-                        MainDropContainer.Refresh();
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.WriteExceptionToRedis();
-                        _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n" + ex.Message + "\nTrace: \n" + ex.StackTrace);
-                    }
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            ex.WriteExceptionToRedis();
-            _logger.LogWarning("c_InventoryUpdated() failed!: \nMessage: \n" + ex.Message + "\nTrace: \n" + ex.StackTrace);
-        }
+        var ench = gameItem.Enchantments;
+        ench.Add(new IntTag("minecraft:mending", 24));
+        gameItem.Enchantments = ench;
     }
-    */
-
 
     private async void SendToAuction(EventArgs eventArgs, GameItem gameItem)
     {
@@ -322,8 +290,6 @@ else
         _auctionService.AddToAuction(_userService.MinecraftUser.NickName, 50, gameItem);
 
     }
-
-
 
     private bool _disposed = false;
 

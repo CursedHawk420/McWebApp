@@ -14,24 +14,237 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 {
     public class GameItem : RedisLivingObject
     {
-        public string? Name { get; set; }
         public string? Json { get; set; }
         public string? Texture { get; set; }
-        public string? TextureUrl { get; set; }
-        public int? Amount { get; set; }
         public string? Identifier { get; set; }
         public string? OriginUuid { get; set; }
-        public DisplayNameAdapter? DisplayName { get; set; }
-        public string? CustomName { get; set; }
-        public CompoundTag CompoundTag { get; set; }
-        public CompoundTag Components { get; set; }
-        public CompoundTag? Enchantments { get; set; }
-        public ListTag? Modifiers { get; set; }
         public CompoundTag? PublicBukkitValues { get; set; }
-        public string? Id { get; set; }
-        public CompoundTag HeadPlayerProfile {get; set;}
-        public CompoundTag HeadProperties {get; set;}
-        public string PlayerHeadTextureId {get; set;}
+        public CompoundTag HeadPlayerProfile { get; set; }
+        public CompoundTag HeadProperties { get; set; }
+        public string PlayerHeadTextureId { get; set; }
+
+        public CompoundTag CompoundTag
+        {
+            get
+            {
+                try
+                {
+                    return StringNbt.Parse(Payload);
+                }
+                catch (Exception ex)
+                {
+                    return StringNbt.Parse("{\r\n    DataVersion: 3955,\r\n    count: 1,\r\n    id: \"minecraft:barrier\"\r\n}");
+                    //ex.WriteExceptionToRedis();
+                }
+            }
+            set
+            {
+                if(CustomName != null)
+                {
+                    Payload = value.Stringify(true);
+                }
+                else
+                {
+                    Payload = value.Stringify(false);
+                }
+            }
+        }
+
+        public int Amount
+        {
+            get
+            {
+                try
+                {
+                    return CompoundTag.Get<IntTag>("count");
+                }
+                catch (Exception ex)
+                {
+                    return 1;
+                }
+            }
+            set
+            {
+                CompoundTag newtag = CompoundTag;
+                if (newtag.ContainsKey("count"))
+                {
+                    newtag.Remove("count");
+                }
+                newtag.Add(new IntTag("count", value));
+                CompoundTag = newtag;
+            }
+        }
+
+        public CompoundTag? Components
+        {
+            get
+            {
+                if (CompoundTag.ContainsKey("components"))
+                {
+                    return (CompoundTag)CompoundTag["components"];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                CompoundTag newtag = CompoundTag;
+                if (newtag.ContainsKey("components"))
+                {
+                    newtag.Remove("components");
+                }
+                newtag.Add(value);
+                CompoundTag = newtag;
+            }
+        }
+
+        public string? TextureUrl
+        {
+            get
+            {
+                if(Enchantments is not null &&  Enchantments.Count > 0)
+                {
+                    Texture = Name + "_enchanted";
+                    return "https://api.highgeek.eu/api/images/items/name/" + Texture;
+                }
+                else
+                {
+                    Texture = Name;
+                    return "https://api.highgeek.eu/api/images/items/name/" + Name;
+                }
+            }
+        }
+
+        public string? Id { 
+            get{
+                return ((StringTag)CompoundTag["id"]).Value;
+            } 
+            set{
+                CompoundTag newtag = CompoundTag;
+                ((StringTag)newtag["id"]).Value = value;
+                CompoundTag = newtag;
+            } 
+        }
+
+        public string? Name
+        {
+            get
+            {
+                return Id.ToLower().Substring(Id.IndexOf(":") + 1, Id.Length - Id.IndexOf(":") - 1);
+            }
+        }
+
+        public string? CustomName
+        {
+            get
+            {
+
+                if (Components is not null && Components.ContainsKey("minecraft:custom_name"))
+                {
+                    return ((StringTag)Components["minecraft:custom_name"]).Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public DisplayNameAdapter? DisplayName
+        {
+            get
+            {
+                //todo: from compound tag get item display name
+                if (CustomName != null)
+                {
+                    return DisplayNameAdapter.FromJson(CustomName);
+                }
+                else
+                {
+                    return new DisplayNameAdapter() { HtmlText =  WordsToUpper(Name) };
+                }
+            }
+        }
+
+        public CompoundTag? Enchantments
+        {
+            get
+            {
+                if (Components is not null && Components.ContainsKey("minecraft:enchantments"))
+                {
+                    return ((CompoundTag)((CompoundTag)Components["minecraft:enchantments"])["levels"]);
+                }
+                else
+                {
+                    return new CompoundTag("levels");
+                }
+            }
+            set
+            {
+                if(value is not null)
+                {
+                    var newtag = new CompoundTag("components");
+                    if (Components is not null)
+                    {
+                        newtag = Components;
+                    }
+
+                    if (!newtag.ContainsKey("minecraft:enchantments"))
+                    {
+                        newtag.Add(new CompoundTag("minecraft:enchantments"));
+                        ((CompoundTag)newtag["minecraft:enchantments"]).Add(new CompoundTag("levels"));
+                    }
+
+                    ((CompoundTag)((CompoundTag)newtag["minecraft:enchantments"])["levels"]).Clear();
+                    foreach (var tag in value)
+                    {
+                        ((CompoundTag)((CompoundTag)newtag["minecraft:enchantments"])["levels"]).Add(tag);
+                    }
+                    Components = newtag;
+                }
+            }
+        }
+
+        public ListTag? Modifiers
+        {
+            get
+            {
+                if (Components is not null && Components.ContainsKey("minecraft:attribute_modifiers"))
+                {
+                    return (ListTag)((CompoundTag)Components["minecraft:attribute_modifiers"])["modifiers"];
+                }
+                else
+                {
+                    return new ListTag("modifiers", TagType.Compound);
+                }
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    var newtag = new CompoundTag("components");
+                    if (Components is not null)
+                    {
+                        newtag = Components;
+                    }
+                    if (!newtag.ContainsKey("minecraft:attribute_modifiers"))
+                    {
+                        newtag.Add(new CompoundTag("minecraft:attribute_modifiers"));
+                        ((CompoundTag)newtag["minecraft:attribute_modifiers"]).Add(new ListTag("modifiers", TagType.Compound));
+                    }
+
+                    ((ListTag)((CompoundTag)newtag["minecraft:attribute_modifiers"])["modifiers"]).Clear();
+                    foreach (var val in value)
+                    {
+                        ((ListTag)((CompoundTag)newtag["minecraft:attribute_modifiers"])["modifiers"]).Add(val);
+                    }
+                    Components = newtag;
+                }
+            }
+        }
+
 
 
         public static string AIRITEM = "{\r\n    \"id\": \"minecraft:air\"\r\n}";
@@ -68,30 +281,12 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         {
             this.Json = json;
             this.OriginUuid = originUuid;
-            try
-            {
-                CompoundTag = StringNbt.Parse(json);
-            }
-            catch (Exception ex)
-            {
-                CompoundTag = StringNbt.Parse("{\r\n    DataVersion: 3955,\r\n    count: 1,\r\n    id: \"minecraft:barrier\"\r\n}");
-                ex.WriteExceptionToRedis();
-            }
-            Amount = GetCount();
-            Id = ((StringTag)CompoundTag["id"]).Value;
-            Name = Id.ToLower().Substring(Id.IndexOf(":") + 1, Id.Length - Id.IndexOf(":") - 1);
+
             if (Id != "minecraft:air")
             {
-                Identifier = originUuid;
+                _uuid = originUuid;
             }
-
-            Components = GetComponents();
-
-            Enchantments = GetEnchantments();
-            Modifiers = GetModifiers();
             PublicBukkitValues = GetBukkitValues();
-            CustomName = GetCustomName();
-            DisplayName = GetDisplayName();
 
             if (Id == "minecraft:player_head")
             {
@@ -124,62 +319,6 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             }
         }
 
-
-        public DisplayNameAdapter GetDisplayName()
-        {
-            //todo: from compound tag get item display name
-            if (CustomName != null)
-            {
-                return DisplayNameAdapter.FromJson(CustomName);
-            }
-            else
-            {
-                var displayName = new DisplayNameAdapter();
-                displayName.HtmlText = Name;
-                displayName.HtmlText = WordsToUpper(displayName.HtmlText);
-                return displayName;
-            }
-        }
-
-        public int GetCount()
-        {
-            int amount;
-            try
-            {
-                amount = CompoundTag.Get<IntTag>("count");
-            }
-            catch (Exception ex)
-            {
-                amount = 1;
-            }
-            return amount;
-        }
-
-        public CompoundTag GetComponents()
-        {
-            if (CompoundTag.ContainsKey("components"))
-            {
-                return (CompoundTag)CompoundTag["components"];
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public ListTag GetModifiers()
-        {
-            if (Components is not null && Components.ContainsKey("minecraft:attribute_modifiers"))
-            {
-                CompoundTag modifiersTag = ((CompoundTag)Components["minecraft:attribute_modifiers"]);
-                return ((ListTag)modifiersTag["modifiers"]);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public CompoundTag GetBukkitValues()
         {
             if (Components is not null && Components.ContainsKey("minecraft:custom_data"))
@@ -189,35 +328,6 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
             }
             else
             {
-                return null;
-            }
-        }
-
-        public string GetCustomName()
-        {
-            if (Components is not null && Components.ContainsKey("minecraft:custom_name"))
-            {
-                return ((StringTag)Components["minecraft:custom_name"]).Value;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public CompoundTag GetEnchantments()
-        {
-            if (Components is not null && Components.ContainsKey("minecraft:enchantments"))
-            {
-                Texture = Name + "_enchanted";
-                TextureUrl = "https://api.highgeek.eu/api/images/items/name/" + Texture;
-                CompoundTag enchantmetsTag = ((CompoundTag)Components["minecraft:enchantments"]);
-                return ((CompoundTag)enchantmetsTag["levels"]);
-            }
-            else
-            {
-                Texture = Name;
-                TextureUrl = "https://api.highgeek.eu/api/images/items/name/" + Name;
                 return null;
             }
         }
@@ -236,6 +346,7 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
         }
 
     }
+
     static class ExtensionMethods
     {
         public static AuctionItem ToAuctionItem(this GameItem source, string owner, long? price, IRedisUpdateService redisUpdateService)

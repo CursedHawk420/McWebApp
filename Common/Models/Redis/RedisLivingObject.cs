@@ -15,6 +15,7 @@ namespace Highgeek.McWebApp.Common.Models.Redis
     {
         string Uuid { get; set; }
         string Payload { get; set; }
+        public void Dispose();
     }
 
     public class RedisLivingObject : IRedisLivingObject, IDisposable
@@ -174,6 +175,13 @@ namespace Highgeek.McWebApp.Common.Models.Redis
         {
             if (!disposedValue)
             {
+                if (_redisUpdateService != null)
+                {
+                    _redisUpdateService.KeyExpiredEvent -= KeyExpiredEvent;
+                    _redisUpdateService.KeyDelEvent -= KeyDelEvent;
+                    _redisUpdateService.KeySetEvent -= KeySetEvent;
+                    _redisUpdateService.InventoryChanged -= KeySetEvent;
+                }
                 if (disposing)
                 {
                     if(_redisUpdateService != null)

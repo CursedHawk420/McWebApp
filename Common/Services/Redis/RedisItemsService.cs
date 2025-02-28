@@ -5,7 +5,9 @@ using Highgeek.McWebApp.Common.Models.Minecraft;
 using Highgeek.McWebApp.Common.Models.Redis;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
+using Polly.Registry;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +18,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 {
     public interface IRedisItemsService
     {
-        public IDictionary<string, IRedisLivingObject> Objects { get; }
+        public ConcurrentDictionary<string, IRedisLivingObject> Objects { get; }
         public IList<IRedisLivingObject> AllItems { get; }
         public Task Init(ApplicationUser applicationUser);
         public Task ItemPicked(MudDragAndDropItemTransaction<IRedisLivingObject> pickItem);
@@ -34,7 +36,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         private bool disposedValue;
 
         public string WinvIdentifier { get; set; }
-        public IDictionary<string, IRedisLivingObject> Objects { get; }
+        public ConcurrentDictionary<string, IRedisLivingObject> Objects { get; }
         public IList<IRedisLivingObject> AllItems
         {
             get
@@ -50,7 +52,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
             _logger = logger;
             _redisUpdateService = redisUpdateService;
             _refreshService = refreshService;
-            Objects = new Dictionary<string, IRedisLivingObject>();
+            Objects = new ConcurrentDictionary<string, IRedisLivingObject>();
 
             //_redisUpdateService.KeySetEvent += AddToDict;
             _redisUpdateService.InventoryChanged += AddToDict;
@@ -112,14 +114,13 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                 {
                     if (item != GameItem.AIRITEM)
                     {
-                        Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService, _logger, _refreshService));
-                    }
-                }
-                else
-                {
-                    if (item != GameItem.AIRITEM)
-                    {
-                        Objects[info.rawuuid] = new GameItem(info.rawuuid, item, _redisUpdateService, _logger, _refreshService);
+                        try
+                        {
+                            Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService, _logger, _refreshService));
+                        }catch (Exception e)
+                        {
+                            _logger.LogInformation("Already in dictionary: " + info.rawuuid);
+                        }
                     }
                 }
                 _refreshService.CallInventoryViewRefresh();
@@ -141,7 +142,8 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         {
             if (Objects.ContainsKey(uuid))
             {
-                Objects.Remove(uuid);
+                IRedisLivingObject removed;
+                Objects.Remove(uuid, out removed);
                 _refreshService.CallInventoryViewRefresh();
             }
         }
@@ -171,6 +173,11 @@ namespace Highgeek.McWebApp.Common.Services.Redis
 
                 // TODO: Uvolněte nespravované prostředky (nespravované objekty) a přepište finalizační metodu.
                 // TODO: Nastavte velká pole na hodnotu null.
+                foreach(var obj in AllItems)
+                {
+                    obj.Dispose();
+                }
+
                 disposedValue = true;
             }
         }
