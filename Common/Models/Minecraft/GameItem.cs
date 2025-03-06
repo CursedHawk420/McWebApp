@@ -14,16 +14,14 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 {
     public class GameItem : RedisLivingObject
     {
-        public string? Json { get; set; }
         public string? Texture { get; set; }
-        public string? Identifier { get; set; }
         public string? OriginUuid { get; set; }
         public CompoundTag? PublicBukkitValues { get; set; }
         public CompoundTag HeadPlayerProfile { get; set; }
         public CompoundTag HeadProperties { get; set; }
         public string PlayerHeadTextureId { get; set; }
 
-        public CompoundTag CompoundTag
+        public virtual CompoundTag CompoundTag
         {
             get
             {
@@ -34,7 +32,6 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
                 catch (Exception ex)
                 {
                     return StringNbt.Parse("{\r\n    DataVersion: 3955,\r\n    count: 1,\r\n    id: \"minecraft:barrier\"\r\n}");
-                    //ex.WriteExceptionToRedis();
                 }
             }
             set
@@ -254,26 +251,37 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
 
         }
 
-        public GameItem(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService) : base(uuid, payload, redisUpdateService, logger, refreshService)
-        {
-            InitGameItem(payload, uuid);
-        }
-
         public override void OnRedisDelete()
         {
             Dispose();
         }
 
-        //legacy mechanics
-
-        public GameItem (string json, string originUuid)
+        public override void OnRedisUpdate()
         {
-            InitGameItem(json, originUuid);
+            InitGameItem(Uuid);
         }
 
-        public void InitGameItem(string json, string originUuid)
+        //legacy mechanics
+
+        public GameItem(string originUuid, string json)
         {
-            this.Json = json;
+            _payload = json;
+            _uuid = originUuid;
+            InitGameItem(originUuid);
+        }
+
+        public GameItem(string originUuid, IRedisUpdateService updateService) : base(originUuid, updateService)
+        {
+            InitGameItem(originUuid);
+        }
+
+        public GameItem(string originUuid, string json, IRedisUpdateService updateService) : base(originUuid, json, updateService)
+        {
+            InitGameItem(originUuid);
+        }
+
+        public void InitGameItem(string originUuid)
+        {
             this.OriginUuid = originUuid;
 
             if (Id != "minecraft:air")
@@ -345,7 +353,14 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
     {
         public static AuctionItem ToAuctionItem(this GameItem source, string owner, long? price, IRedisUpdateService redisUpdateService)
         {
-            return new AuctionItem(source, owner, price, redisUpdateService);
+            AuctionItemAdapter AuctionItemAdapter = new AuctionItemAdapter();
+            AuctionItemAdapter = new AuctionItemAdapter();
+            AuctionItemAdapter.GameItem = source.Payload;
+            AuctionItemAdapter.Price = price;
+            AuctionItemAdapter.Owner = owner;
+            AuctionItemAdapter.Datetime = DateTime.Now.ToString();
+            string uuid = "auction:" + Guid.NewGuid().ToString();
+            return new AuctionItem(uuid, AuctionItemAdapter, redisUpdateService);
         }
     }
 }

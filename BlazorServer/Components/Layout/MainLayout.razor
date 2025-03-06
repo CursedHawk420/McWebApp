@@ -59,7 +59,7 @@
                                 @Body
                                 <Highgeek.McWebApp.BlazorServer.Components.GameChat.ChatButton />
                                 <Highgeek.McWebApp.BlazorServer.Components.Inventory.InventoryButton />
-                                <MudDropZone T="GameItem" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu  d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
+                                <MudDropZone T="IRedisLivingObject" Identifier="@(_invService.WinvIdentifier + "2")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu  d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:41px;width:41.4px;" />
 
                             </MudContainer>
                         </MudMainContent>
@@ -74,8 +74,7 @@
             <ItemRenderer>
                 @if (context.Payload != GameItem.AIRITEM)
                 {
-                    @switch (context)
-                    {
+                    @switch(context){
                         case AuctionItem auctionItem:
                             <MudMenu Tag="auctionItem" @ondblclick="@( (x) => DoubleClickOnMenuEvent(x, auctionItem))" @ref="MudMenu" ActivationEvent="@MouseEvent.RightClick" Style="height:33px;width:33px;">
                                 <ActivatorContent>
@@ -92,7 +91,7 @@
                                             </ChildContent>
                                             <TooltipContent>
                                                 <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)auctionItem.DisplayName.HtmlText)</MudText>
-                                                <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)(((AuctionItem)auctionItem).Owner))</MudText>
+                                                <MudText Style="font-family:'Minecraft'" Typo="Typo.body1">@((MarkupString)(auctionItem.Owner))</MudText>
                                                 @if (auctionItem.Enchantments != null)
                                                 {
                                                     foreach (IntTag enchant in auctionItem.Enchantments.Values)
@@ -147,7 +146,6 @@
                                 </ChildContent>
                             </MudMenu>
                             break;
-
                     }
                 }
             </ItemRenderer>
@@ -216,7 +214,7 @@ else
     }
 
 
-    private async void DoubleClickOnMenuEvent(MouseEventArgs mouseEventArgs, GameItem item)
+    private async void DoubleClickOnMenuEvent(MouseEventArgs mouseEventArgs, IRedisLivingObject item)
     {
         await MudMenus.FirstOrDefault(x => x.Tag == item).OpenMenuAsync(mouseEventArgs);
     }

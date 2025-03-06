@@ -16,7 +16,7 @@
                         <div class="d-flex dropinv ">
                             @for (int c = 0; c < 9; c++)
                             {
-                                <MudDropZone T="IRedisLivingObject" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                <MudDropZone CanDrop="@((item) => item is INonMoveable ? false : true)" T="IRedisLivingObject" Identifier="@($"{vinvrawuuid}{i.ToString()}")" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
                                 i++;
                             }
                         </div>

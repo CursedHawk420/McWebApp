@@ -62,6 +62,11 @@ h1:focus {
     top: 2rem;
     left: -0.5rem;
 }
+.inv-static-top-left {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+}
 
 .item-bottom-right-text {
     position: absolute;

@@ -152,20 +152,20 @@ namespace Highgeek.McWebApp.Common.Services
             {
                 return;
             }
-            string olduuid = dropItem.Item.Identifier;
+            //string olduuid = dropItem.Item.Identifier;
 
 
             //dropItem.Item.Identifier = dropItem.DropzoneIdentifier;
 
-            string item = await RedisService.GetFromRedisAsync(olduuid);
-            await RedisService.SetInRedis(olduuid, GameItem.AIRITEM);
-            await RedisService.SetInRedis(dropItem.DropzoneIdentifier, item);
+            //string item = await RedisService.GetFromRedisAsync(olduuid);
+            //await RedisService.SetInRedis(olduuid, GameItem.AIRITEM);
+            //await RedisService.SetInRedis(dropItem.DropzoneIdentifier, item);
         }
 
         public async Task listUpdater(InventoryPositionInfo info)
         {
             _logger.LogInformation("Updating item: " + info.uuid + ":" + info.position);
-            AllItems[int.Parse(info.position) + InvData.ListPosition[info.uuid]].Json = info.Item;
+            //AllItems[int.Parse(info.position) + InvData.ListPosition[info.uuid]].Json = info.Item;
             AllItems[int.Parse(info.position) + InvData.ListPosition[info.uuid]] = new GameItem(info.Item, info.rawuuid);
         }
 

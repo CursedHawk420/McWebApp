@@ -31,6 +31,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
     public class RedisItemsService : IRedisItemsService, IDisposable
     {
         private readonly IRedisUpdateService _redisUpdateService;
+        private readonly IAuctionService _auctionService;
         private readonly ILogger<RedisItemsService> _logger;
         private readonly IRefreshService _refreshService;
         private bool disposedValue;
@@ -41,16 +42,20 @@ namespace Highgeek.McWebApp.Common.Services.Redis
         {
             get
             {
-                return Objects.Values.ToArray();
+                var allItems = new List<IRedisLivingObject>(Objects.Values.Count + _auctionService.Items.Count);
+                allItems.AddRange(Objects.Values.ToList());
+                allItems.AddRange(_auctionService.Items);
+                return allItems.ToArray();
             }
         }
         public IList<VirtualInventory> VirtualInventories { get; set; }
         private ApplicationUser ApplicationUser { get; set; }
 
-        public RedisItemsService(IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
+        public RedisItemsService(IRedisUpdateService redisUpdateService, IAuctionService auctionService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
         {
             _logger = logger;
             _redisUpdateService = redisUpdateService;
+            _auctionService = auctionService;
             _refreshService = refreshService;
             Objects = new ConcurrentDictionary<string, IRedisLivingObject>();
 
@@ -80,7 +85,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     {
                         try
                         {
-                            Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService));
+                            Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService));
                         }
                         catch (Exception e)
                         {
@@ -96,7 +101,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     {
                         try
                         {
-                            Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService, _logger, _refreshService));
+                            Objects.TryAdd(uuid, new GameItem(uuid, item, _redisUpdateService));
                         }
                         catch(Exception e)
                         {
@@ -124,7 +129,7 @@ namespace Highgeek.McWebApp.Common.Services.Redis
                     {
                         try
                         {
-                            Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService, _logger, _refreshService));
+                            Objects.TryAdd(info.rawuuid, new GameItem(info.rawuuid, item, _redisUpdateService));
                         }catch (Exception e)
                         {
                             _logger.LogInformation("Already in dictionary: " + info.rawuuid);

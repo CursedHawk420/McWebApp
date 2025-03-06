@@ -2,6 +2,7 @@
 
 @inject IAuctionService _auctionService
 @inject IRedisUpdateService _redisUpdateService
+@inject IRefreshService _refreshService
 
 @if (loadingComplete)
 {
@@ -17,7 +18,7 @@
                                 <div class="d-flex dropinv ">
                                     @for (int c = 0; c < 9; c++)
                                     {
-                                        <MudDropZone T="GameItem" Identifier="@(GetIdentifier())" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
+                                        <MudDropZone T="IRedisLivingObject" Identifier="@(GetIdentifier())" CanDrop="@((item) => false)" DraggingClass="mud-theme-success" Class="mud-drop-zone-with-menu d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="height:37.8px;width:38.1px;" />
                                         i++;
                                     }
                                 </div>
@@ -25,7 +26,7 @@
                             this.i = 0;
                         }
                     </div>
-                    <MudText class="inv-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
+                    <MudText class="inv-static-top-left" Style="font-family:'Minecraft'; margin-top:0.5%; color:#3f3f3f;">ChestTest</MudText>
                 </div>
             </div>
         </div>
@@ -61,7 +62,7 @@
     {
         if (i < _auctionService.Items.Count)
         {
-            return _auctionService.Items[i].Identifier;
+            return _auctionService.Items[i].Uuid;
         }
         else
         {
@@ -73,13 +74,14 @@
     {
         RefreshAsync();
         MainLayout.MainDropContainer.Refresh();
+        _refreshService.CallInventoryViewRefresh();
     }
 
     private void RefreshInventory(object? sender, AuctionItem auctionItem)
     {
         RefreshAsync();
         MainLayout.MainDropContainer.Refresh();
+        _refreshService.CallInventoryViewRefresh();
+
     }
-
-
 }

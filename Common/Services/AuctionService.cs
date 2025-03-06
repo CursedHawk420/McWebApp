@@ -51,8 +51,7 @@ namespace Highgeek.McWebApp.Common.Services
 
         public AuctionItem BuildAuctionItem(string uuid)
         {
-            var adapter = AuctionItemAdapter.FromJson(RedisService.GetFromRedis(uuid));
-            return new AuctionItem(_redisUpdateService, adapter.GameItem, uuid, adapter.Owner, adapter.Price, adapter.Datetime);
+            return new AuctionItem(uuid, RedisService.GetFromRedis(uuid), _redisUpdateService);
         }
 
     }

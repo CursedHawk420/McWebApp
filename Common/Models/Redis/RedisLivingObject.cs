@@ -21,8 +21,6 @@ namespace Highgeek.McWebApp.Common.Models.Redis
     public class RedisLivingObject : IRedisLivingObject, IDisposable
     {
         public readonly IRedisUpdateService? _redisUpdateService;
-        public readonly ILogger<RedisItemsService>? _logger;
-        public readonly IRefreshService _refreshService;
         private bool disposedValue;
 
         protected string _uuid;
@@ -70,66 +68,36 @@ namespace Highgeek.McWebApp.Common.Models.Redis
             this._uuid = uuid;
         }
 
-        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
-        {
-            _logger = logger;
-            this._payload = RedisService.GetFromRedis(uuid);
-            this._uuid = uuid;
-            _refreshService = refreshService;
-            _redisUpdateService = redisUpdateService;
-            _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
-            _redisUpdateService.KeyDelEvent += KeyDelEvent;
-            _redisUpdateService.KeySetEvent += KeySetEvent;
-            _redisUpdateService.InventoryChanged += KeySetEvent;
-        }
-
-        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService, ILogger<RedisItemsService> logger, IRefreshService refreshService)
-        {
-            _logger = logger;
-            this._payload = payload;
-            this._uuid = uuid;
-            _refreshService = refreshService;
-            _redisUpdateService = redisUpdateService;
-            _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
-            _redisUpdateService.KeyDelEvent += KeyDelEvent;
-            _redisUpdateService.KeySetEvent += KeySetEvent;
-            _redisUpdateService.InventoryChanged += KeySetEvent;
-        }
-
-        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
+        public RedisLivingObject(string uuid, IRedisUpdateService redisUpdateService)
         {
             this._payload = RedisService.GetFromRedis(uuid);
             this._uuid = uuid;
-            _refreshService = refreshService;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
             _redisUpdateService.KeySetEvent += KeySetEvent;
-            _redisUpdateService.InventoryChanged += KeySetEvent;
+            _redisUpdateService.InventoryChanged += InventoryKeySetEvent;
         }
 
-        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService, IRefreshService refreshService)
+        public RedisLivingObject(string uuid, string payload, IRedisUpdateService redisUpdateService)
         {
             this._payload = payload;
             this._uuid = uuid;
-            _refreshService = refreshService;
             _redisUpdateService = redisUpdateService;
             _redisUpdateService.KeyExpiredEvent += KeyExpiredEvent;
             _redisUpdateService.KeyDelEvent += KeyDelEvent;
             _redisUpdateService.KeySetEvent += KeySetEvent;
-            _redisUpdateService.InventoryChanged += KeySetEvent;
+            _redisUpdateService.InventoryChanged += InventoryKeySetEvent;
         }
 
 
 
 
-        void KeySetEvent(object? sender, InventoryPositionInfo info)
+        void InventoryKeySetEvent(object? sender, InventoryPositionInfo info)
         {
             if (info.rawuuid == this.Uuid)
             {
-                string newPayload = RedisService.GetFromRedis(info.rawuuid);
-                _logger.LogInformation("Item: " + info.rawuuid);
-                this._payload = newPayload;
+                this._payload = RedisService.GetFromRedis(info.rawuuid);
                 OnRedisUpdate();
             }
         }
@@ -138,9 +106,7 @@ namespace Highgeek.McWebApp.Common.Models.Redis
         {
             if(uuid == this.Uuid)
             {
-                string newPayload = RedisService.GetFromRedis(uuid);
-                _logger.LogInformation("Item: " + uuid);
-                this._payload = newPayload;
+                this._payload = RedisService.GetFromRedis(uuid);
                 OnRedisUpdate();
             }
         }
@@ -175,13 +141,6 @@ namespace Highgeek.McWebApp.Common.Models.Redis
         {
             if (!disposedValue)
             {
-                if (_redisUpdateService != null)
-                {
-                    _redisUpdateService.KeyExpiredEvent -= KeyExpiredEvent;
-                    _redisUpdateService.KeyDelEvent -= KeyDelEvent;
-                    _redisUpdateService.KeySetEvent -= KeySetEvent;
-                    _redisUpdateService.InventoryChanged -= KeySetEvent;
-                }
                 if (disposing)
                 {
                     if(_redisUpdateService != null)
@@ -189,7 +148,7 @@ namespace Highgeek.McWebApp.Common.Models.Redis
                         _redisUpdateService.KeyExpiredEvent -= KeyExpiredEvent;
                         _redisUpdateService.KeyDelEvent -= KeyDelEvent;
                         _redisUpdateService.KeySetEvent -= KeySetEvent;
-                        _redisUpdateService.InventoryChanged -= KeySetEvent;
+                        _redisUpdateService.InventoryChanged -= InventoryKeySetEvent;
                     }
                 }
 

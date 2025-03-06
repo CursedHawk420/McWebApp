@@ -1,7 +1,11 @@
 ﻿using Highgeek.McWebApp.Common.Models.Adapters.Auction;
+using Highgeek.McWebApp.Common.Models.Redis;
 using Highgeek.McWebApp.Common.Services;
 using Highgeek.McWebApp.Common.Services.Redis;
+using Microsoft.Win32;
 using NetTopologySuite.Densify;
+using SharpNBT;
+using SharpNBT.SNBT;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,91 +14,97 @@ using System.Text;
 
 namespace Highgeek.McWebApp.Common.Models.Minecraft
 {
-    public class AuctionItem : GameItem, IDisposable
+    public interface IAuctionItem : INonMoveable
     {
         public string? Owner { get; set; }
         public DateTime? TimeAdded { get; set; }
         public long? Price { get; set; }
+        public AuctionItemAdapter AuctionItemAdapter { get; set; }
+    }
 
-        public IRedisUpdateService? _redisUpdateService;
-
+    public class AuctionItem : GameItem, IRedisLivingObject, IAuctionItem
+    {
+        public string? Owner { get; set; }
+        public DateTime? TimeAdded { get; set; }
+        public long? Price { get; set; }
+        public AuctionItemAdapter AuctionItemAdapter { get; set; }
         private bool disposedValue;
+
+        public override CompoundTag CompoundTag {
+            get
+            {
+                try
+                {
+                    return StringNbt.Parse(AuctionItemAdapter.FromJson(Payload).GameItem);
+                }
+                catch (Exception ex)
+                {
+                    return StringNbt.Parse("{\r\n    DataVersion: 3955,\r\n    count: 1,\r\n    id: \"minecraft:barrier\"\r\n}");
+                    //ex.WriteExceptionToRedis();
+                }
+            }
+            set
+            {
+                if (CustomName != null)
+                {
+                    this.AuctionItemAdapter.GameItem = value.Stringify(true).Remove(0, 1).Replace("\"minecraft:custom_name\":\"{\"extra\"", "\"minecraft:custom_name\":'{\"extra\"").Replace(",\"text\":\"\"}\",\"", ",\"text\":\"\"}',\"");
+                    Payload = this.AuctionItemAdapter.ToJson();
+                }
+                else
+                {
+                    this.AuctionItemAdapter.GameItem = value.Stringify(false);
+                    Payload = this.AuctionItemAdapter.ToJson();
+                }
+            }
+        }
 
         public AuctionItem() { }
 
-        public AuctionItem(GameItem gameItem, string owner, long? price, IRedisUpdateService redisUpdateService)
+        //existing AuctionItem
+        public AuctionItem(string uuid, string json, IRedisUpdateService redisUpdateService) : base(uuid, json, redisUpdateService)
         {
-            InitInhertedProperties(gameItem);
-            Owner = owner;
-            Price = price;
-            _redisUpdateService = redisUpdateService;
-
-            var item = new AuctionItemAdapter();
-            item.Owner = Owner;
-            item.Price = Price;
-            item.Datetime = DateTime.UtcNow.ToString();
-            item.GameItem = Json;
-            OriginUuid = Guid.NewGuid().ToString();
-            Identifier = OriginUuid;
-
-            RedisService.SetInRedis("auction:" + OriginUuid, item.ToJson());
-        }
-        public AuctionItem(IRedisUpdateService redisUpdateService)
-        {
-            _redisUpdateService = redisUpdateService;
-        }
-
-        public AuctionItem(IRedisUpdateService redisUpdateService, string json, string originUuid, string owner, long? price) : base(json, originUuid)
-        {
-            _redisUpdateService = redisUpdateService;
-
-            _redisUpdateService.AuctionItemChange += ItemChanged;
-
-            this.Price = price;
-            this.Owner = owner;
-            this.TimeAdded = DateTime.UtcNow;
-        }
-
-        public AuctionItem(IRedisUpdateService redisUpdateService, string json, string originUuid, string owner, long? price, string datetime) : base(json, originUuid)
-        {
-            _redisUpdateService = redisUpdateService;
-
-            _redisUpdateService.AuctionItemChange += ItemChanged;
-
-            this.Price = price;
-            this.Owner = owner;
-            if(DateTime.TryParse(datetime, out DateTime added))
+            var obj = AuctionItemAdapter.FromJson(json);
+            this.AuctionItemAdapter = obj;
+            this.Owner = obj.Owner;
+            this.Price = obj.Price;
+            if(DateTime.TryParse(obj.Datetime, out DateTime result))
             {
-                this.TimeAdded = added;
+                this.TimeAdded = result;
+            }
+            _redisUpdateService.AuctionItemChange += UpdateItem;
+        }
+
+        //new AuctionItem
+        public AuctionItem(string uuid, AuctionItemAdapter auctionItemAdapter, IRedisUpdateService redisUpdateService) : base(uuid, auctionItemAdapter.ToJson(), redisUpdateService)
+        {
+            this.TimeAdded = DateTime.UtcNow;
+            this.Owner = auctionItemAdapter.Owner;
+            this.Price = auctionItemAdapter.Price;
+            this.AuctionItemAdapter = auctionItemAdapter;
+            this.Uuid = uuid;
+        }
+
+        void UpdateItem(object? sender, string uuid)
+        {
+            if(uuid == Uuid)
+            {
+                base.InitGameItem(uuid);
+                _payload = RedisService.GetFromRedis(uuid);
+                _redisUpdateService.CallAuctionItemChangeAction();
             }
         }
 
-
-
-        private async void ItemChanged(object? sender, string uuid)
+        protected override void Dispose(bool disposing)
         {
-            try
+            base.Dispose(disposing);
+
+            if (!disposedValue)
             {
-                if (uuid == OriginUuid)
+                if (disposing)
                 {
-                    SetItem();
+                    _redisUpdateService.AuctionItemChange -= UpdateItem;
                 }
             }
-            catch (Exception ex)
-            {
-
-            }
-        }
-        private void SetItem()
-        {
-
-            var adapter = AuctionItemAdapter.FromJson(RedisService.GetFromRedis(OriginUuid));
-            InitGameItem(adapter.GameItem, OriginUuid);
-            Price = adapter.Price;
-            Owner = adapter.Owner;
-            TimeAdded = DateTime.Parse(adapter.Datetime);
-
-            _redisUpdateService.CallAuctionItemChangeAction();
         }
 
         private void InitInhertedProperties(object baseClassInstance)
@@ -104,32 +114,6 @@ namespace Highgeek.McWebApp.Common.Models.Minecraft
                 object value = propertyInfo.GetValue(baseClassInstance, null);
                 if (null != value) propertyInfo.SetValue(this, value, null);
             }
-        }
-
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _redisUpdateService.AuctionItemChange -= ItemChanged;
-                }
-
-                disposedValue = true;
-            }
-        }
-
-
-        ~AuctionItem()
-        {
-            Dispose(disposing: false);
-        }
-
-        void IDisposable.Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }
